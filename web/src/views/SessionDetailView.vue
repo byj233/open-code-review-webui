@@ -469,7 +469,7 @@ function resumeReview(): void {
     if (summary.value.diff_from) query.from = summary.value.diff_from
     if (summary.value.diff_to) query.to = summary.value.diff_to
   }
-  void router.push({ path: '/review', query })
+  void router.push({ path: '/reviews', query })
 }
 
 async function copySessionId(): Promise<void> {

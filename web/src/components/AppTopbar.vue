@@ -68,10 +68,10 @@ const branchLabel = computed(() => {
   if (info.detached) return info.head || t('repo.detachedShort')
   return info.branch || t('repo.noCommitsShort')
 })
-const isReviewRoute = computed(() => route.name === 'review' || route.name === 'run')
+const isReviewRoute = computed(() => Boolean(route.meta.hideNewReview))
 
 function startReview(): void {
-  void router.push('/review')
+  void router.push('/reviews')
 }
 </script>
 

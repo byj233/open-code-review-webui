@@ -110,8 +110,8 @@ const groups = computed<Array<{ label: string; items: NavItem[] }>>(() => [
     label: t('nav.group.workspace'),
     items: [
       { label: t('nav.overview'), to: '/', icon: Grid },
-      { label: t('nav.review'), to: '/review', icon: EditPen },
-      { label: t('nav.scan'), to: '/scan', icon: Search },
+      { label: t('nav.review'), to: '/reviews', icon: EditPen },
+      { label: t('nav.scan'), to: '/scans', icon: Search },
     ],
   },
   {
@@ -162,7 +162,6 @@ const providerMeta = computed(() => {
 function isActive(item: NavItem): boolean {
   if (item.to === '/') return route.path === '/'
   if (route.path.startsWith(item.to)) return true
-  if (item.to === '/review' && route.path.startsWith('/runs/')) return false
   return false
 }
 </script>

@@ -15,21 +15,33 @@ const router = createRouter({
       component: () => import('@/views/OverviewView.vue'),
     },
     {
-      path: '/review',
-      name: 'review',
-      meta: { title: 'nav.review' },
+      path: '/reviews',
+      name: 'reviews',
+      meta: { title: 'nav.review', hideNewReview: true },
       component: () => import('@/views/ReviewView.vue'),
     },
     {
-      path: '/scan',
-      name: 'scan',
-      meta: { title: 'nav.scan' },
+      path: '/reviews/:id',
+      name: 'review-run',
+      meta: { title: 'nav.run', hideNewReview: true },
+      component: () => import('@/views/RunView.vue'),
+    },
+    {
+      path: '/scans',
+      name: 'scans',
+      meta: { title: 'nav.scan', hideNewReview: true },
       component: () => import('@/views/ScanView.vue'),
+    },
+    {
+      path: '/scans/:id',
+      name: 'scan-run',
+      meta: { title: 'nav.run', hideNewReview: true },
+      component: () => import('@/views/RunView.vue'),
     },
     {
       path: '/runs/:id',
       name: 'run',
-      meta: { title: 'nav.run' },
+      meta: { title: 'nav.run', hideNewReview: true },
       component: () => import('@/views/RunView.vue'),
     },
     {
@@ -62,6 +74,9 @@ const router = createRouter({
       meta: { title: 'nav.rules' },
       component: () => import('@/views/RulesView.vue'),
     },
+    // Singular paths shipped with the first console build; keep them working.
+    { path: '/review', redirect: '/reviews' },
+    { path: '/scan', redirect: '/scans' },
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',

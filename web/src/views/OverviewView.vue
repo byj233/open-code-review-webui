@@ -40,11 +40,11 @@
         </div>
       </div>
       <div class="hero__actions">
-        <el-button type="primary" @click="go('/review')">
+        <el-button type="primary" @click="go('/reviews')">
           <el-icon class="btn-icon"><EditPen /></el-icon>
           {{ t('topbar.newReview') }}
         </el-button>
-        <el-button @click="go('/scan')">
+        <el-button @click="go('/scans')">
           <el-icon class="btn-icon"><Search /></el-icon>
           {{ t('overview.hero.scanRepo') }}
         </el-button>
@@ -76,7 +76,7 @@
     </div>
 
     <div class="quick-grid">
-      <button class="quick-card quick-card--accent" type="button" @click="go('/review')">
+      <button class="quick-card quick-card--accent" type="button" @click="go('/reviews')">
         <span class="quick-card__icon"><el-icon><EditPen /></el-icon></span>
         <span class="quick-card__body">
           <span class="quick-card__title">{{ t('overview.quick.reviewTitle') }}</span>
@@ -84,7 +84,7 @@
         </span>
         <el-icon class="quick-card__arrow"><ArrowRight /></el-icon>
       </button>
-      <button class="quick-card" type="button" @click="go('/scan')">
+      <button class="quick-card" type="button" @click="go('/scans')">
         <span class="quick-card__icon"><el-icon><Search /></el-icon></span>
         <span class="quick-card__body">
           <span class="quick-card__title">{{ t('overview.quick.scanTitle') }}</span>
@@ -193,7 +193,7 @@
           :title="t('overview.sessions.emptyTitle')"
           :description="t('overview.sessions.emptyDesc')"
         >
-          <el-button type="primary" size="small" @click="go('/review')">{{ t('overview.sessions.run') }}</el-button>
+          <el-button type="primary" size="small" @click="go('/reviews')">{{ t('overview.sessions.run') }}</el-button>
           <el-button size="small" @click="go('/sessions')">{{ t('overview.sessions.browse') }}</el-button>
         </EmptyState>
 
@@ -323,7 +323,7 @@
           :key="job.id"
           class="job-row"
           type="button"
-          @click="go(`/runs/${job.id}`)"
+          @click="go(jobPath(job.id, job.kind))"
         >
           <StatusPill :status="job.status" />
           <span class="job-row__title">{{ job.title }}</span>
@@ -365,6 +365,7 @@ import {
   formatCount,
   formatRelative,
 } from '@/utils/format'
+import { jobPath } from '@/utils/routes'
 import {
   authLabel,
   sessionModeLabel,
@@ -499,7 +500,7 @@ async function testConnection(): Promise<void> {
   testing.value = true
   try {
     const job = await api.testConnection()
-    await router.push(`/runs/${job.id}`)
+    await router.push(jobPath(job.id, job.kind))
   } catch (err) {
     ElMessage.error(errorMessage(err))
   } finally {

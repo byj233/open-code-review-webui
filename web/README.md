@@ -56,6 +56,31 @@ browser over SSE; the JSON result on stdout is parsed into the findings view.
 One review and one scan may run at a time, so a double click cannot double the
 model spend.
 
+## Routes
+
+The console uses HTML5 history routing (`createWebHistory`), so there is no `#`
+in the address bar. The Go server answers unknown paths with `index.html`, which
+keeps a refresh or a deep link working, and the bundle loads `/assets/...`
+absolutely so nested paths resolve.
+
+Resources use plural nouns; a run is addressed under the resource that started it,
+with `/runs/<job>` kept for jobs that have no owning resource (the connection
+test, and links from the recent-activity list):
+
+| Path | Screen |
+|---|---|
+| `/` | Overview |
+| `/reviews` | Review form |
+| `/reviews/<job>` | A review run |
+| `/scans` | Scan form |
+| `/scans/<job>` | A scan run |
+| `/runs/<job>` | Any job |
+| `/sessions`, `/sessions/<id>` | Session history and detail |
+| `/providers`, `/settings`, `/rules` | Setup screens |
+
+`/review` and `/scan` redirect to their plural paths, preserving the query
+string, so links from the first console build keep working.
+
 ## Development
 
 ```bash

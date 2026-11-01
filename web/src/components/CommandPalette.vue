@@ -76,6 +76,7 @@ import {
   VideoPlay,
 } from '@element-plus/icons-vue'
 import { api, errorMessage } from '@/api/client'
+import { jobPath } from '@/utils/routes'
 import { useI18n, type MessageKey } from '@/i18n'
 import type { Component } from 'vue'
 
@@ -108,8 +109,8 @@ const inputRef = ref<HTMLInputElement | null>(null)
 
 const items: PaletteItem[] = [
   { id: 'overview', labelKey: 'palette.overview.label', hintKey: 'palette.overview.hint', group: 'navigate', icon: Grid, to: '/' },
-  { id: 'review', labelKey: 'palette.review.label', hintKey: 'palette.review.hint', group: 'navigate', icon: EditPen, to: '/review' },
-  { id: 'scan', labelKey: 'palette.scan.label', hintKey: 'palette.scan.hint', group: 'navigate', icon: Search, to: '/scan' },
+  { id: 'review', labelKey: 'palette.review.label', hintKey: 'palette.review.hint', group: 'navigate', icon: EditPen, to: '/reviews' },
+  { id: 'scan', labelKey: 'palette.scan.label', hintKey: 'palette.scan.hint', group: 'navigate', icon: Search, to: '/scans' },
   { id: 'sessions', labelKey: 'palette.sessions.label', hintKey: 'palette.sessions.hint', group: 'navigate', icon: Collection, to: '/sessions' },
   { id: 'providers', labelKey: 'palette.providers.label', hintKey: 'palette.providers.hint', group: 'navigate', icon: Connection, to: '/providers' },
   { id: 'settings', labelKey: 'palette.settings.label', hintKey: 'palette.settings.hint', group: 'navigate', icon: Setting, to: '/settings' },
@@ -187,7 +188,7 @@ async function execute(item: PaletteItem): Promise<void> {
   if (item.action === 'test-connection') {
     try {
       const job = await api.testConnection()
-      await router.push(`/runs/${job.id}`)
+      await router.push(jobPath(job.id, job.kind))
     } catch (error) {
       ElMessage.error(errorMessage(error))
     }

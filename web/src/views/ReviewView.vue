@@ -427,6 +427,7 @@ import { useI18n } from '@/i18n'
 import { useMetaStore } from '@/stores/meta'
 import { createReviewForm, reviewCommand } from '@/utils/command'
 import { formatCount } from '@/utils/format'
+import { jobPath } from '@/utils/routes'
 import { authLabel } from '@/utils/status'
 import type { ProviderCard, ProvidersResponse, ReviewFormState, ReviewRequest } from '@/types'
 
@@ -578,14 +579,14 @@ function swapRefs(): void {
 function clearResume(): void {
   resumeId.value = ''
   form.resume = ''
-  void router.replace('/review')
+  void router.replace('/reviews')
 }
 
 function resetForm(): void {
   const pristine = createReviewForm()
   Object.assign(form, pristine)
   resumeId.value = ''
-  void router.replace('/review')
+  void router.replace('/reviews')
 }
 
 function payload(preview: boolean): ReviewRequest {
@@ -617,7 +618,7 @@ async function submit(preview: boolean): Promise<void> {
   submitting.value = preview ? 'preview' : 'run'
   try {
     const job = await api.startReview(payload(preview))
-    await router.push(`/runs/${job.id}`)
+    await router.push(jobPath(job.id, job.kind))
   } catch (error) {
     ElMessage.error(errorMessage(error))
   } finally {

@@ -11,7 +11,7 @@
           <el-icon class="btn-icon"><Refresh /></el-icon>
           {{ t('common.refresh') }}
         </el-button>
-        <el-button type="primary" @click="go('/review')">
+        <el-button type="primary" @click="go('/reviews')">
           <el-icon class="btn-icon"><EditPen /></el-icon>
           {{ t('topbar.newReview') }}
         </el-button>
@@ -150,7 +150,7 @@
           :title="sessions.length ? t('sessions.empty.noMatch') : t('sessions.empty.none')"
           :description="sessions.length ? t('sessions.empty.noMatchHint') : t('sessions.empty.noneHint')"
         >
-          <el-button v-if="!sessions.length" type="primary" size="small" @click="go('/review')">
+          <el-button v-if="!sessions.length" type="primary" size="small" @click="go('/reviews')">
             {{ t('sessions.empty.runReview') }}
           </el-button>
           <el-button v-else size="small" @click="clearFilters">{{ t('sessions.empty.clearFilters') }}</el-button>

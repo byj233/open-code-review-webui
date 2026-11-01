@@ -180,7 +180,7 @@
             </details>
             <div class="connection-actions">
               <el-button size="small" @click="runAgain">{{ t('run.header.backToProviders') }}</el-button>
-              <el-button v-if="job.status === 'succeeded'" size="small" type="primary" @click="go('/review')">{{ t('run.connection.runReview') }}</el-button>
+              <el-button v-if="job.status === 'succeeded'" size="small" type="primary" @click="go('/reviews')">{{ t('run.connection.runReview') }}</el-button>
             </div>
           </div>
         </div>
@@ -268,11 +268,11 @@ const kindLabel = computed(() => {
 const backTo = computed(() => {
   switch (job.value?.kind) {
     case 'scan':
-      return '/scan'
+      return '/scans'
     case 'llm-test':
       return '/providers'
     default:
-      return '/review'
+      return '/reviews'
   }
 })
 const backLabel = computed(() => {

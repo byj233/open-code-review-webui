@@ -330,6 +330,7 @@ import { api, errorMessage } from '@/api/client'
 import { useMetaStore } from '@/stores/meta'
 import { createScanForm, scanCommand } from '@/utils/command'
 import { formatCount } from '@/utils/format'
+import { jobPath } from '@/utils/routes'
 import { authLabel } from '@/utils/status'
 import type { ProviderCard, ProvidersResponse, ScanFormState, ScanRequest } from '@/types'
 
@@ -434,7 +435,7 @@ async function submit(preview: boolean): Promise<void> {
   submitting.value = preview ? 'preview' : 'run'
   try {
     const job = await api.startScan(payload(preview))
-    await router.push(`/runs/${job.id}`)
+    await router.push(jobPath(job.id, job.kind))
   } catch (error) {
     ElMessage.error(errorMessage(error))
   } finally {

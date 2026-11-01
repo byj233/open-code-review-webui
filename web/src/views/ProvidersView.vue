@@ -264,6 +264,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import { api, errorMessage } from '@/api/client'
 import { useI18n } from '@/i18n'
 import { useMetaStore } from '@/stores/meta'
+import { jobPath } from '@/utils/routes'
 import { authLabel, sourceLabel } from '@/utils/status'
 import type { ProviderCard, ProvidersResponse } from '@/types'
 
@@ -467,7 +468,7 @@ async function testConnection(): Promise<void> {
   testing.value = true
   try {
     const job = await api.testConnection()
-    await router.push(`/runs/${job.id}`)
+    await router.push(jobPath(job.id, job.kind))
   } catch (err) {
     ElMessage.error(errorMessage(err))
   } finally {

@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Component } from 'vue'
+import type { Component } from 'vue';
 
 defineProps<{
   label: string
@@ -19,7 +19,7 @@ defineProps<{
   hint?: string
   icon?: Component
   compact?: boolean
-}>()
+}>();
 </script>
 
 <style scoped>

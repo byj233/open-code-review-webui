@@ -155,4 +155,4 @@ export const shell = {
     'The route may have moved, or a session or run has expired. Everything the console can do is reachable from the navigation.',
   'notFound.backToOverview': 'Back to overview',
   'notFound.goBack': 'Go back',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

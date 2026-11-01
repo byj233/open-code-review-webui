@@ -19,4 +19,4 @@ export const logs = {
   'logs.footer.trimmed': '이전 출력이 잘렸습니다',
   'logs.footer.running': '명령 실행 중',
   'logs.footer.complete': '출력 완료',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

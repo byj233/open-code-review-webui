@@ -45,4 +45,4 @@ export const rules = {
 
   'rules.message.copied': '规则已复制',
   'rules.message.copyFailed': '无法复制规则',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

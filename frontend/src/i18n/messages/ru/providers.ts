@@ -82,4 +82,4 @@ export const providers = {
 
   'providers.toast.added': 'Собственный провайдер добавлен',
   'providers.toast.activated': 'Провайдер активирован',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

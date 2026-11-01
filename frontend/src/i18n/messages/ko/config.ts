@@ -104,4 +104,4 @@ export const config = {
 
   'config.toast.saved': '설정을 저장했습니다',
   'config.toast.savedPrefix': '저장됨: ',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

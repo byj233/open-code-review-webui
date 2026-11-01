@@ -77,4 +77,4 @@ export const scan = {
   'scan.rail.reasonFocusedText': 'Point the scan at one directory to keep cost and time predictable.',
   'scan.rail.tipLabel': 'Start smaller than you think',
   'scan.rail.tipText': 'A scan reviews whole files, so token usage grows quickly. Start with one package and use the token budget as a guardrail.',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

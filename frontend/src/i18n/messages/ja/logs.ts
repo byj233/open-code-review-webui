@@ -19,4 +19,4 @@ export const logs = {
   'logs.footer.trimmed': '古い出力は切り捨てられました',
   'logs.footer.running': 'コマンド実行中',
   'logs.footer.complete': '出力完了',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

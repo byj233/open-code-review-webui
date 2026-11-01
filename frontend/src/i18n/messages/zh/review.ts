@@ -115,4 +115,4 @@ export const review = {
   'review.error.refs': '请同时选择起始 ref 和目标 ref。',
   'review.error.sameRefs': '起始 ref 和目标 ref 必须不同。',
   'review.error.busy': '审查已经在启动中。',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

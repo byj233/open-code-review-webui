@@ -28,7 +28,7 @@ withDefaults(
     weight?: number
   }>(),
   { size: 22, weight: 2.2 },
-)
+);
 </script>
 
 <style scoped>

@@ -76,4 +76,4 @@ export const sessionDetail = {
   'sessionDetail.actions.copied': 'Session id copied',
   'sessionDetail.actions.copyFailed': 'Could not copy the session id',
   'sessionDetail.actions.deleted': 'Session deleted',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

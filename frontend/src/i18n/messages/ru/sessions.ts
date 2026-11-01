@@ -47,4 +47,4 @@ export const sessions = {
   'sessions.delete.description':
     'Сохранённый сеанс и его замечания будут удалены с диска. Само ревью не затрагивается, но историю восстановить не удастся.',
   'sessions.delete.success': 'Сеанс удалён',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

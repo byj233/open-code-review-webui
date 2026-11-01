@@ -147,8 +147,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { computed, onMounted, ref } from 'vue';
+import { ElMessage } from 'element-plus';
 import {
   Aim,
   ArrowRight,
@@ -159,120 +159,120 @@ import {
   Refresh,
   Search,
   WarningFilled,
-} from '@element-plus/icons-vue'
-import EmptyState from '@/components/EmptyState.vue'
-import MarkdownView from '@/components/MarkdownView.vue'
-import PageHeader from '@/components/PageHeader.vue'
-import SurfaceCard from '@/components/SurfaceCard.vue'
-import { api } from '@/api/client'
-import { describeError } from '@/utils/format'
-import { useI18n } from '@/i18n'
-import { copyText } from '@/utils/clipboard'
-import type { RuleCheckResponse, RulesResponse } from '@/types'
+} from '@element-plus/icons-vue';
+import EmptyState from '@/components/EmptyState.vue';
+import MarkdownView from '@/components/MarkdownView.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import SurfaceCard from '@/components/SurfaceCard.vue';
+import { api } from '@/api/client';
+import { describeError } from '@/utils/format';
+import { useI18n } from '@/i18n';
+import { copyText } from '@/utils/clipboard';
+import type { RuleCheckResponse, RulesResponse } from '@/types';
 
-const { t, tn } = useI18n()
+const { t, tn } = useI18n();
 
-const rules = ref<RulesResponse | null>(null)
-const loading = ref(true)
-const error = ref('')
-const query = ref('')
-const selected = ref(-1)
-const checkPath = ref('')
-const checking = ref(false)
-const checkResult = ref<RuleCheckResponse | null>(null)
-const checkError = ref('')
+const rules = ref<RulesResponse | null>(null);
+const loading = ref(true);
+const error = ref('');
+const query = ref('');
+const selected = ref(-1);
+const checkPath = ref('');
+const checking = ref(false);
+const checkResult = ref<RuleCheckResponse | null>(null);
+const checkError = ref('');
 
-const patternCount = computed(() => rules.value?.patterns.length ?? 0)
+const patternCount = computed(() => rules.value?.patterns.length ?? 0);
 const filteredPatterns = computed(() => {
-  if (!rules.value) return []
-  const term = query.value.trim().toLowerCase()
+  if (!rules.value) return [];
+  const term = query.value.trim().toLowerCase();
   return rules.value.patterns
     .map((entry, index) => ({ ...entry, index }))
     .filter((entry) => {
-      if (!term) return true
-      return `${entry.pattern} ${entry.rule}`.toLowerCase().includes(term)
-    })
-})
+      if (!term) return true;
+      return `${entry.pattern} ${entry.rule}`.toLowerCase().includes(term);
+    });
+});
 const defaultVisible = computed(() => {
-  if (!rules.value) return false
-  const term = query.value.trim().toLowerCase()
-  if (!term) return true
-  return rules.value.default_rule.toLowerCase().includes(term)
-})
+  if (!rules.value) return false;
+  const term = query.value.trim().toLowerCase();
+  if (!term) return true;
+  return rules.value.default_rule.toLowerCase().includes(term);
+});
 const selectedPattern = computed(() => {
-  if (!rules.value || selected.value < 0) return null
-  return rules.value.patterns[selected.value] ?? null
-})
+  if (!rules.value || selected.value < 0) return null;
+  return rules.value.patterns[selected.value] ?? null;
+});
 const selectedRule = computed(() =>
   selected.value < 0 ? rules.value?.default_rule ?? '' : selectedPattern.value?.rule ?? '',
-)
+);
 const selectedTitle = computed(() =>
   selected.value < 0
     ? t('rules.detail.defaultTitle')
     : selectedPattern.value?.pattern || t('rules.detail.genericTitle'),
-)
+);
 const selectedSubtitle = computed(() =>
   selected.value < 0
     ? t('rules.detail.defaultSubtitle')
     : t('rules.detail.patternSubtitle', { pattern: selectedPattern.value?.pattern ?? '' }),
-)
+);
 
 function ruleHint(pattern: string): string {
-  if (pattern.includes('{')) return t('rules.hint.braceExpanded')
-  if (pattern.includes('pom.xml') || pattern.includes('Cargo.toml')) return t('rules.hint.projectManifest')
-  if (pattern.includes('*.xml')) return t('rules.hint.xmlMapping')
-  return t('rules.hint.firstMatch')
+  if (pattern.includes('{')) return t('rules.hint.braceExpanded');
+  if (pattern.includes('pom.xml') || pattern.includes('Cargo.toml')) return t('rules.hint.projectManifest');
+  if (pattern.includes('*.xml')) return t('rules.hint.xmlMapping');
+  return t('rules.hint.firstMatch');
 }
 
 function sourceName(source: string): string {
   switch (source) {
     case 'custom':
-      return t('rules.source.custom')
+      return t('rules.source.custom');
     case 'project':
-      return t('rules.source.project')
+      return t('rules.source.project');
     case 'global':
-      return t('rules.source.global')
+      return t('rules.source.global');
     case 'system':
-      return t('rules.source.system')
+      return t('rules.source.system');
     default:
-      return source || t('rules.source.fallback')
+      return source || t('rules.source.fallback');
   }
 }
 
 async function checkPathRule(): Promise<void> {
-  const path = checkPath.value.trim()
-  if (!path) return
-  checking.value = true
-  checkError.value = ''
+  const path = checkPath.value.trim();
+  if (!path) return;
+  checking.value = true;
+  checkError.value = '';
   try {
-    checkResult.value = await api.checkRule(path)
+    checkResult.value = await api.checkRule(path);
   } catch (err) {
-    checkResult.value = null
-    checkError.value = describeError(err)
+    checkResult.value = null;
+    checkError.value = describeError(err);
   } finally {
-    checking.value = false
+    checking.value = false;
   }
 }
 
 async function copyRule(): Promise<void> {
-  const copied = await copyText(selectedRule.value)
-  if (copied) ElMessage.success(t('rules.message.copied'))
-  else ElMessage.error(t('rules.message.copyFailed'))
+  const copied = await copyText(selectedRule.value);
+  if (copied) ElMessage.success(t('rules.message.copied'));
+  else ElMessage.error(t('rules.message.copyFailed'));
 }
 
 async function load(): Promise<void> {
-  loading.value = true
-  error.value = ''
+  loading.value = true;
+  error.value = '';
   try {
-    rules.value = await api.rules()
+    rules.value = await api.rules();
   } catch (err) {
-    error.value = describeError(err)
+    error.value = describeError(err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
-onMounted(load)
+onMounted(load);
 </script>
 
 <style scoped>

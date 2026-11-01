@@ -45,4 +45,4 @@ export const rules = {
 
   'rules.message.copied': 'ルールをコピーしました',
   'rules.message.copyFailed': 'ルールをコピーできませんでした',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

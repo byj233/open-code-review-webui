@@ -79,4 +79,4 @@ export const run = {
   'run.message.stopping': '실행을 중지하는 중입니다',
   'run.message.sessionCopied': '세션 ID를 복사했습니다',
   'run.message.copyFailed': '세션 ID를 복사하지 못했습니다',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

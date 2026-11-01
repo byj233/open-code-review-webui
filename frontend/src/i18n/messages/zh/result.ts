@@ -51,4 +51,4 @@ export const result = {
 
   'result.empty.title': '无结构化结果',
   'result.empty.description': '此命令未返回 JSON 文档，请查看活动日志中的输出。',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

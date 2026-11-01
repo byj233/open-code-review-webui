@@ -7,34 +7,34 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { jobStatusMeta } from '@/utils/status'
+import { computed } from 'vue';
+import { jobStatusMeta } from '@/utils/status';
 
 const props = defineProps<{
   status?: string
   label?: string
   tone?: 'neutral' | 'accent' | 'success' | 'warning' | 'danger'
   pulse?: boolean
-}>()
+}>();
 
-const meta = computed(() => jobStatusMeta(props.status))
-const text = computed(() => props.label ?? meta.value.label)
-const isPulsing = computed(() => props.pulse ?? meta.value.pulse)
+const meta = computed(() => jobStatusMeta(props.status));
+const text = computed(() => props.label ?? meta.value.label);
+const isPulsing = computed(() => props.pulse ?? meta.value.pulse);
 const toneClass = computed(() => {
-  if (props.tone) return props.tone
+  if (props.tone) return props.tone;
   switch (meta.value.tone) {
     case 'success':
-      return 'success'
+      return 'success';
     case 'warning':
-      return 'warning'
+      return 'warning';
     case 'danger':
-      return 'danger'
+      return 'danger';
     case 'accent':
-      return 'accent'
+      return 'accent';
     default:
-      return 'neutral'
+      return 'neutral';
   }
-})
+});
 </script>
 
 <style scoped>

@@ -184,9 +184,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
 import {
   ArrowRight,
   ChatDotRound,
@@ -198,36 +198,36 @@ import {
   Refresh,
   Search,
   WarningFilled,
-} from '@element-plus/icons-vue'
-import EmptyState from '@/components/EmptyState.vue'
-import PageHeader from '@/components/PageHeader.vue'
-import StatTile from '@/components/StatTile.vue'
-import { api } from '@/api/client'
-import { describeError } from '@/utils/format'
-import { useI18n } from '@/i18n'
+} from '@element-plus/icons-vue';
+import EmptyState from '@/components/EmptyState.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import StatTile from '@/components/StatTile.vue';
+import { api } from '@/api/client';
+import { describeError } from '@/utils/format';
+import { useI18n } from '@/i18n';
 import {
   formatCount,
   formatDate,
   formatDurationNs,
   formatRelative,
   shortId,
-} from '@/utils/format'
-import { sessionModeLabel, sessionState, type Tone } from '@/utils/status'
-import type { SessionSummary } from '@/types'
+} from '@/utils/format';
+import { sessionModeLabel, sessionState, type Tone } from '@/utils/status';
+import type { SessionSummary } from '@/types';
 
-const router = useRouter()
-const { t, tn } = useI18n()
-const sessions = ref<SessionSummary[]>([])
-const total = ref(0)
-const loading = ref(true)
-const error = ref('')
-const query = ref('')
-const statusFilter = ref('all')
-const page = ref(1)
-const pageSize = 12
-const deleteOpen = ref(false)
-const deleteTarget = ref<SessionSummary | null>(null)
-const deleting = ref(false)
+const router = useRouter();
+const { t, tn } = useI18n();
+const sessions = ref<SessionSummary[]>([]);
+const total = ref(0);
+const loading = ref(true);
+const error = ref('');
+const query = ref('');
+const statusFilter = ref('all');
+const page = ref(1);
+const pageSize = 12;
+const deleteOpen = ref(false);
+const deleteTarget = ref<SessionSummary | null>(null);
+const deleting = ref(false);
 
 const statusOptions = computed(() => [
   { value: 'all', label: t('sessions.filter.all') },
@@ -235,19 +235,19 @@ const statusOptions = computed(() => [
   { value: 'partial', label: t('status.partial') },
   { value: 'failed', label: t('status.failed') },
   { value: 'interrupted', label: t('status.interrupted') },
-])
+]);
 
 const filtered = computed(() => {
-  const term = query.value.trim().toLowerCase()
+  const term = query.value.trim().toLowerCase();
   return sessions.value.filter((session) => {
-    const state = sessionState(session)
+    const state = sessionState(session);
     if (statusFilter.value !== 'all') {
       if (statusFilter.value === 'interrupted' && state.key !== 'interrupted' && state.key !== 'aborted') {
-        return false
+        return false;
       }
-      if (statusFilter.value !== 'interrupted' && state.key !== statusFilter.value) return false
+      if (statusFilter.value !== 'interrupted' && state.key !== statusFilter.value) return false;
     }
-    if (!term) return true
+    if (!term) return true;
     const haystack = [
       session.session_id,
       session.model,
@@ -259,116 +259,116 @@ const filtered = computed(() => {
     ]
       .filter(Boolean)
       .join(' ')
-      .toLowerCase()
-    return haystack.includes(term)
-  })
-})
+      .toLowerCase();
+    return haystack.includes(term);
+  });
+});
 
 const paginated = computed(() => {
-  const start = (page.value - 1) * pageSize
-  return filtered.value.slice(start, start + pageSize)
-})
+  const start = (page.value - 1) * pageSize;
+  return filtered.value.slice(start, start + pageSize);
+});
 
-const totalFindings = computed(() => sessions.value.reduce((sum, session) => sum + session.total_comments, 0))
-const totalFiles = computed(() => sessions.value.reduce((sum, session) => sum + session.completed_files, 0))
+const totalFindings = computed(() => sessions.value.reduce((sum, session) => sum + session.total_comments, 0));
+const totalFiles = computed(() => sessions.value.reduce((sum, session) => sum + session.completed_files, 0));
 const averageFindings = computed(() => {
-  if (!sessions.value.length) return '--'
-  return (totalFindings.value / sessions.value.length).toFixed(1)
-})
+  if (!sessions.value.length) return '--';
+  return (totalFindings.value / sessions.value.length).toFixed(1);
+});
 const latestHint = computed(() =>
   sessions.value.length
     ? t('sessions.stat.latest', { when: formatRelative(sessions.value[0].start_time) })
     : t('sessions.stat.noHistory'),
-)
+);
 
 watch([query, statusFilter], () => {
-  page.value = 1
-})
+  page.value = 1;
+});
 
 function stateDot(tone: Tone): string {
   switch (tone) {
     case 'success':
-      return 'dot--green'
+      return 'dot--green';
     case 'warning':
-      return 'dot--amber'
+      return 'dot--amber';
     case 'danger':
-      return 'dot--red'
+      return 'dot--red';
     case 'accent':
-      return 'dot--accent'
+      return 'dot--accent';
     default:
-      return ''
+      return '';
   }
 }
 
 function scopeRefs(session: SessionSummary): string {
-  if (session.review_mode === 'scan') return t('sessions.scope.wholeRepository')
+  if (session.review_mode === 'scan') return t('sessions.scope.wholeRepository');
   if (session.review_mode === 'commit') {
     return session.diff_commit
       ? t('sessions.scope.commit', { id: session.diff_commit.slice(0, 10) })
-      : t('sessions.scope.commitOnly')
+      : t('sessions.scope.commitOnly');
   }
-  if (session.diff_from && session.diff_to) return `${session.diff_from}..${session.diff_to}`
+  if (session.diff_from && session.diff_to) return `${session.diff_from}..${session.diff_to}`;
   return session.review_mode === 'workspace'
     ? t('sessions.scope.workingTree')
-    : session.review_mode || '--'
+    : session.review_mode || '--';
 }
 
 function filePercent(session: SessionSummary): number {
-  if (!session.selected_files) return 0
-  return Math.min(100, Math.round((session.completed_files / session.selected_files) * 100))
+  if (!session.selected_files) return 0;
+  return Math.min(100, Math.round((session.completed_files / session.selected_files) * 100));
 }
 
 function openSession(id: string): void {
-  void router.push(`/sessions/${encodeURIComponent(id)}`)
+  void router.push(`/sessions/${encodeURIComponent(id)}`);
 }
 
 function go(path: string): void {
-  void router.push(path)
+  void router.push(path);
 }
 
 function clearFilters(): void {
-  query.value = ''
-  statusFilter.value = 'all'
+  query.value = '';
+  statusFilter.value = 'all';
 }
 
 function askDelete(session: SessionSummary): void {
-  deleteTarget.value = session
-  deleteOpen.value = true
+  deleteTarget.value = session;
+  deleteOpen.value = true;
 }
 
 async function confirmDelete(): Promise<void> {
-  const target = deleteTarget.value
-  if (!target) return
-  deleting.value = true
+  const target = deleteTarget.value;
+  if (!target) return;
+  deleting.value = true;
   try {
-    await api.deleteSession(target.session_id)
-    deleteOpen.value = false
-    deleteTarget.value = null
-    ElMessage.success(t('sessions.delete.success'))
-    await load()
-    if (!paginated.value.length && page.value > 1) page.value -= 1
+    await api.deleteSession(target.session_id);
+    deleteOpen.value = false;
+    deleteTarget.value = null;
+    ElMessage.success(t('sessions.delete.success'));
+    await load();
+    if (!paginated.value.length && page.value > 1) page.value -= 1;
   } catch (err) {
-    ElMessage.error(describeError(err))
+    ElMessage.error(describeError(err));
   } finally {
-    deleting.value = false
+    deleting.value = false;
   }
 }
 
 async function load(): Promise<void> {
-  loading.value = true
-  error.value = ''
+  loading.value = true;
+  error.value = '';
   try {
-    const response = await api.sessions(500)
-    sessions.value = response.sessions
-    total.value = response.total
+    const response = await api.sessions(500);
+    sessions.value = response.sessions;
+    total.value = response.total;
   } catch (err) {
-    error.value = describeError(err)
+    error.value = describeError(err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
-onMounted(load)
+onMounted(load);
 </script>
 
 <style scoped>

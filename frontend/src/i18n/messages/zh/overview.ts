@@ -82,4 +82,4 @@ export const overview = {
 
   'overview.activity.title': '最近活动',
   'overview.activity.subtitle': '从此控制台启动的命令',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

@@ -19,4 +19,4 @@ export const logs = {
   'logs.footer.trimmed': 'Older output was trimmed',
   'logs.footer.running': 'Command running',
   'logs.footer.complete': 'Output complete',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

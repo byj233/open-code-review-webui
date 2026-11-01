@@ -263,9 +263,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { computed, onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   ArrowRight,
   Connection,
@@ -275,35 +275,35 @@ import {
   InfoFilled,
   Refresh,
   WarningFilled,
-} from '@element-plus/icons-vue'
-import BrandMark from '@/components/BrandMark.vue'
-import EmptyState from '@/components/EmptyState.vue'
-import PageHeader from '@/components/PageHeader.vue'
-import SurfaceCard from '@/components/SurfaceCard.vue'
-import { api } from '@/api/client'
-import { describeError } from '@/utils/format'
-import { useI18n } from '@/i18n'
-import { useMetaStore } from '@/stores/meta'
-import { copyText } from '@/utils/clipboard'
-import { authLabel, sourceLabel } from '@/utils/status'
-import type { ConfigView } from '@/types'
+} from '@element-plus/icons-vue';
+import BrandMark from '@/components/BrandMark.vue';
+import EmptyState from '@/components/EmptyState.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import SurfaceCard from '@/components/SurfaceCard.vue';
+import { api } from '@/api/client';
+import { describeError } from '@/utils/format';
+import { useI18n } from '@/i18n';
+import { useMetaStore } from '@/stores/meta';
+import { copyText } from '@/utils/clipboard';
+import { authLabel, sourceLabel } from '@/utils/status';
+import type { ConfigView } from '@/types';
 
-const router = useRouter()
-const { t, tn } = useI18n()
-const { refresh } = useMetaStore()
+const router = useRouter();
+const { t, tn } = useI18n();
+const { refresh } = useMetaStore();
 
-const configView = ref<ConfigView | null>(null)
-const loading = ref(true)
-const error = ref('')
-const saving = ref('')
+const configView = ref<ConfigView | null>(null);
+const loading = ref(true);
+const error = ref('');
+const saving = ref('');
 
 const modelForm = reactive({
   model: '',
   effort: '',
   maxTokens: 0,
   language: '',
-})
-const initialModel = reactive({ ...modelForm })
+});
+const initialModel = reactive({ ...modelForm });
 
 const llmForm = reactive({
   url: '',
@@ -312,32 +312,32 @@ const llmForm = reactive({
   timeoutSec: 0,
   authToken: '',
   authTokenCmd: '',
-})
-const initialLlm = reactive({ ...llmForm })
+});
+const initialLlm = reactive({ ...llmForm });
 
 const telemetryForm = reactive({
   enabled: false,
   exporter: '',
   otlpEndpoint: '',
   contentLog: false,
-})
-const initialTelemetry = reactive({ ...telemetryForm })
+});
+const initialTelemetry = reactive({ ...telemetryForm });
 
 const modelOptions = computed(() => {
-  const view = configView.value
-  const options = new Set<string>()
-  if (view?.active.model) options.add(view.active.model)
+  const view = configView.value;
+  const options = new Set<string>();
+  if (view?.active.model) options.add(view.active.model);
   for (const entry of Object.values(view?.providers ?? {})) {
-    for (const model of entry.models ?? []) options.add(model)
-    if (entry.model) options.add(entry.model)
+    for (const model of entry.models ?? []) options.add(model);
+    if (entry.model) options.add(entry.model);
   }
   for (const entry of Object.values(view?.custom_providers ?? {})) {
-    for (const model of entry.models ?? []) options.add(model)
-    if (entry.model) options.add(entry.model)
+    for (const model of entry.models ?? []) options.add(model);
+    if (entry.model) options.add(entry.model);
   }
-  if (modelForm.model) options.add(modelForm.model)
-  return Array.from(options)
-})
+  if (modelForm.model) options.add(modelForm.model);
+  return Array.from(options);
+});
 
 const modelDirty = computed(
   () =>
@@ -345,7 +345,7 @@ const modelDirty = computed(
     modelForm.effort !== initialModel.effort ||
     Number(modelForm.maxTokens || 0) !== initialModel.maxTokens ||
     modelForm.language.trim() !== initialModel.language,
-)
+);
 
 const llmDirty = computed(
   () =>
@@ -355,7 +355,7 @@ const llmDirty = computed(
     Number(llmForm.timeoutSec || 0) !== initialLlm.timeoutSec ||
     llmForm.authToken.trim() !== '' ||
     llmForm.authTokenCmd.trim() !== initialLlm.authTokenCmd,
-)
+);
 
 const telemetryDirty = computed(
   () =>
@@ -363,32 +363,32 @@ const telemetryDirty = computed(
     telemetryForm.exporter !== initialTelemetry.exporter ||
     telemetryForm.otlpEndpoint.trim() !== initialTelemetry.otlpEndpoint ||
     telemetryForm.contentLog !== initialTelemetry.contentLog,
-)
+);
 
 async function load(silent = false): Promise<void> {
-  if (!silent) loading.value = true
-  error.value = ''
+  if (!silent) loading.value = true;
+  error.value = '';
   try {
-    const view = await api.config()
-    configView.value = view
-    if (view.error) error.value = t('config.file.parseFailed', { error: view.error })
-    modelForm.model = view.active.model || view.providers?.[view.active.provider || '']?.model || ''
-    modelForm.effort = view.effort || ''
-    modelForm.maxTokens = view.max_tokens || 0
-    modelForm.language = view.language || ''
+    const view = await api.config();
+    configView.value = view;
+    if (view.error) error.value = t('config.file.parseFailed', { error: view.error });
+    modelForm.model = view.active.model || view.providers?.[view.active.provider || '']?.model || '';
+    modelForm.effort = view.effort || '';
+    modelForm.maxTokens = view.max_tokens || 0;
+    modelForm.language = view.language || '';
     Object.assign(initialModel, {
       model: modelForm.model,
       effort: modelForm.effort,
       maxTokens: modelForm.maxTokens,
       language: modelForm.language,
-    })
+    });
 
-    llmForm.url = view.llm.url || ''
-    llmForm.model = view.llm.model || ''
-    llmForm.protocol = view.llm.protocol || 'anthropic'
-    llmForm.timeoutSec = view.llm.timeout_sec || 0
-    llmForm.authToken = ''
-    llmForm.authTokenCmd = view.llm.auth_token_cmd || ''
+    llmForm.url = view.llm.url || '';
+    llmForm.model = view.llm.model || '';
+    llmForm.protocol = view.llm.protocol || 'anthropic';
+    llmForm.timeoutSec = view.llm.timeout_sec || 0;
+    llmForm.authToken = '';
+    llmForm.authTokenCmd = view.llm.auth_token_cmd || '';
     Object.assign(initialLlm, {
       url: llmForm.url,
       model: llmForm.model,
@@ -396,73 +396,73 @@ async function load(silent = false): Promise<void> {
       timeoutSec: llmForm.timeoutSec,
       authToken: '',
       authTokenCmd: llmForm.authTokenCmd,
-    })
+    });
 
-    telemetryForm.enabled = view.telemetry?.enabled ?? false
-    telemetryForm.exporter = view.telemetry?.exporter || ''
-    telemetryForm.otlpEndpoint = view.telemetry?.otlp_endpoint || ''
-    telemetryForm.contentLog = view.telemetry?.content_logging ?? false
-    Object.assign(initialTelemetry, { ...telemetryForm })
+    telemetryForm.enabled = view.telemetry?.enabled ?? false;
+    telemetryForm.exporter = view.telemetry?.exporter || '';
+    telemetryForm.otlpEndpoint = view.telemetry?.otlp_endpoint || '';
+    telemetryForm.contentLog = view.telemetry?.content_logging ?? false;
+    Object.assign(initialTelemetry, { ...telemetryForm });
   } catch (err) {
-    error.value = describeError(err)
+    error.value = describeError(err);
   } finally {
-    if (!silent) loading.value = false
+    if (!silent) loading.value = false;
   }
 }
 
 async function applyChanges(set: Record<string, string>, unset: string[] = []): Promise<void> {
-  const response = await api.applyConfig(set, unset)
-  await Promise.all([load(true), refresh(true)])
-  const first = response.messages.find(Boolean)
-  ElMessage.success(first ? first.replace(/^Set /, t('config.toast.savedPrefix')) : t('config.toast.saved'))
+  const response = await api.applyConfig(set, unset);
+  await Promise.all([load(true), refresh(true)]);
+  const first = response.messages.find(Boolean);
+  ElMessage.success(first ? first.replace(/^Set /, t('config.toast.savedPrefix')) : t('config.toast.saved'));
 }
 
 async function saveModel(): Promise<void> {
-  const set: Record<string, string> = {}
-  const unset: string[] = []
-  if (modelForm.model.trim() !== initialModel.model) set.model = modelForm.model.trim()
+  const set: Record<string, string> = {};
+  const unset: string[] = [];
+  if (modelForm.model.trim() !== initialModel.model) set.model = modelForm.model.trim();
   if (modelForm.effort !== initialModel.effort) {
-    if (modelForm.effort) set.effort = modelForm.effort
-    else unset.push('effort')
+    if (modelForm.effort) set.effort = modelForm.effort;
+    else unset.push('effort');
   }
-  const maxTokens = Number(modelForm.maxTokens || 0)
+  const maxTokens = Number(modelForm.maxTokens || 0);
   if (maxTokens !== initialModel.maxTokens) {
-    if (maxTokens > 0) set.max_tokens = String(maxTokens)
-    else unset.push('max_tokens')
+    if (maxTokens > 0) set.max_tokens = String(maxTokens);
+    else unset.push('max_tokens');
   }
-  if (modelForm.language.trim() !== initialModel.language) set.language = modelForm.language.trim()
-  if (!Object.keys(set).length && !unset.length) return
-  saving.value = 'model'
+  if (modelForm.language.trim() !== initialModel.language) set.language = modelForm.language.trim();
+  if (!Object.keys(set).length && !unset.length) return;
+  saving.value = 'model';
   try {
-    await applyChanges(set, unset)
+    await applyChanges(set, unset);
   } catch (err) {
-    ElMessage.error(describeError(err))
+    ElMessage.error(describeError(err));
   } finally {
-    saving.value = ''
+    saving.value = '';
   }
 }
 
 async function saveLlm(): Promise<void> {
-  const set: Record<string, string> = {}
-  if (llmForm.url.trim() !== initialLlm.url) set['llm.url'] = llmForm.url.trim()
-  if (llmForm.model.trim() !== initialLlm.model) set['llm.model'] = llmForm.model.trim()
-  if (llmForm.protocol !== initialLlm.protocol) set['llm.protocol'] = llmForm.protocol
+  const set: Record<string, string> = {};
+  if (llmForm.url.trim() !== initialLlm.url) set['llm.url'] = llmForm.url.trim();
+  if (llmForm.model.trim() !== initialLlm.model) set['llm.model'] = llmForm.model.trim();
+  if (llmForm.protocol !== initialLlm.protocol) set['llm.protocol'] = llmForm.protocol;
   if (Number(llmForm.timeoutSec || 0) !== initialLlm.timeoutSec) {
-    set['llm.timeout_sec'] = String(Number(llmForm.timeoutSec || 0))
+    set['llm.timeout_sec'] = String(Number(llmForm.timeoutSec || 0));
   }
-  if (llmForm.authToken.trim()) set['llm.auth_token'] = llmForm.authToken.trim()
+  if (llmForm.authToken.trim()) set['llm.auth_token'] = llmForm.authToken.trim();
   if (llmForm.authTokenCmd.trim() !== initialLlm.authTokenCmd) {
-    set['llm.auth_token_cmd'] = llmForm.authTokenCmd.trim()
+    set['llm.auth_token_cmd'] = llmForm.authTokenCmd.trim();
   }
-  if (!Object.keys(set).length) return
-  saving.value = 'llm'
+  if (!Object.keys(set).length) return;
+  saving.value = 'llm';
   try {
-    await applyChanges(set)
-    llmForm.authToken = ''
+    await applyChanges(set);
+    llmForm.authToken = '';
   } catch (err) {
-    ElMessage.error(describeError(err))
+    ElMessage.error(describeError(err));
   } finally {
-    saving.value = ''
+    saving.value = '';
   }
 }
 
@@ -472,17 +472,17 @@ async function clearToken(): Promise<void> {
       t('config.legacy.clearTokenConfirm'),
       t('config.legacy.clearTokenTitle'),
       { confirmButtonText: t('config.legacy.clearTokenConfirmButton'), cancelButtonText: t('common.cancel'), type: 'warning' },
-    )
+    );
   } catch {
-    return
+    return;
   }
-  saving.value = 'clear-token'
+  saving.value = 'clear-token';
   try {
-    await applyChanges({ 'llm.auth_token': '' })
+    await applyChanges({ 'llm.auth_token': '' });
   } catch (err) {
-    ElMessage.error(describeError(err))
+    ElMessage.error(describeError(err));
   } finally {
-    saving.value = ''
+    saving.value = '';
   }
 }
 
@@ -490,18 +490,18 @@ async function saveTelemetry(): Promise<void> {
   const set: Record<string, string> = {
     'telemetry.enabled': String(telemetryForm.enabled),
     'telemetry.content_logging': String(telemetryForm.contentLog),
-  }
-  if (telemetryForm.exporter) set['telemetry.exporter'] = telemetryForm.exporter
+  };
+  if (telemetryForm.exporter) set['telemetry.exporter'] = telemetryForm.exporter;
   if (telemetryForm.otlpEndpoint.trim() !== initialTelemetry.otlpEndpoint) {
-    set['telemetry.otlp_endpoint'] = telemetryForm.otlpEndpoint.trim()
+    set['telemetry.otlp_endpoint'] = telemetryForm.otlpEndpoint.trim();
   }
-  saving.value = 'telemetry'
+  saving.value = 'telemetry';
   try {
-    await applyChanges(set)
+    await applyChanges(set);
   } catch (err) {
-    ElMessage.error(describeError(err))
+    ElMessage.error(describeError(err));
   } finally {
-    saving.value = ''
+    saving.value = '';
   }
 }
 
@@ -511,30 +511,30 @@ async function removeMcp(name: string): Promise<void> {
       t('config.mcp.removeConfirm', { name }),
       t('config.mcp.removeServer'),
       { confirmButtonText: t('config.mcp.removeButton'), cancelButtonText: t('common.cancel'), type: 'warning' },
-    )
+    );
   } catch {
-    return
+    return;
   }
   try {
-    await applyChanges({}, [`mcp_servers.${name}`])
+    await applyChanges({}, [`mcp_servers.${name}`]);
   } catch (err) {
-    ElMessage.error(describeError(err))
+    ElMessage.error(describeError(err));
   }
 }
 
 async function copyPath(): Promise<void> {
-  const copied = await copyText(configView.value?.path ?? '')
-  if (copied) ElMessage.success(t('config.file.copied'))
-  else ElMessage.error(t('config.file.copyFailed'))
+  const copied = await copyText(configView.value?.path ?? '');
+  if (copied) ElMessage.success(t('config.file.copied'));
+  else ElMessage.error(t('config.file.copyFailed'));
 }
 
 function go(path: string): void {
-  void router.push(path)
+  void router.push(path);
 }
 
 onMounted(() => {
-  void load()
-})
+  void load();
+});
 </script>
 
 <style scoped>

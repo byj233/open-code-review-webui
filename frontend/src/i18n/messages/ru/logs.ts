@@ -19,4 +19,4 @@ export const logs = {
   'logs.footer.trimmed': 'Старый вывод обрезан',
   'logs.footer.running': 'Команда выполняется',
   'logs.footer.complete': 'Вывод завершён',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

@@ -307,9 +307,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
 import {
   ArrowRight,
   Compass,
@@ -320,94 +320,94 @@ import {
   Setting,
   VideoPlay,
   View,
-} from '@element-plus/icons-vue'
-import BrandMark from '@/components/BrandMark.vue'
-import CommandBar from '@/components/CommandBar.vue'
-import PageHeader from '@/components/PageHeader.vue'
-import SurfaceCard from '@/components/SurfaceCard.vue'
-import { useI18n } from '@/i18n'
-import { api } from '@/api/client'
-import { describeError } from '@/utils/format'
-import { useMetaStore } from '@/stores/meta'
-import { createScanForm, scanCommand } from '@/utils/command'
-import { formatCount } from '@/utils/format'
-import { jobPath } from '@/utils/routes'
-import { authLabel } from '@/utils/status'
-import type { ProviderCard, ProvidersResponse, ScanFormState, ScanRequest } from '@/types'
+} from '@element-plus/icons-vue';
+import BrandMark from '@/components/BrandMark.vue';
+import CommandBar from '@/components/CommandBar.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import SurfaceCard from '@/components/SurfaceCard.vue';
+import { useI18n } from '@/i18n';
+import { api } from '@/api/client';
+import { describeError } from '@/utils/format';
+import { useMetaStore } from '@/stores/meta';
+import { createScanForm, scanCommand } from '@/utils/command';
+import { formatCount } from '@/utils/format';
+import { jobPath } from '@/utils/routes';
+import { authLabel } from '@/utils/status';
+import type { ProviderCard, ProvidersResponse, ScanFormState, ScanRequest } from '@/types';
 
-const { meta, refresh } = useMetaStore()
-const router = useRouter()
-const { t, tn } = useI18n()
-const form = reactive<ScanFormState>(createScanForm())
-const providers = ref<ProvidersResponse | null>(null)
-const advancedPanels = ref<string[]>([])
-const submitting = ref<'run' | 'preview' | null>(null)
+const { meta, refresh } = useMetaStore();
+const router = useRouter();
+const { t, tn } = useI18n();
+const form = reactive<ScanFormState>(createScanForm());
+const providers = ref<ProvidersResponse | null>(null);
+const advancedPanels = ref<string[]>([]);
+const submitting = ref<'run' | 'preview' | null>(null);
 
-const repo = computed(() => meta.value?.repo)
-const active = computed(() => meta.value?.config.active)
+const repo = computed(() => meta.value?.repo);
+const active = computed(() => meta.value?.config.active);
 const pathsError = computed(() => {
   for (const raw of form.paths.split(',')) {
-    const path = raw.trim()
-    if (!path) continue
-    const normalized = path.replace(/\\/g, '/')
-    if (normalized.startsWith('/') || /^[A-Za-z]:/.test(normalized)) return t('scan.scope.errorRelative')
-    if (normalized.split('/').includes('..')) return t('scan.scope.errorInside')
+    const path = raw.trim();
+    if (!path) continue;
+    const normalized = path.replace(/\\/g, '/');
+    if (normalized.startsWith('/') || /^[A-Za-z]:/.test(normalized)) return t('scan.scope.errorRelative');
+    if (normalized.split('/').includes('..')) return t('scan.scope.errorInside');
   }
-  return ''
-})
+  return '';
+});
 
 const providerOptions = computed<ProviderCard[]>(() => {
-  if (!providers.value) return []
-  return [...(providers.value.providers ?? []), ...(providers.value.custom ?? [])]
-})
+  if (!providers.value) return [];
+  return [...(providers.value.providers ?? []), ...(providers.value.custom ?? [])];
+});
 const selectedProvider = computed(() =>
   providerOptions.value.find((provider) => provider.name === form.provider) ?? null,
-)
+);
 const modelOptions = computed(() => {
-  const source = selectedProvider.value ?? providerOptions.value.find((provider) => provider.name === active.value?.provider)
-  const models = [...(source?.models ?? [])]
-  if (active.value?.model && !models.includes(active.value.model)) models.unshift(active.value.model)
-  if (form.model && !models.includes(form.model)) models.unshift(form.model)
-  return models
-})
+  const source = selectedProvider.value ?? providerOptions.value.find((provider) => provider.name === active.value?.provider);
+  const models = [...(source?.models ?? [])];
+  if (active.value?.model && !models.includes(active.value.model)) models.unshift(active.value.model);
+  if (form.model && !models.includes(form.model)) models.unshift(form.model);
+  return models;
+});
 const effectiveProviderLabel = computed(() =>
   form.provider
     ? selectedProvider.value?.display_name || form.provider
     : active.value?.provider_label || t('scan.rail.noProvider'),
-)
+);
 const effectiveModel = computed(() => {
-  if (form.model) return form.model
-  if (selectedProvider.value) return selectedProvider.value.model || t('scan.rail.selectModel')
-  return active.value?.model || t('scan.rail.noModelSelected')
-})
+  if (form.model) return form.model;
+  if (selectedProvider.value) return selectedProvider.value.model || t('scan.rail.selectModel');
+  return active.value?.model || t('scan.rail.noModelSelected');
+});
 const effectiveConfigured = computed(() =>
   form.provider ? Boolean(selectedProvider.value?.configured) : Boolean(active.value?.configured),
-)
+);
 const batchLabel = computed(() => {
   switch (form.batch) {
     case 'none':
-      return t('scan.advanced.batchNone')
+      return t('scan.advanced.batchNone');
     case 'by-language':
-      return t('scan.advanced.batchByLanguage')
+      return t('scan.advanced.batchByLanguage');
     case 'by-directory':
-      return t('scan.advanced.batchByDirectory')
+      return t('scan.advanced.batchByDirectory');
     default:
-      return t('scan.advanced.batchDefault')
+      return t('scan.advanced.batchDefault');
   }
-})
+});
 const batchHint = computed(() => {
   switch (form.batch) {
     case 'none':
-      return t('scan.advanced.batchHintNone')
+      return t('scan.advanced.batchHintNone');
     case 'by-language':
-      return t('scan.advanced.batchHintLanguage')
+      return t('scan.advanced.batchHintLanguage');
     case 'by-directory':
-      return t('scan.advanced.batchHintDirectory')
+      return t('scan.advanced.batchHintDirectory');
     default:
-      return t('scan.advanced.batchHintDefault')
+      return t('scan.advanced.batchHintDefault');
   }
-})
-const commandPreview = computed(() => scanCommand({ ...form, preview: false }))
+});
+const commandPreview = computed(() => scanCommand({ ...form, preview: false }));
 
 function payload(preview: boolean): ScanRequest {
   return {
@@ -425,53 +425,53 @@ function payload(preview: boolean): ScanRequest {
     no_dedup: form.no_dedup,
     no_summary: form.no_summary,
     preview,
-  }
+  };
 }
 
 async function submit(preview: boolean): Promise<void> {
   if (pathsError.value) {
-    ElMessage.warning(pathsError.value)
-    return
+    ElMessage.warning(pathsError.value);
+    return;
   }
-  submitting.value = preview ? 'preview' : 'run'
+  submitting.value = preview ? 'preview' : 'run';
   try {
-    const job = await api.startScan(payload(preview))
-    await router.push(jobPath(job.id, job.kind))
+    const job = await api.startScan(payload(preview));
+    await router.push(jobPath(job.id, job.kind));
   } catch (error) {
-    ElMessage.error(describeError(error))
+    ElMessage.error(describeError(error));
   } finally {
-    submitting.value = null
+    submitting.value = null;
   }
 }
 
 async function loadProviders(): Promise<void> {
   try {
-    providers.value = await api.providers()
+    providers.value = await api.providers();
   } catch {
-    providers.value = null
+    providers.value = null;
   }
 }
 
 function resetForm(): void {
-  Object.assign(form, createScanForm())
+  Object.assign(form, createScanForm());
 }
 
 watch(
   () => form.provider,
   (name, previous) => {
-    if (name === previous) return
+    if (name === previous) return;
     if (!name) {
-      form.model = ''
-      return
+      form.model = '';
+      return;
     }
-    const card = providerOptions.value.find((provider) => provider.name === name)
-    if (card) form.model = card.model || card.models[0] || ''
+    const card = providerOptions.value.find((provider) => provider.name === name);
+    if (card) form.model = card.model || card.models[0] || '';
   },
-)
+);
 
 onMounted(async () => {
-  await Promise.all([refresh(true), loadProviders()])
-})
+  await Promise.all([refresh(true), loadProviders()]);
+});
 </script>
 
 <style scoped>

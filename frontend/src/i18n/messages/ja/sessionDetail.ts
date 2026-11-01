@@ -76,4 +76,4 @@ export const sessionDetail = {
   'sessionDetail.actions.copied': 'セッション ID をコピーしました',
   'sessionDetail.actions.copyFailed': 'セッション ID をコピーできませんでした',
   'sessionDetail.actions.deleted': 'セッションを削除しました',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

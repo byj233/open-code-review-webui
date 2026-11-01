@@ -122,4 +122,4 @@ export const review = {
   'review.error.refs': 'Укажите обе ссылки: начальную и конечную.',
   'review.error.sameRefs': 'Начальная и конечная ссылки должны различаться.',
   'review.error.busy': 'Ревью уже запускается.',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

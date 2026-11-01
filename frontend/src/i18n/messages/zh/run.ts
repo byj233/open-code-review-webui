@@ -79,4 +79,4 @@ export const run = {
   'run.message.stopping': '正在停止运行',
   'run.message.sessionCopied': '会话 ID 已复制',
   'run.message.copyFailed': '无法复制会话 ID',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

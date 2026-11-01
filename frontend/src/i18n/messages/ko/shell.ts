@@ -155,4 +155,4 @@ export const shell = {
     '경로가 이동했거나 세션 또는 실행이 만료되었습니다. 콘솔의 모든 기능은 탐색에서 열 수 있습니다.',
   'notFound.backToOverview': '개요로 돌아가기',
   'notFound.goBack': '뒤로 가기',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

@@ -82,4 +82,4 @@ export const providers = {
 
   'providers.toast.added': '사용자 지정 공급자를 추가했습니다',
   'providers.toast.activated': '공급자를 활성화했습니다',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

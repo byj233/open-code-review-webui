@@ -19,4 +19,4 @@ export const finding = {
 
   'finding.copy.current': '当前：',
   'finding.copy.suggested': '建议：',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

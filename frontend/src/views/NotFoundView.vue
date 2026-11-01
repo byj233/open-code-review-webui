@@ -15,12 +15,12 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import BrandMark from '@/components/BrandMark.vue'
-import { useI18n } from '@/i18n'
+import { useRouter } from 'vue-router';
+import BrandMark from '@/components/BrandMark.vue';
+import { useI18n } from '@/i18n';
 
-const router = useRouter()
-const { t } = useI18n()
+const router = useRouter();
+const { t } = useI18n();
 </script>
 
 <style scoped>

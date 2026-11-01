@@ -54,4 +54,4 @@ export const result = {
   'result.empty.title': 'Нет структурированного результата',
   'result.empty.description':
     'Команда не вернула документ JSON. Вывод — в журнале активности.',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

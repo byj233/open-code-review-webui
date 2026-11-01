@@ -20,10 +20,10 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft } from '@element-plus/icons-vue'
-import { useI18n } from '@/i18n'
+import { ArrowLeft } from '@element-plus/icons-vue';
+import { useI18n } from '@/i18n';
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 withDefaults(
   defineProps<{
@@ -35,7 +35,7 @@ withDefaults(
     accentEyebrow?: boolean
   }>(),
   { accentEyebrow: true },
-)
+);
 </script>
 
 <style scoped>

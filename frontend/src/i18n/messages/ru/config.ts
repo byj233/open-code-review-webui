@@ -107,4 +107,4 @@ export const config = {
 
   'config.toast.saved': 'Настройки сохранены',
   'config.toast.savedPrefix': 'Сохранено: ',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

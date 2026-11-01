@@ -79,4 +79,4 @@ export const run = {
   'run.message.stopping': 'Stopping the run',
   'run.message.sessionCopied': 'Session id copied',
   'run.message.copyFailed': 'Could not copy the session id',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

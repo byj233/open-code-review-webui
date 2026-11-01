@@ -60,13 +60,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
-import { ArrowDown, Bottom, CopyDocument } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
-import { useI18n } from '@/i18n'
-import { copyText } from '@/utils/clipboard'
-import { formatDate } from '@/utils/format'
-import type { JobLogLine } from '@/types'
+import { computed, nextTick, ref, watch } from 'vue';
+import { ArrowDown, Bottom, CopyDocument } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
+import { useI18n } from '@/i18n';
+import { copyText } from '@/utils/clipboard';
+import { formatDate } from '@/utils/format';
+import type { JobLogLine } from '@/types';
 
 const props = withDefaults(
   defineProps<{
@@ -77,61 +77,61 @@ const props = withDefaults(
     truncated?: boolean
   }>(),
   { running: false, height: 460, truncated: false },
-)
+);
 
-const { t, tn } = useI18n()
+const { t, tn } = useI18n();
 
-const bodyRef = ref<HTMLElement | null>(null)
-const follow = ref(true)
+const bodyRef = ref<HTMLElement | null>(null);
+const follow = ref(true);
 
-const titleText = computed(() => props.title ?? t('logs.header.title'))
+const titleText = computed(() => props.title ?? t('logs.header.title'));
 
 const heightStyle = computed(() =>
   typeof props.height === 'number' ? `${props.height}px` : props.height,
-)
+);
 
 function lineClass(line: JobLogLine): string[] {
-  const classes = ['log__line']
-  if (line.stream === 'stderr') classes.push('log__line--stderr')
-  if (/\b(error|failed|failure)\b/i.test(line.text)) classes.push('log__line--error')
-  else if (/\b(warning|warn)\b/i.test(line.text)) classes.push('log__line--warn')
-  else if (/(completed|successful|done)\b/i.test(line.text)) classes.push('log__line--success')
-  return classes
+  const classes = ['log__line'];
+  if (line.stream === 'stderr') classes.push('log__line--stderr');
+  if (/\b(error|failed|failure)\b/i.test(line.text)) classes.push('log__line--error');
+  else if (/\b(warning|warn)\b/i.test(line.text)) classes.push('log__line--warn');
+  else if (/(completed|successful|done)\b/i.test(line.text)) classes.push('log__line--success');
+  return classes;
 }
 
 function isNearBottom(): boolean {
-  const el = bodyRef.value
-  if (!el) return true
-  return el.scrollHeight - el.scrollTop - el.clientHeight < 48
+  const el = bodyRef.value;
+  if (!el) return true;
+  return el.scrollHeight - el.scrollTop - el.clientHeight < 48;
 }
 
 function onScroll(): void {
-  if (isNearBottom()) follow.value = true
-  else follow.value = false
+  if (isNearBottom()) follow.value = true;
+  else follow.value = false;
 }
 
 async function jumpToLatest(): Promise<void> {
-  follow.value = true
-  await nextTick()
-  const el = bodyRef.value
-  if (el) el.scrollTop = el.scrollHeight
+  follow.value = true;
+  await nextTick();
+  const el = bodyRef.value;
+  if (el) el.scrollTop = el.scrollHeight;
 }
 
 watch(
   () => props.lines.length,
   async () => {
-    if (!follow.value) return
-    await nextTick()
-    const el = bodyRef.value
-    if (el) el.scrollTop = el.scrollHeight
+    if (!follow.value) return;
+    await nextTick();
+    const el = bodyRef.value;
+    if (el) el.scrollTop = el.scrollHeight;
   },
-)
+);
 
 async function copyLog(): Promise<void> {
-  const text = props.lines.map((line) => line.text).join('\n')
-  const copied = await copyText(text)
-  if (copied) ElMessage.success(t('logs.actions.copied'))
-  else ElMessage.error(t('logs.actions.copyFailed'))
+  const text = props.lines.map((line) => line.text).join('\n');
+  const copied = await copyText(text);
+  if (copied) ElMessage.success(t('logs.actions.copied'));
+  else ElMessage.error(t('logs.actions.copyFailed'));
 }
 </script>
 

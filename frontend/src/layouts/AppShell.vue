@@ -20,28 +20,28 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import AppSidebar from '@/layouts/AppSidebar.vue'
-import AppTopbar from '@/layouts/AppTopbar.vue'
-import CommandPalette from '@/components/CommandPalette.vue'
-import { useMetaStore } from '@/stores/meta'
+import { onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import AppSidebar from '@/layouts/AppSidebar.vue';
+import AppTopbar from '@/layouts/AppTopbar.vue';
+import CommandPalette from '@/components/CommandPalette.vue';
+import { useMetaStore } from '@/stores/meta';
 
-const paletteOpen = ref(false)
-const mobileOpen = ref(false)
-const route = useRoute()
-const { refresh } = useMetaStore()
+const paletteOpen = ref(false);
+const mobileOpen = ref(false);
+const route = useRoute();
+const { refresh } = useMetaStore();
 
 watch(
   () => route.fullPath,
   () => {
-    mobileOpen.value = false
+    mobileOpen.value = false;
   },
-)
+);
 
 onMounted(() => {
-  void refresh(true)
-})
+  void refresh(true);
+});
 </script>
 
 <style scoped>

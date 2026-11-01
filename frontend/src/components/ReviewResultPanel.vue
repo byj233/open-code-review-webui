@@ -241,41 +241,41 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { InfoFilled, WarningFilled } from '@element-plus/icons-vue'
-import EmptyState from '@/components/EmptyState.vue'
-import FindingCard from '@/components/FindingCard.vue'
-import MarkdownView from '@/components/MarkdownView.vue'
+import { computed, ref } from 'vue';
+import { InfoFilled, WarningFilled } from '@element-plus/icons-vue';
+import EmptyState from '@/components/EmptyState.vue';
+import FindingCard from '@/components/FindingCard.vue';
+import MarkdownView from '@/components/MarkdownView.vue';
 import {
   formatCompact,
   formatCount,
-} from '@/utils/format'
+} from '@/utils/format';
 import {
   categoryLabel,
   excludeReasonLabel,
   manifestStateLabel,
   normalizedSeverity,
   severityOrder,
-} from '@/utils/status'
+} from '@/utils/status';
 import type {
   LlmComment,
   PreviewEntry,
   PreviewResult,
   ReviewResult,
-} from '@/types'
-import { useI18n } from '@/i18n'
+} from '@/types';
+import { useI18n } from '@/i18n';
 
 const props = defineProps<{
   result: ReviewResult | PreviewResult | null
-}>()
+}>();
 
-const { t, tn } = useI18n()
+const { t, tn } = useI18n();
 
-const severityFilter = ref('all')
-const categoryFilter = ref('')
-const commentQuery = ref('')
-const previewFilter = ref<'all' | 'review' | 'excluded'>('all')
-const previewQuery = ref('')
+const severityFilter = ref('all');
+const categoryFilter = ref('');
+const commentQuery = ref('');
+const previewFilter = ref<'all' | 'review' | 'excluded'>('all');
+const previewQuery = ref('');
 
 const severityFilters = computed(() => [
   { value: 'all' as const, label: t('result.filters.all') },
@@ -283,150 +283,150 @@ const severityFilters = computed(() => [
   { value: 'high' as const, label: t('status.severity.high') },
   { value: 'medium' as const, label: t('status.severity.medium') },
   { value: 'low' as const, label: t('status.severity.low') },
-])
+]);
 const previewFilters = computed(() => [
   { value: 'all' as const, label: t('result.filters.all') },
   { value: 'review' as const, label: t('result.preview.willReview') },
   { value: 'excluded' as const, label: t('result.preview.excluded') },
-])
+]);
 
 const preview = computed<PreviewResult | null>(() => {
-  const value = props.result as PreviewResult | null
-  return value && Array.isArray(value.files) ? value : null
-})
+  const value = props.result as PreviewResult | null;
+  return value && Array.isArray(value.files) ? value : null;
+});
 
 const review = computed<ReviewResult | null>(() => {
-  const value = props.result as ReviewResult | null
-  if (!value || preview.value) return null
-  if (Array.isArray(value.comments) || value.summary || value.manifest) return value
-  return null
-})
+  const value = props.result as ReviewResult | null;
+  if (!value || preview.value) return null;
+  if (Array.isArray(value.comments) || value.summary || value.manifest) return value;
+  return null;
+});
 
-const comments = computed<LlmComment[]>(() => review.value?.comments ?? [])
-const totalComments = computed(() => comments.value.length)
-const manifest = computed(() => review.value?.manifest ?? null)
-const completedFiles = computed(() => manifest.value?.coverage?.completed?.length ?? 0)
-const failedItems = computed(() => (manifest.value?.coverage?.failed ?? []).slice(0, 12))
+const comments = computed<LlmComment[]>(() => review.value?.comments ?? []);
+const totalComments = computed(() => comments.value.length);
+const manifest = computed(() => review.value?.manifest ?? null);
+const completedFiles = computed(() => manifest.value?.coverage?.completed?.length ?? 0);
+const failedItems = computed(() => (manifest.value?.coverage?.failed ?? []).slice(0, 12));
 
 const coverageText = computed(() => {
-  if (!manifest.value?.coverage) return t('result.review.coverageNotRecorded')
-  const selected = manifest.value.coverage.selected?.length ?? 0
-  const completed = manifest.value.coverage.completed?.length ?? 0
-  return t('result.review.coverageSelected', { completed, selected })
-})
+  if (!manifest.value?.coverage) return t('result.review.coverageNotRecorded');
+  const selected = manifest.value.coverage.selected?.length ?? 0;
+  const completed = manifest.value.coverage.completed?.length ?? 0;
+  return t('result.review.coverageSelected', { completed, selected });
+});
 
 const severityCounts = computed(() => {
-  const counts = { critical: 0, high: 0, medium: 0, low: 0, unknown: 0 }
+  const counts = { critical: 0, high: 0, medium: 0, low: 0, unknown: 0 };
   for (const comment of comments.value) {
-    counts[normalizedSeverity(comment.severity)] += 1
+    counts[normalizedSeverity(comment.severity)] += 1;
   }
-  return counts
-})
+  return counts;
+});
 
 const severityBreakdown = computed(() => {
-  const total = totalComments.value || 1
+  const total = totalComments.value || 1;
   return (['critical', 'high', 'medium', 'low'] as const)
     .map((name) => ({
       name,
       count: severityCounts.value[name],
       percent: (severityCounts.value[name] / total) * 100,
     }))
-    .filter((entry) => entry.count > 0)
-})
+    .filter((entry) => entry.count > 0);
+});
 
 const categories = computed(() =>
   Array.from(new Set(comments.value.map((comment) => (comment.category || 'other').toLowerCase()))).sort(),
-)
+);
 
 const filteredComments = computed(() => {
-  const query = commentQuery.value.trim().toLowerCase()
+  const query = commentQuery.value.trim().toLowerCase();
   return comments.value
     .filter((comment) => {
       if (severityFilter.value !== 'all' && normalizedSeverity(comment.severity) !== severityFilter.value) {
-        return false
+        return false;
       }
       if (categoryFilter.value && (comment.category || 'other').toLowerCase() !== categoryFilter.value) {
-        return false
+        return false;
       }
       if (query) {
-        const haystack = `${comment.path} ${comment.content} ${comment.suggestion_code ?? ''}`.toLowerCase()
-        if (!haystack.includes(query)) return false
+        const haystack = `${comment.path} ${comment.content} ${comment.suggestion_code ?? ''}`.toLowerCase();
+        if (!haystack.includes(query)) return false;
       }
-      return true
+      return true;
     })
     .sort((left, right) => {
-      if (left.path !== right.path) return left.path.localeCompare(right.path)
-      const severityDelta = severityOrder[normalizedSeverity(left.severity) as keyof typeof severityOrder] ?? 9
-      const rightSeverity = severityOrder[normalizedSeverity(right.severity) as keyof typeof severityOrder] ?? 9
-      if (severityDelta !== rightSeverity) return severityDelta - rightSeverity
-      return (left.start_line ?? 0) - (right.start_line ?? 0)
-    })
-})
+      if (left.path !== right.path) return left.path.localeCompare(right.path);
+      const severityDelta = severityOrder[normalizedSeverity(left.severity) as keyof typeof severityOrder] ?? 9;
+      const rightSeverity = severityOrder[normalizedSeverity(right.severity) as keyof typeof severityOrder] ?? 9;
+      if (severityDelta !== rightSeverity) return severityDelta - rightSeverity;
+      return (left.start_line ?? 0) - (right.start_line ?? 0);
+    });
+});
 
 const groupedComments = computed(() => {
-  const groups = new Map<string, LlmComment[]>()
+  const groups = new Map<string, LlmComment[]>();
   for (const comment of filteredComments.value) {
-    const list = groups.get(comment.path) ?? []
-    list.push(comment)
-    groups.set(comment.path, list)
+    const list = groups.get(comment.path) ?? [];
+    list.push(comment);
+    groups.set(comment.path, list);
   }
-  return Array.from(groups.entries()).map(([path, items]) => ({ path, comments: items }))
-})
+  return Array.from(groups.entries()).map(([path, items]) => ({ path, comments: items }));
+});
 
 const filteredPreviewFiles = computed<PreviewEntry[]>(() => {
-  if (!preview.value) return []
-  const query = previewQuery.value.trim().toLowerCase()
+  if (!preview.value) return [];
+  const query = previewQuery.value.trim().toLowerCase();
   return preview.value.files.filter((file) => {
-    if (previewFilter.value === 'review' && !file.will_review) return false
-    if (previewFilter.value === 'excluded' && file.will_review) return false
-    if (query && !file.path.toLowerCase().includes(query)) return false
-    return true
-  })
-})
+    if (previewFilter.value === 'review' && !file.will_review) return false;
+    if (previewFilter.value === 'excluded' && file.will_review) return false;
+    if (query && !file.path.toLowerCase().includes(query)) return false;
+    return true;
+  });
+});
 
 function previewStatusClass(file: PreviewEntry): string {
   switch (normalizedPreviewStatus(file.status)) {
     case 'A':
-      return 'preview-row__status--add'
+      return 'preview-row__status--add';
     case 'D':
-      return 'preview-row__status--delete'
+      return 'preview-row__status--delete';
     case 'R':
-      return 'preview-row__status--rename'
+      return 'preview-row__status--rename';
     default:
-      return 'preview-row__status--modify'
+      return 'preview-row__status--modify';
   }
 }
 
 function normalizedPreviewStatus(status?: string): string {
-  const value = (status ?? '').trim().toLowerCase()
+  const value = (status ?? '').trim().toLowerCase();
   switch (value) {
     case 'a':
     case 'added':
     case 'add':
-      return 'A'
+      return 'A';
     case 'd':
     case 'deleted':
     case 'delete':
-      return 'D'
+      return 'D';
     case 'r':
     case 'renamed':
     case 'rename':
-      return 'R'
+      return 'R';
     case 'c':
     case 'copied':
     case 'copy':
-      return 'C'
+      return 'C';
     default:
-      return 'M'
+      return 'M';
   }
 }
 
 function previewStatusLetter(status?: string): string {
-  return normalizedPreviewStatus(status)
+  return normalizedPreviewStatus(status);
 }
 
 function commentKey(comment: LlmComment): string {
-  return `${comment.path}:${comment.start_line}:${comment.end_line}:${comment.content.slice(0, 24)}`
+  return `${comment.path}:${comment.start_line}:${comment.end_line}:${comment.content.slice(0, 24)}`;
 }
 </script>
 

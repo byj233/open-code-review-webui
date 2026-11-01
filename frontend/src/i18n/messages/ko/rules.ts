@@ -45,4 +45,4 @@ export const rules = {
 
   'rules.message.copied': '규칙을 복사했습니다',
   'rules.message.copyFailed': '규칙을 복사하지 못했습니다',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

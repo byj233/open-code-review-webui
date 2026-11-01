@@ -86,4 +86,4 @@ export const overview = {
 
   'overview.activity.title': '最近のアクティビティ',
   'overview.activity.subtitle': 'このコンソールから開始したコマンド',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

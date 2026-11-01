@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 alibaba/open-code-review Contributors
 
-import { watch } from 'vue'
-import { createRouter, createWebHistory, type RouteLocationNormalizedLoaded } from 'vue-router'
-import { locale, t, type MessageKey } from '@/i18n'
+import { watch } from 'vue';
+import { createRouter, createWebHistory, type RouteLocationNormalizedLoaded } from 'vue-router';
+import { locale, t, type MessageKey } from '@/i18n';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -91,18 +91,18 @@ const router = createRouter({
     },
   ],
   scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) return savedPosition
-    return { top: 0 }
+    if (savedPosition) return savedPosition;
+    return { top: 0 };
   },
-})
+});
 
 function applyTitle(route: RouteLocationNormalizedLoaded): void {
-  const key = route.meta.title as MessageKey | undefined
-  document.title = `${key ? t(key) : t('topbar.console')} · ${t('app.title')}`
+  const key = route.meta.title as MessageKey | undefined;
+  document.title = `${key ? t(key) : t('topbar.console')} · ${t('app.title')}`;
 }
 
-router.afterEach(applyTitle)
+router.afterEach(applyTitle);
 
-watch(locale, () => applyTitle(router.currentRoute.value))
+watch(locale, () => applyTitle(router.currentRoute.value));
 
-export default router
+export default router;

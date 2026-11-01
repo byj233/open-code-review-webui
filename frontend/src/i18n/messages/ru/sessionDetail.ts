@@ -80,4 +80,4 @@ export const sessionDetail = {
   'sessionDetail.actions.copied': 'Идентификатор сеанса скопирован',
   'sessionDetail.actions.copyFailed': 'Не удалось скопировать идентификатор сеанса',
   'sessionDetail.actions.deleted': 'Сеанс удалён',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

@@ -47,4 +47,4 @@ export const rules = {
 
   'rules.message.copied': 'Правило скопировано',
   'rules.message.copyFailed': 'Не удалось скопировать правило',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

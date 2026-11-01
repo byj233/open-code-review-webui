@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 alibaba/open-code-review Contributors
 
-import { t } from '@/i18n'
+import { t } from '@/i18n';
 import type {
   ActivateProviderResponse,
   ConfigApplyResponse,
@@ -17,74 +17,74 @@ import type {
   ScanRequest,
   SessionDetailResponse,
   SessionsResponse,
-} from '@/types'
+} from '@/types';
 
 const token =
   typeof document === 'undefined'
     ? ''
-    : document.querySelector<HTMLMetaElement>('meta[name="ocr-console-token"]')?.content ?? ''
+    : document.querySelector<HTMLMetaElement>('meta[name="ocr-console-token"]')?.content ?? '';
 
 export class ApiError extends Error {
-  status: number
+  status: number;
 
   constructor(message: string, status: number) {
-    super(message)
-    this.name = 'ApiError'
-    this.status = status
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
   }
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const method = (init.method ?? 'GET').toUpperCase()
-  const headers = new Headers(init.headers)
-  headers.set('Accept', 'application/json')
+  const method = (init.method ?? 'GET').toUpperCase();
+  const headers = new Headers(init.headers);
+  headers.set('Accept', 'application/json');
   if (init.body && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json')
+    headers.set('Content-Type', 'application/json');
   }
   if (method !== 'GET' && method !== 'HEAD') {
-    headers.set('X-OCR-Token', token)
+    headers.set('X-OCR-Token', token);
   }
 
-  let response: Response
+  let response: Response;
   try {
-    response = await fetch(path, { ...init, method, headers })
+    response = await fetch(path, { ...init, method, headers });
   } catch {
-    throw new ApiError(t('errors.unreachable'), 0)
+    throw new ApiError(t('errors.unreachable'), 0);
   }
 
   if (!response.ok) {
-    let message = `${response.status} ${response.statusText}`
+    let message = `${response.status} ${response.statusText}`;
     try {
-      const payload = (await response.json()) as { error?: string }
-      if (payload.error) message = payload.error
+      const payload = (await response.json()) as { error?: string };
+      if (payload.error) message = payload.error;
     } catch {
-      const text = await response.text().catch(() => '')
-      if (text) message = text
+      const text = await response.text().catch(() => '');
+      if (text) message = text;
     }
-    throw new ApiError(message, response.status)
+    throw new ApiError(message, response.status);
   }
-  if (response.status === 204) return undefined as T
-  return (await response.json()) as T
+  if (response.status === 204) return undefined as T;
+  return (await response.json()) as T;
 }
 
 export const api = {
   meta(): Promise<MetaResponse> {
-    return request('/api/meta')
+    return request('/api/meta');
   },
   repo(): Promise<RepoInfo> {
-    return request('/api/repo')
+    return request('/api/repo');
   },
   config(): Promise<ConfigView> {
-    return request('/api/config')
+    return request('/api/config');
   },
   applyConfig(set: Record<string, string>, unset: string[] = []): Promise<ConfigApplyResponse> {
     return request('/api/config/apply', {
       method: 'POST',
       body: JSON.stringify({ set, unset }),
-    })
+    });
   },
   providers(): Promise<ProvidersResponse> {
-    return request('/api/providers')
+    return request('/api/providers');
   },
   activateProvider(payload: {
     name: string
@@ -97,50 +97,50 @@ export const api = {
     return request('/api/providers/activate', {
       method: 'POST',
       body: JSON.stringify(payload),
-    })
+    });
   },
   sessions(limit = 100, query = ''): Promise<SessionsResponse> {
-    const params = new URLSearchParams({ limit: String(limit) })
-    if (query.trim()) params.set('q', query.trim())
-    return request(`/api/sessions?${params.toString()}`)
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (query.trim()) params.set('q', query.trim());
+    return request(`/api/sessions?${params.toString()}`);
   },
   session(id: string): Promise<SessionDetailResponse> {
-    return request(`/api/sessions/${encodeURIComponent(id)}`)
+    return request(`/api/sessions/${encodeURIComponent(id)}`);
   },
   deleteSession(id: string): Promise<{ ok: boolean }> {
-    return request(`/api/sessions/${encodeURIComponent(id)}`, { method: 'DELETE' })
+    return request(`/api/sessions/${encodeURIComponent(id)}`, { method: 'DELETE' });
   },
   rules(): Promise<RulesResponse> {
-    return request('/api/rules')
+    return request('/api/rules');
   },
   checkRule(path: string): Promise<RuleCheckResponse> {
     return request('/api/rules/check', {
       method: 'POST',
       body: JSON.stringify({ path }),
-    })
+    });
   },
   startReview(payload: ReviewRequest): Promise<JobSnapshot> {
-    return request('/api/review', { method: 'POST', body: JSON.stringify(payload) })
+    return request('/api/review', { method: 'POST', body: JSON.stringify(payload) });
   },
   startScan(payload: ScanRequest): Promise<JobSnapshot> {
-    return request('/api/scan', { method: 'POST', body: JSON.stringify(payload) })
+    return request('/api/scan', { method: 'POST', body: JSON.stringify(payload) });
   },
   testConnection(): Promise<JobSnapshot> {
-    return request('/api/llm/test', { method: 'POST', body: '{}' })
+    return request('/api/llm/test', { method: 'POST', body: '{}' });
   },
   jobs(): Promise<JobsResponse> {
-    return request('/api/jobs')
+    return request('/api/jobs');
   },
   job(id: string): Promise<JobSnapshot> {
-    return request(`/api/jobs/${encodeURIComponent(id)}`)
+    return request(`/api/jobs/${encodeURIComponent(id)}`);
   },
   cancelJob(id: string): Promise<JobSnapshot> {
     return request(`/api/jobs/${encodeURIComponent(id)}/cancel`, {
       method: 'POST',
       body: '{}',
-    })
+    });
   },
   eventsUrl(id: string): string {
-    return `/api/jobs/${encodeURIComponent(id)}/events`
+    return `/api/jobs/${encodeURIComponent(id)}/events`;
   },
-}
+};

@@ -336,8 +336,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import {
   ArrowRight,
   ChatDotRound,
@@ -351,168 +351,168 @@ import {
   Share,
   VideoPlay,
   WarningFilled,
-} from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
-import BrandMark from '@/components/BrandMark.vue'
-import EmptyState from '@/components/EmptyState.vue'
-import StatTile from '@/components/StatTile.vue'
-import StatusPill from '@/components/StatusPill.vue'
-import SurfaceCard from '@/components/SurfaceCard.vue'
-import { api } from '@/api/client'
-import { describeError } from '@/utils/format'
-import { useI18n } from '@/i18n'
-import { useMetaStore } from '@/stores/meta'
+} from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
+import BrandMark from '@/components/BrandMark.vue';
+import EmptyState from '@/components/EmptyState.vue';
+import StatTile from '@/components/StatTile.vue';
+import StatusPill from '@/components/StatusPill.vue';
+import SurfaceCard from '@/components/SurfaceCard.vue';
+import { api } from '@/api/client';
+import { describeError } from '@/utils/format';
+import { useI18n } from '@/i18n';
+import { useMetaStore } from '@/stores/meta';
 import {
   formatCount,
   formatRelative,
-} from '@/utils/format'
-import { jobPath } from '@/utils/routes'
+} from '@/utils/format';
+import { jobPath } from '@/utils/routes';
 import {
   authLabel,
   sessionModeLabel,
   sessionState,
   sourceLabel,
   type Tone,
-} from '@/utils/status'
-import type { JobSnapshot, SessionSummary } from '@/types'
+} from '@/utils/status';
+import type { JobSnapshot, SessionSummary } from '@/types';
 
-const router = useRouter()
-const { meta, refresh } = useMetaStore()
-const { t, tn } = useI18n()
+const router = useRouter();
+const { meta, refresh } = useMetaStore();
+const { t, tn } = useI18n();
 
-const sessions = ref<SessionSummary[]>([])
-const jobs = ref<JobSnapshot[]>([])
-const sessionsLoading = ref(false)
-const initialLoading = ref(true)
-const error = ref('')
-const testing = ref(false)
+const sessions = ref<SessionSummary[]>([]);
+const jobs = ref<JobSnapshot[]>([]);
+const sessionsLoading = ref(false);
+const initialLoading = ref(true);
+const error = ref('');
+const testing = ref(false);
 
-const repo = computed(() => meta.value?.repo)
-const active = computed(() => meta.value?.config.active)
-const recentSessions = computed(() => sessions.value.slice(0, 5))
-const recentCommits = computed(() => (repo.value?.commits ?? []).slice(0, 5))
+const repo = computed(() => meta.value?.repo);
+const active = computed(() => meta.value?.config.active);
+const recentSessions = computed(() => sessions.value.slice(0, 5));
+const recentCommits = computed(() => (repo.value?.commits ?? []).slice(0, 5));
 const totalFindings = computed(() =>
   sessions.value.reduce((total, session) => total + session.total_comments, 0),
-)
+);
 
 const greeting = computed(() => {
-  const hour = new Date().getHours()
-  if (hour < 5) return t('overview.greeting.workingLate')
-  if (hour < 12) return t('overview.greeting.morning')
-  if (hour < 18) return t('overview.greeting.afternoon')
-  return t('overview.greeting.evening')
-})
+  const hour = new Date().getHours();
+  if (hour < 5) return t('overview.greeting.workingLate');
+  if (hour < 12) return t('overview.greeting.morning');
+  if (hour < 18) return t('overview.greeting.afternoon');
+  return t('overview.greeting.evening');
+});
 const heroLine = computed(() =>
   repo.value?.is_git ? t('overview.hero.headlineReview') : t('overview.hero.headlineNoRepo'),
-)
+);
 const branchLabel = computed(() => {
-  const info = repo.value
-  if (!info?.is_git) return t('overview.hero.branchNotGit')
-  if (info.detached) return t('repo.detached', { head: info.head || '--' })
-  return info.branch || t('repo.noCommits')
-})
+  const info = repo.value;
+  if (!info?.is_git) return t('overview.hero.branchNotGit');
+  if (info.detached) return t('repo.detached', { head: info.head || '--' });
+  return info.branch || t('repo.noCommits');
+});
 const changedHint = computed(() => {
-  const info = repo.value
-  if (!info?.is_git) return t('overview.stats.gitRequired')
+  const info = repo.value;
+  if (!info?.is_git) return t('overview.stats.gitRequired');
   return t('overview.stats.dirtySummary', {
     staged: info.staged,
     unstaged: info.unstaged,
     untracked: info.untracked,
-  })
-})
+  });
+});
 const sessionsHint = computed(() => {
-  if (!sessions.value.length) return t('overview.stats.noHistory')
-  return t('overview.stats.latest', { time: formatRelative(sessions.value[0].start_time) })
-})
+  if (!sessions.value.length) return t('overview.stats.noHistory');
+  return t('overview.stats.latest', { time: formatRelative(sessions.value[0].start_time) });
+});
 const findingsHint = computed(() => {
-  if (!sessions.value.length) return t('overview.stats.acrossSessions')
-  const latest = sessions.value[0]
-  return t('overview.stats.latestFindings', { count: latest.total_comments })
-})
+  if (!sessions.value.length) return t('overview.stats.acrossSessions');
+  const latest = sessions.value[0];
+  return t('overview.stats.latestFindings', { count: latest.total_comments });
+});
 const providerHint = computed(() => {
-  if (!active.value?.configured) return t('overview.stats.modelMissing')
-  return `${authLabel(active.value.auth_mode)} · ${sourceLabel(active.value.source)}`
-})
+  if (!active.value?.configured) return t('overview.stats.modelMissing');
+  return `${authLabel(active.value.auth_mode)} · ${sourceLabel(active.value.source)}`;
+});
 const quickProviderDesc = computed(() => {
-  if (active.value?.configured) return active.value.model || active.value.provider_label || t('overview.quick.manageModels')
-  return t('overview.quick.providerDesc')
-})
+  if (active.value?.configured) return active.value.model || active.value.provider_label || t('overview.quick.manageModels');
+  return t('overview.quick.providerDesc');
+});
 
 function stateDot(tone: Tone): string {
   switch (tone) {
     case 'success':
-      return 'dot--green'
+      return 'dot--green';
     case 'warning':
-      return 'dot--amber'
+      return 'dot--amber';
     case 'danger':
-      return 'dot--red'
+      return 'dot--red';
     case 'accent':
-      return 'dot--accent'
+      return 'dot--accent';
     default:
-      return ''
+      return '';
   }
 }
 
 function shortPath(path?: string): string {
-  if (!path) return ''
+  if (!path) return '';
   const compact = path
     .replace(/\\/g, '/')
     .replace(/^[A-Za-z]:\/Users\/[^/]+\//, '~/')
-    .replace(/^\/home\/[^/]+\//, '~/')
-  return compact.length > 46 ? `${compact.slice(0, 22)}…${compact.slice(-20)}` : compact
+    .replace(/^\/home\/[^/]+\//, '~/');
+  return compact.length > 46 ? `${compact.slice(0, 22)}…${compact.slice(-20)}` : compact;
 }
 
 function go(path: string): void {
-  void router.push(path)
+  void router.push(path);
 }
 
 function openSession(id: string): void {
-  void router.push(`/sessions/${encodeURIComponent(id)}`)
+  void router.push(`/sessions/${encodeURIComponent(id)}`);
 }
 
 async function loadSessions(): Promise<void> {
-  sessionsLoading.value = true
+  sessionsLoading.value = true;
   try {
-    const response = await api.sessions(100)
-    sessions.value = response.sessions
+    const response = await api.sessions(100);
+    sessions.value = response.sessions;
   } catch (err) {
-    error.value = describeError(err)
+    error.value = describeError(err);
   } finally {
-    sessionsLoading.value = false
+    sessionsLoading.value = false;
   }
 }
 
 async function loadJobs(): Promise<void> {
   try {
-    const response = await api.jobs()
-    jobs.value = response.jobs.slice(0, 4)
+    const response = await api.jobs();
+    jobs.value = response.jobs.slice(0, 4);
   } catch {
-    jobs.value = []
+    jobs.value = [];
   }
 }
 
 async function loadAll(): Promise<void> {
-  error.value = ''
-  await refresh(true)
-  await Promise.all([loadSessions(), loadJobs()])
+  error.value = '';
+  await refresh(true);
+  await Promise.all([loadSessions(), loadJobs()]);
 }
 
 async function testConnection(): Promise<void> {
-  testing.value = true
+  testing.value = true;
   try {
-    const job = await api.testConnection()
-    await router.push(jobPath(job.id, job.kind))
+    const job = await api.testConnection();
+    await router.push(jobPath(job.id, job.kind));
   } catch (err) {
-    ElMessage.error(describeError(err))
+    ElMessage.error(describeError(err));
   } finally {
-    testing.value = false
+    testing.value = false;
   }
 }
 
 onMounted(async () => {
-  await loadAll()
-  initialLoading.value = false
-})
+  await loadAll();
+  initialLoading.value = false;
+});
 </script>
 
 <style scoped>

@@ -19,4 +19,4 @@ export const finding = {
 
   'finding.copy.current': 'Текущий:',
   'finding.copy.suggested': 'Предлагаемый:',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

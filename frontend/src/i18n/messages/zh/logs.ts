@@ -19,4 +19,4 @@ export const logs = {
   'logs.footer.trimmed': '较早的输出已被截断',
   'logs.footer.running': '命令运行中',
   'logs.footer.complete': '输出已完成',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

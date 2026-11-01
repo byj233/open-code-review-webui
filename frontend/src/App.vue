@@ -6,5 +6,5 @@
 </template>
 
 <script setup lang="ts">
-import { elementLocale } from '@/i18n'
+import { elementLocale } from '@/i18n';
 </script>

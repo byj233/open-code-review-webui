@@ -122,4 +122,4 @@ export const review = {
   'review.error.refs': 'Choose both a from and a to ref.',
   'review.error.sameRefs': 'The from and to refs must be different.',
   'review.error.busy': 'The review is already starting.',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

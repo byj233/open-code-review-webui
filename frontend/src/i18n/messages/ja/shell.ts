@@ -155,4 +155,4 @@ export const shell = {
     'ルートが移動したか、セッションまたは実行が期限切れです。コンソールの機能はすべてナビゲーションから開けます。',
   'notFound.backToOverview': '概要に戻る',
   'notFound.goBack': '前のページに戻る',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

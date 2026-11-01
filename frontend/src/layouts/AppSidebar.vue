@@ -66,8 +66,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import {
   ArrowRight,
   Collection,
@@ -80,17 +80,17 @@ import {
   Search,
   Setting,
   Sunny,
-} from '@element-plus/icons-vue'
-import BrandMark from '@/components/BrandMark.vue'
-import { useMetaStore } from '@/stores/meta'
-import { useTheme } from '@/composables/useTheme'
-import { useI18n } from '@/i18n'
-import { authLabel } from '@/utils/status'
-import type { ActiveConfig } from '@/types'
-import type { Component } from 'vue'
+} from '@element-plus/icons-vue';
+import BrandMark from '@/components/BrandMark.vue';
+import { useMetaStore } from '@/stores/meta';
+import { useTheme } from '@/composables/useTheme';
+import { useI18n } from '@/i18n';
+import { authLabel } from '@/utils/status';
+import type { ActiveConfig } from '@/types';
+import type { Component } from 'vue';
 
-defineProps<{ open?: boolean }>()
-defineEmits<{ navigate: []; palette: [] }>()
+defineProps<{ open?: boolean }>();
+defineEmits<{ navigate: []; palette: [] }>();
 
 interface NavItem {
   label: string
@@ -100,10 +100,10 @@ interface NavItem {
   badge?: string
 }
 
-const route = useRoute()
-const { meta } = useMetaStore()
-const { isDark, toggleTheme } = useTheme()
-const { t } = useI18n()
+const route = useRoute();
+const { meta } = useMetaStore();
+const { isDark, toggleTheme } = useTheme();
+const { t } = useI18n();
 
 const groups = computed<Array<{ label: string; items: NavItem[] }>>(() => [
   {
@@ -126,16 +126,16 @@ const groups = computed<Array<{ label: string; items: NavItem[] }>>(() => [
       { label: t('nav.rules'), to: '/rules', icon: Reading },
     ],
   },
-])
+]);
 
-const repo = computed(() => meta.value?.repo)
-const repoName = computed(() => repo.value?.name || t('repo.none'))
+const repo = computed(() => meta.value?.repo);
+const repoName = computed(() => repo.value?.name || t('repo.none'));
 const repoBranch = computed(() => {
-  const info = repo.value
-  if (!info?.is_git) return t('repo.notGit')
-  if (info.detached) return t('repo.detached', { head: info.head || '--' })
-  return info.branch || t('repo.noCommits')
-})
+  const info = repo.value;
+  if (!info?.is_git) return t('repo.notGit');
+  if (info.detached) return t('repo.detached', { head: info.head || '--' });
+  return info.branch || t('repo.noCommits');
+});
 
 const provider = computed<ActiveConfig>(
   () =>
@@ -146,23 +146,23 @@ const provider = computed<ActiveConfig>(
       env_set: false,
       configured: false,
     },
-)
+);
 const providerName = computed(() => {
-  const active = provider.value
-  if (!active.provider_label) return t('provider.connect')
-  return active.provider_label
-})
+  const active = provider.value;
+  if (!active.provider_label) return t('provider.connect');
+  return active.provider_label;
+});
 const providerMeta = computed(() => {
-  const active = provider.value
-  if (!active.configured) return t('provider.addKey')
-  const model = active.model || t('provider.modelNotSelected')
-  return `${model} · ${authLabel(active.auth_mode)}`
-})
+  const active = provider.value;
+  if (!active.configured) return t('provider.addKey');
+  const model = active.model || t('provider.modelNotSelected');
+  return `${model} · ${authLabel(active.auth_mode)}`;
+});
 
 function isActive(item: NavItem): boolean {
-  if (item.to === '/') return route.path === '/'
-  if (route.path.startsWith(item.to)) return true
-  return false
+  if (item.to === '/') return route.path === '/';
+  if (route.path.startsWith(item.to)) return true;
+  return false;
 }
 </script>
 

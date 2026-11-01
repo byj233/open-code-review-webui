@@ -86,4 +86,4 @@ export const overview = {
 
   'overview.activity.title': 'Recent activity',
   'overview.activity.subtitle': 'Commands started from this console',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

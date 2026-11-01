@@ -77,4 +77,4 @@ export const scan = {
   'scan.rail.reasonFocusedText': '스캔 대상을 디렉터리 하나로 지정해 비용과 시간을 예측 가능하게 유지합니다.',
   'scan.rail.tipLabel': '생각보다 작게 시작하세요',
   'scan.rail.tipText': '스캔은 파일 전체를 리뷰하므로 토큰 사용량이 빠르게 늘어납니다. 패키지 하나로 시작하고 토큰 예산을 안전장치로 활용하세요.',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

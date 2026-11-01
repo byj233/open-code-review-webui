@@ -77,4 +77,4 @@ export const scan = {
   'scan.rail.reasonFocusedText': '将扫描指向单个目录，让成本和时间可预期。',
   'scan.rail.tipLabel': '从小范围开始',
   'scan.rail.tipText': '扫描会审查完整文件，Token 消耗增长很快。先从单个包开始，并用 Token 预算作为护栏。',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

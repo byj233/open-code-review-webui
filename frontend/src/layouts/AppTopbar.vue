@@ -41,37 +41,37 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { Files, Menu, Moon, Plus, Search, Sunny } from '@element-plus/icons-vue'
-import LocaleSwitcher from '@/components/LocaleSwitcher.vue'
-import { useMetaStore } from '@/stores/meta'
-import { useTheme } from '@/composables/useTheme'
-import { useI18n, type MessageKey } from '@/i18n'
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { Files, Menu, Moon, Plus, Search, Sunny } from '@element-plus/icons-vue';
+import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
+import { useMetaStore } from '@/stores/meta';
+import { useTheme } from '@/composables/useTheme';
+import { useI18n, type MessageKey } from '@/i18n';
 
-defineEmits<{ 'open-menu': []; 'open-palette': [] }>()
+defineEmits<{ 'open-menu': []; 'open-palette': [] }>();
 
-const route = useRoute()
-const router = useRouter()
-const { meta } = useMetaStore()
-const { isDark, toggleTheme } = useTheme()
-const { t } = useI18n()
+const route = useRoute();
+const router = useRouter();
+const { meta } = useMetaStore();
+const { isDark, toggleTheme } = useTheme();
+const { t } = useI18n();
 
 const title = computed(() => {
-  const key = route.meta.title as MessageKey | undefined
-  return key ? t(key) : t('nav.overview')
-})
-const repo = computed(() => meta.value?.repo)
+  const key = route.meta.title as MessageKey | undefined;
+  return key ? t(key) : t('nav.overview');
+});
+const repo = computed(() => meta.value?.repo);
 const branchLabel = computed(() => {
-  const info = repo.value
-  if (!info?.is_git) return t('repo.notGitShort')
-  if (info.detached) return info.head || t('repo.detachedShort')
-  return info.branch || t('repo.noCommitsShort')
-})
-const isReviewRoute = computed(() => Boolean(route.meta.hideNewReview))
+  const info = repo.value;
+  if (!info?.is_git) return t('repo.notGitShort');
+  if (info.detached) return info.head || t('repo.detachedShort');
+  return info.branch || t('repo.noCommitsShort');
+});
+const isReviewRoute = computed(() => Boolean(route.meta.hideNewReview));
 
 function startReview(): void {
-  void router.push('/reviews')
+  void router.push('/reviews');
 }
 </script>
 

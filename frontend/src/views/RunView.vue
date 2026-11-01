@@ -218,9 +218,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   ArrowRight,
   CircleCheck,
@@ -228,101 +228,101 @@ import {
   CopyDocument,
   InfoFilled,
   WarningFilled,
-} from '@element-plus/icons-vue'
-import CommandBar from '@/components/CommandBar.vue'
-import LogConsole from '@/components/LogConsole.vue'
-import PageHeader from '@/components/PageHeader.vue'
-import ReviewResultPanel from '@/components/ReviewResultPanel.vue'
-import StatusPill from '@/components/StatusPill.vue'
-import SurfaceCard from '@/components/SurfaceCard.vue'
-import { useI18n } from '@/i18n'
-import { api } from '@/api/client'
-import { describeError } from '@/utils/format'
-import { useJobStream } from '@/composables/useJobStream'
-import { formatDate, formatElapsed, shortId } from '@/utils/format'
-import { copyText } from '@/utils/clipboard'
-import type { PreviewResult, ReviewResult } from '@/types'
+} from '@element-plus/icons-vue';
+import CommandBar from '@/components/CommandBar.vue';
+import LogConsole from '@/components/LogConsole.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import ReviewResultPanel from '@/components/ReviewResultPanel.vue';
+import StatusPill from '@/components/StatusPill.vue';
+import SurfaceCard from '@/components/SurfaceCard.vue';
+import { useI18n } from '@/i18n';
+import { api } from '@/api/client';
+import { describeError } from '@/utils/format';
+import { useJobStream } from '@/composables/useJobStream';
+import { formatDate, formatElapsed, shortId } from '@/utils/format';
+import { copyText } from '@/utils/clipboard';
+import type { PreviewResult, ReviewResult } from '@/types';
 
-const route = useRoute()
-const router = useRouter()
-const { t, tn } = useI18n()
-const jobId = String(route.params.id ?? '')
-const { job, connected, error, start, refresh } = useJobStream(jobId)
+const route = useRoute();
+const router = useRouter();
+const { t, tn } = useI18n();
+const jobId = String(route.params.id ?? '');
+const { job, connected, error, start, refresh } = useJobStream(jobId);
 
-const now = ref(Date.now())
-const canceling = ref(false)
-let timer: number | undefined
+const now = ref(Date.now());
+const canceling = ref(false);
+let timer: number | undefined;
 
 const running = computed(() =>
   job.value ? ['running', 'canceling'].includes(job.value.status) : false,
-)
+);
 const kindLabel = computed(() => {
   switch (job.value?.kind) {
     case 'scan':
-      return t('run.kind.scan')
+      return t('run.kind.scan');
     case 'llm-test':
-      return t('run.kind.llmTest')
+      return t('run.kind.llmTest');
     default:
-      return t('run.kind.review')
+      return t('run.kind.review');
   }
-})
+});
 const backTo = computed(() => {
   switch (job.value?.kind) {
     case 'scan':
-      return '/scans'
+      return '/scans';
     case 'llm-test':
-      return '/providers'
+      return '/providers';
     default:
-      return '/reviews'
+      return '/reviews';
   }
-})
+});
 const backLabel = computed(() => {
   switch (job.value?.kind) {
     case 'scan':
-      return t('run.header.backToScan')
+      return t('run.header.backToScan');
     case 'llm-test':
-      return t('run.header.backToProviders')
+      return t('run.header.backToProviders');
     default:
-      return t('run.header.backToReview')
+      return t('run.header.backToReview');
   }
-})
+});
 const runDescription = computed(() => {
-  if (!job.value) return ''
-  return t('run.header.description', { time: formatDate(job.value.started_at) })
-})
+  if (!job.value) return '';
+  return t('run.header.description', { time: formatDate(job.value.started_at) });
+});
 const duration = computed(() => {
-  const current = job.value
-  if (!current) return '--'
-  const end = current.ended_at ?? new Date(now.value).toISOString()
-  return formatElapsed(current.started_at, end)
-})
-const isLLMTest = computed(() => job.value?.kind === 'llm-test')
+  const current = job.value;
+  if (!current) return '--';
+  const end = current.ended_at ?? new Date(now.value).toISOString();
+  return formatElapsed(current.started_at, end);
+});
+const isLLMTest = computed(() => job.value?.kind === 'llm-test');
 const result = computed<ReviewResult | PreviewResult | null>(() => {
-  const value = job.value?.result
-  if (!value) return null
-  if (Array.isArray((value as PreviewResult).files)) return value as PreviewResult
-  const review = value as ReviewResult
-  if (Array.isArray(review.comments) || review.summary || review.manifest) return review
-  return null
-})
-const sessionId = computed(() => (result.value as ReviewResult | null)?.session_id ?? '')
-const llmModel = computed(() => (result.value as ReviewResult | null)?.llm?.model ?? '')
+  const value = job.value?.result;
+  if (!value) return null;
+  if (Array.isArray((value as PreviewResult).files)) return value as PreviewResult;
+  const review = value as ReviewResult;
+  if (Array.isArray(review.comments) || review.summary || review.manifest) return review;
+  return null;
+});
+const sessionId = computed(() => (result.value as ReviewResult | null)?.session_id ?? '');
+const llmModel = computed(() => (result.value as ReviewResult | null)?.llm?.model ?? '');
 const latestLine = computed(() => {
-  const lines = job.value?.logs ?? []
-  return lines.length ? lines[lines.length - 1].text : ''
-})
+  const lines = job.value?.logs ?? [];
+  return lines.length ? lines[lines.length - 1].text : '';
+});
 const connectionOutput = computed(() => {
-  const current = job.value
-  if (!current) return ''
-  if (current.output) return current.output.trim()
-  return (current.logs ?? []).map((line) => line.text).join('\n').trim()
-})
+  const current = job.value;
+  if (!current) return '';
+  if (current.output) return current.output.trim();
+  return (current.logs ?? []).map((line) => line.text).join('\n').trim();
+});
 const connectionDetails = computed(() =>
   connectionOutput.value
     .split('\n')
     .filter((line) => /^(Source|URL|Model|Region|Profile):/.test(line))
     .slice(0, 4),
-)
+);
 
 async function cancelRun(): Promise<void> {
   try {
@@ -334,52 +334,52 @@ async function cancelRun(): Promise<void> {
         cancelButtonText: t('run.confirm.cancel'),
         type: 'warning',
       },
-    )
+    );
   } catch {
-    return
+    return;
   }
-  canceling.value = true
+  canceling.value = true;
   try {
-    await api.cancelJob(jobId)
-    await refresh()
-    ElMessage.info(t('run.message.stopping'))
+    await api.cancelJob(jobId);
+    await refresh();
+    ElMessage.info(t('run.message.stopping'));
   } catch (err) {
-    ElMessage.error(describeError(err))
+    ElMessage.error(describeError(err));
   } finally {
-    canceling.value = false
+    canceling.value = false;
   }
 }
 
 function openSession(): void {
   if (sessionId.value) {
-    void router.push(`/sessions/${encodeURIComponent(sessionId.value)}`)
+    void router.push(`/sessions/${encodeURIComponent(sessionId.value)}`);
   }
 }
 
 async function copySession(): Promise<void> {
-  const copied = await copyText(sessionId.value)
-  if (copied) ElMessage.success(t('run.message.sessionCopied'))
-  else ElMessage.error(t('run.message.copyFailed'))
+  const copied = await copyText(sessionId.value);
+  if (copied) ElMessage.success(t('run.message.sessionCopied'));
+  else ElMessage.error(t('run.message.copyFailed'));
 }
 
 function runAgain(): void {
-  void router.push(backTo.value)
+  void router.push(backTo.value);
 }
 
 function go(path: string): void {
-  void router.push(path)
+  void router.push(path);
 }
 
 onMounted(async () => {
   timer = window.setInterval(() => {
-    now.value = Date.now()
-  }, 1000)
-  await start()
-})
+    now.value = Date.now();
+  }, 1000);
+  await start();
+});
 
 onBeforeUnmount(() => {
-  if (timer !== undefined) window.clearInterval(timer)
-})
+  if (timer !== undefined) window.clearInterval(timer);
+});
 </script>
 
 <style scoped>

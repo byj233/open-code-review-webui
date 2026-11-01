@@ -12,18 +12,18 @@
 </template>
 
 <script setup lang="ts">
-import { CopyDocument } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
-import { copyText } from '@/utils/clipboard'
-import { useI18n } from '@/i18n'
+import { CopyDocument } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
+import { copyText } from '@/utils/clipboard';
+import { useI18n } from '@/i18n';
 
-const props = defineProps<{ command: string }>()
-const { t } = useI18n()
+const props = defineProps<{ command: string }>();
+const { t } = useI18n();
 
 async function copy(): Promise<void> {
-  const copied = await copyText(props.command)
-  if (copied) ElMessage.success(t('command.copied'))
-  else ElMessage.error(t('command.copyFailed'))
+  const copied = await copyText(props.command);
+  if (copied) ElMessage.success(t('command.copied'));
+  else ElMessage.error(t('command.copyFailed'));
 }
 </script>
 

@@ -24,7 +24,7 @@ defineProps<{
   title?: string
   subtitle?: string
   flush?: boolean
-}>()
+}>();
 </script>
 
 <style scoped>

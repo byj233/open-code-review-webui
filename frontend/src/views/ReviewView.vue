@@ -403,9 +403,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
 import {
   ArrowRight,
   Clock,
@@ -417,30 +417,30 @@ import {
   Switch,
   VideoPlay,
   View,
-} from '@element-plus/icons-vue'
-import BrandMark from '@/components/BrandMark.vue'
-import CommandBar from '@/components/CommandBar.vue'
-import PageHeader from '@/components/PageHeader.vue'
-import SurfaceCard from '@/components/SurfaceCard.vue'
-import { api } from '@/api/client'
-import { describeError } from '@/utils/format'
-import { useI18n } from '@/i18n'
-import { useMetaStore } from '@/stores/meta'
-import { createReviewForm, reviewCommand } from '@/utils/command'
-import { jobPath } from '@/utils/routes'
-import { authLabel } from '@/utils/status'
-import type { ProviderCard, ProvidersResponse, ReviewFormState, ReviewRequest } from '@/types'
+} from '@element-plus/icons-vue';
+import BrandMark from '@/components/BrandMark.vue';
+import CommandBar from '@/components/CommandBar.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import SurfaceCard from '@/components/SurfaceCard.vue';
+import { api } from '@/api/client';
+import { describeError } from '@/utils/format';
+import { useI18n } from '@/i18n';
+import { useMetaStore } from '@/stores/meta';
+import { createReviewForm, reviewCommand } from '@/utils/command';
+import { jobPath } from '@/utils/routes';
+import { authLabel } from '@/utils/status';
+import type { ProviderCard, ProvidersResponse, ReviewFormState, ReviewRequest } from '@/types';
 
-const route = useRoute()
-const router = useRouter()
-const { meta, refresh } = useMetaStore()
-const { t, tn } = useI18n()
+const route = useRoute();
+const router = useRouter();
+const { meta, refresh } = useMetaStore();
+const { t, tn } = useI18n();
 
-const form = reactive<ReviewFormState>(createReviewForm())
-const providers = ref<ProvidersResponse | null>(null)
-const advancedPanels = ref<string[]>([])
-const submitting = ref<'run' | 'preview' | null>(null)
-const resumeId = ref('')
+const form = reactive<ReviewFormState>(createReviewForm());
+const providers = ref<ProvidersResponse | null>(null);
+const advancedPanels = ref<string[]>([]);
+const submitting = ref<'run' | 'preview' | null>(null);
+const resumeId = ref('');
 
 const modes = computed(() => [
   {
@@ -461,14 +461,14 @@ const modes = computed(() => [
     description: t('review.mode.range.description'),
     icon: Connection,
   },
-] as const)
+] as const);
 
 const effortOptions = computed(() => [
   { value: '', label: t('review.effort.default') },
   { value: 'low', label: t('review.effort.low') },
   { value: 'medium', label: t('review.effort.medium') },
   { value: 'high', label: t('review.effort.high') },
-])
+]);
 
 const pipeline = computed(() => [
   {
@@ -487,106 +487,106 @@ const pipeline = computed(() => [
     title: t('review.pipeline.save.title'),
     description: t('review.pipeline.save.description'),
   },
-])
+]);
 
-const repo = computed(() => meta.value?.repo)
-const active = computed(() => meta.value?.config.active)
-const canRun = computed(() => Boolean(repo.value?.is_git) && !scopeError.value && submitting.value === null)
+const repo = computed(() => meta.value?.repo);
+const active = computed(() => meta.value?.config.active);
+const canRun = computed(() => Boolean(repo.value?.is_git) && !scopeError.value && submitting.value === null);
 const scopeError = computed(() => {
-  if (!repo.value?.is_git) return t('review.error.noRepo')
-  if (form.mode === 'commit' && !form.commit.trim()) return t('review.error.commit')
+  if (!repo.value?.is_git) return t('review.error.noRepo');
+  if (form.mode === 'commit' && !form.commit.trim()) return t('review.error.commit');
   if (form.mode === 'range') {
-    if (!form.from.trim() || !form.to.trim()) return t('review.error.refs')
-    if (form.from.trim() === form.to.trim()) return t('review.error.sameRefs')
+    if (!form.from.trim() || !form.to.trim()) return t('review.error.refs');
+    if (form.from.trim() === form.to.trim()) return t('review.error.sameRefs');
   }
-  return ''
-})
+  return '';
+});
 
 const refOptions = computed(() => {
-  const values = [...(repo.value?.branches ?? []), ...(repo.value?.tags ?? [])]
-  return Array.from(new Set(values))
-})
+  const values = [...(repo.value?.branches ?? []), ...(repo.value?.tags ?? [])];
+  return Array.from(new Set(values));
+});
 const commitOptions = computed(() =>
   (repo.value?.commits ?? []).map((commit) => ({
     value: commit.hash || commit.short,
     label: `${commit.short} · ${commit.subject}`,
   })),
-)
+);
 
 const providerOptions = computed<ProviderCard[]>(() => {
-  if (!providers.value) return []
-  return [...(providers.value.providers ?? []), ...(providers.value.custom ?? [])]
-})
+  if (!providers.value) return [];
+  return [...(providers.value.providers ?? []), ...(providers.value.custom ?? [])];
+});
 
 const selectedProvider = computed(() =>
   providerOptions.value.find((provider) => provider.name === form.provider) ?? null,
-)
+);
 
 const modelOptions = computed(() => {
-  const source = selectedProvider.value ?? providerCard(active.value?.provider)
-  const models = [...(source?.models ?? [])]
-  if (form.model && !models.includes(form.model)) models.unshift(form.model)
-  const activeModel = active.value?.model
-  if (activeModel && !models.includes(activeModel)) models.unshift(activeModel)
-  return models
-})
+  const source = selectedProvider.value ?? providerCard(active.value?.provider);
+  const models = [...(source?.models ?? [])];
+  if (form.model && !models.includes(form.model)) models.unshift(form.model);
+  const activeModel = active.value?.model;
+  if (activeModel && !models.includes(activeModel)) models.unshift(activeModel);
+  return models;
+});
 
 const effectiveProviderLabel = computed(() => {
-  if (form.provider) return selectedProvider.value?.display_name || form.provider
-  return active.value?.provider_label || t('review.model.noProvider')
-})
+  if (form.provider) return selectedProvider.value?.display_name || form.provider;
+  return active.value?.provider_label || t('review.model.noProvider');
+});
 const effectiveModel = computed(() => {
-  if (form.model) return form.model
-  if (selectedProvider.value) return selectedProvider.value.model || t('review.model.selectModel')
-  return active.value?.model || t('review.model.noModel')
-})
-const effectiveAuthMode = computed(() => selectedProvider.value?.auth_mode ?? active.value?.auth_mode)
+  if (form.model) return form.model;
+  if (selectedProvider.value) return selectedProvider.value.model || t('review.model.selectModel');
+  return active.value?.model || t('review.model.noModel');
+});
+const effectiveAuthMode = computed(() => selectedProvider.value?.auth_mode ?? active.value?.auth_mode);
 const effectiveConfigured = computed(() =>
   form.provider ? Boolean(selectedProvider.value?.configured) : Boolean(active.value?.configured),
-)
+);
 const overrideSummary = computed(() => {
-  if (form.provider && form.model) return t('review.override.summaryBoth')
-  if (form.provider) return t('review.override.summaryProvider')
-  if (form.model) return t('review.override.summaryModel')
-  return ''
-})
+  if (form.provider && form.model) return t('review.override.summaryBoth');
+  if (form.provider) return t('review.override.summaryProvider');
+  if (form.model) return t('review.override.summaryModel');
+  return '';
+});
 const effortHint = computed(() => {
   switch (form.effort) {
     case 'low':
-      return t('review.effort.hint.low')
+      return t('review.effort.hint.low');
     case 'high':
-      return t('review.effort.hint.high')
+      return t('review.effort.hint.high');
     case 'medium':
-      return t('review.effort.hint.medium')
+      return t('review.effort.hint.medium');
     default:
-      return t('review.effort.hint.default')
+      return t('review.effort.hint.default');
   }
-})
+});
 
-const commandPreview = computed(() => reviewCommand({ ...form, preview: false }))
+const commandPreview = computed(() => reviewCommand({ ...form, preview: false }));
 
 function providerCard(name?: string): ProviderCard | undefined {
-  if (!name) return undefined
-  return providerOptions.value.find((provider) => provider.name === name)
+  if (!name) return undefined;
+  return providerOptions.value.find((provider) => provider.name === name);
 }
 
 function swapRefs(): void {
-  const from = form.from
-  form.from = form.to
-  form.to = from
+  const from = form.from;
+  form.from = form.to;
+  form.to = from;
 }
 
 function clearResume(): void {
-  resumeId.value = ''
-  form.resume = ''
-  void router.replace('/reviews')
+  resumeId.value = '';
+  form.resume = '';
+  void router.replace('/reviews');
 }
 
 function resetForm(): void {
-  const pristine = createReviewForm()
-  Object.assign(form, pristine)
-  resumeId.value = ''
-  void router.replace('/reviews')
+  const pristine = createReviewForm();
+  Object.assign(form, pristine);
+  resumeId.value = '';
+  void router.replace('/reviews');
 }
 
 function payload(preview: boolean): ReviewRequest {
@@ -607,67 +607,67 @@ function payload(preview: boolean): ReviewRequest {
     max_tokens_budget: Number(form.max_tokens_budget) || 0,
     no_filter: form.no_filter,
     preview,
-  }
+  };
 }
 
 async function submit(preview: boolean): Promise<void> {
   if (!canRun.value) {
-    ElMessage.warning(scopeError.value || t('review.error.busy'))
-    return
+    ElMessage.warning(scopeError.value || t('review.error.busy'));
+    return;
   }
-  submitting.value = preview ? 'preview' : 'run'
+  submitting.value = preview ? 'preview' : 'run';
   try {
-    const job = await api.startReview(payload(preview))
-    await router.push(jobPath(job.id, job.kind))
+    const job = await api.startReview(payload(preview));
+    await router.push(jobPath(job.id, job.kind));
   } catch (error) {
-    ElMessage.error(describeError(error))
+    ElMessage.error(describeError(error));
   } finally {
-    submitting.value = null
+    submitting.value = null;
   }
 }
 
 async function loadProviders(): Promise<void> {
   try {
-    providers.value = await api.providers()
+    providers.value = await api.providers();
   } catch {
-    providers.value = null
+    providers.value = null;
   }
 }
 
 function applyQuery(): void {
-  const query = route.query
-  const mode = query.mode
+  const query = route.query;
+  const mode = query.mode;
   if (mode === 'commit' || mode === 'range' || mode === 'workspace') {
-    form.mode = mode
+    form.mode = mode;
   }
-  if (typeof query.commit === 'string') form.commit = query.commit
-  if (typeof query.from === 'string') form.from = query.from
-  if (typeof query.to === 'string') form.to = query.to
+  if (typeof query.commit === 'string') form.commit = query.commit;
+  if (typeof query.from === 'string') form.from = query.from;
+  if (typeof query.to === 'string') form.to = query.to;
   if (typeof query.resume === 'string') {
-    form.resume = query.resume
-    resumeId.value = query.resume
-    if (form.mode === 'workspace') form.mode = query.commit ? 'commit' : 'range'
+    form.resume = query.resume;
+    resumeId.value = query.resume;
+    if (form.mode === 'workspace') form.mode = query.commit ? 'commit' : 'range';
   }
-  if (typeof query.background === 'string') form.background = query.background
+  if (typeof query.background === 'string') form.background = query.background;
 }
 
 watch(
   () => form.provider,
   (name, previous) => {
-    if (name === previous) return
+    if (name === previous) return;
     if (!name) {
-      form.model = ''
-      return
+      form.model = '';
+      return;
     }
-    const card = providerCard(name)
-    if (card) form.model = card.model || card.models[0] || ''
+    const card = providerCard(name);
+    if (card) form.model = card.model || card.models[0] || '';
   },
-)
+);
 
 onMounted(async () => {
-  applyQuery()
-  await Promise.all([refresh(true), loadProviders()])
-})
+  applyQuery();
+  await Promise.all([refresh(true), loadProviders()]);
+});
 </script>
 
 <style scoped>

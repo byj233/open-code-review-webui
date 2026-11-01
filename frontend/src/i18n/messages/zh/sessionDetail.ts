@@ -74,4 +74,4 @@ export const sessionDetail = {
   'sessionDetail.actions.copied': '会话 ID 已复制',
   'sessionDetail.actions.copyFailed': '无法复制会话 ID',
   'sessionDetail.actions.deleted': '会话已删除',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

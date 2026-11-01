@@ -46,4 +46,4 @@ export const sessions = {
   'sessions.delete.action': '删除会话',
   'sessions.delete.description': '这会从磁盘删除已保存的会话及其问题。审查本身不受影响，但历史记录将无法恢复。',
   'sessions.delete.success': '会话已删除',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

@@ -155,4 +155,4 @@ export const shell = {
     'Маршрут мог измениться, либо сеанс или запуск истёк. Все возможности консоли доступны из навигации.',
   'notFound.backToOverview': 'Вернуться к обзору',
   'notFound.goBack': 'Назад',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

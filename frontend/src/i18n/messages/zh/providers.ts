@@ -81,4 +81,4 @@ export const providers = {
 
   'providers.toast.added': '已添加自定义供应商',
   'providers.toast.activated': '供应商已启用',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

@@ -20,15 +20,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useI18n, type LocaleCode } from '@/i18n'
+import { computed } from 'vue';
+import { useI18n, type LocaleCode } from '@/i18n';
 
-const { t, locale, setLocale, locales } = useI18n()
+const { t, locale, setLocale, locales } = useI18n();
 
-const current = computed(() => locales.find((option) => option.code === locale.value) ?? locales[0])
+const current = computed(() => locales.find((option) => option.code === locale.value) ?? locales[0]);
 
 function onSelect(code: string | number | object): void {
-  if (typeof code === 'string') setLocale(code as LocaleCode)
+  if (typeof code === 'string') setLocale(code as LocaleCode);
 }
 </script>
 

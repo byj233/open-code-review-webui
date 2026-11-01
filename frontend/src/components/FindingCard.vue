@@ -55,39 +55,39 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { CopyDocument, Document, MagicStick } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
-import MarkdownView from '@/components/MarkdownView.vue'
-import { useI18n } from '@/i18n'
-import { copyText } from '@/utils/clipboard'
-import { categoryLabel, normalizedSeverity, severityLabel } from '@/utils/status'
-import type { LlmComment } from '@/types'
+import { computed } from 'vue';
+import { CopyDocument, Document, MagicStick } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
+import MarkdownView from '@/components/MarkdownView.vue';
+import { useI18n } from '@/i18n';
+import { copyText } from '@/utils/clipboard';
+import { categoryLabel, normalizedSeverity, severityLabel } from '@/utils/status';
+import type { LlmComment } from '@/types';
 
-const props = defineProps<{ comment: LlmComment }>()
+const props = defineProps<{ comment: LlmComment }>();
 
-const { t, tn } = useI18n()
+const { t, tn } = useI18n();
 
 const severity = computed(() => {
-  const value = normalizedSeverity(props.comment.severity)
-  return value === 'unknown' ? '' : value
-})
+  const value = normalizedSeverity(props.comment.severity);
+  return value === 'unknown' ? '' : value;
+});
 
 const lineLabel = computed(() => {
-  const { start_line: start, end_line: end } = props.comment
-  if (!start) return ''
-  return end && end !== start ? `${start}-${end}` : `${start}`
-})
+  const { start_line: start, end_line: end } = props.comment;
+  if (!start) return '';
+  return end && end !== start ? `${start}-${end}` : `${start}`;
+});
 
 async function copyFinding(): Promise<void> {
-  const comment = props.comment
-  const header = `${comment.path}:${lineLabel.value}`
-  const text = [header, '', comment.content]
-  if (comment.existing_code) text.push('', t('finding.copy.current'), comment.existing_code)
-  if (comment.suggestion_code) text.push('', t('finding.copy.suggested'), comment.suggestion_code)
-  const copied = await copyText(text.join('\n'))
-  if (copied) ElMessage.success(t('finding.actions.copied'))
-  else ElMessage.error(t('finding.actions.copyFailed'))
+  const comment = props.comment;
+  const header = `${comment.path}:${lineLabel.value}`;
+  const text = [header, '', comment.content];
+  if (comment.existing_code) text.push('', t('finding.copy.current'), comment.existing_code);
+  if (comment.suggestion_code) text.push('', t('finding.copy.suggested'), comment.suggestion_code);
+  const copied = await copyText(text.join('\n'));
+  if (copied) ElMessage.success(t('finding.actions.copied'));
+  else ElMessage.error(t('finding.actions.copyFailed'));
 }
 </script>
 

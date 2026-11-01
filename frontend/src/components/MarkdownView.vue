@@ -5,10 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import DOMPurify from 'dompurify'
-import { marked } from 'marked'
-import { useI18n } from '@/i18n'
+import { computed } from 'vue';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+import { useI18n } from '@/i18n';
 
 const props = withDefaults(
   defineProps<{
@@ -16,30 +16,30 @@ const props = withDefaults(
     emptyText?: string
   }>(),
   { text: '' },
-)
+);
 
-const { t } = useI18n()
+const { t } = useI18n();
 
-marked.setOptions({ gfm: true, breaks: true })
+marked.setOptions({ gfm: true, breaks: true });
 
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
   if (node.tagName === 'A') {
-    node.setAttribute('target', '_blank')
-    node.setAttribute('rel', 'noopener noreferrer')
+    node.setAttribute('target', '_blank');
+    node.setAttribute('rel', 'noopener noreferrer');
   }
-})
+});
 
-const emptyLabel = computed(() => props.emptyText ?? t('markdown.empty'))
+const emptyLabel = computed(() => props.emptyText ?? t('markdown.empty'));
 
 const html = computed(() => {
-  const source = props.text?.trim()
-  if (!source) return ''
-  const rendered = marked.parse(source) as string
+  const source = props.text?.trim();
+  if (!source) return '';
+  const rendered = marked.parse(source) as string;
   return DOMPurify.sanitize(rendered, {
     USE_PROFILES: { html: true },
     FORBID_TAGS: ['style', 'iframe', 'form', 'input'],
-  })
-})
+  });
+});
 </script>
 
 <style scoped>

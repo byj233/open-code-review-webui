@@ -288,9 +288,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
 import {
   ChatDotRound,
   CopyDocument,
@@ -300,15 +300,15 @@ import {
   Search,
   Timer,
   WarningFilled,
-} from '@element-plus/icons-vue'
-import EmptyState from '@/components/EmptyState.vue'
-import FindingCard from '@/components/FindingCard.vue'
-import PageHeader from '@/components/PageHeader.vue'
-import StatTile from '@/components/StatTile.vue'
-import StatusPill from '@/components/StatusPill.vue'
-import { api } from '@/api/client'
-import { describeError } from '@/utils/format'
-import { useI18n } from '@/i18n'
+} from '@element-plus/icons-vue';
+import EmptyState from '@/components/EmptyState.vue';
+import FindingCard from '@/components/FindingCard.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import StatTile from '@/components/StatTile.vue';
+import StatusPill from '@/components/StatusPill.vue';
+import { api } from '@/api/client';
+import { describeError } from '@/utils/format';
+import { useI18n } from '@/i18n';
 import {
   formatCount,
   formatDate,
@@ -316,8 +316,8 @@ import {
   formatDurationNs,
   formatRelative,
   shortId,
-} from '@/utils/format'
-import { copyText } from '@/utils/clipboard'
+} from '@/utils/format';
+import { copyText } from '@/utils/clipboard';
 import {
   categoryLabel,
   manifestStateLabel,
@@ -326,23 +326,23 @@ import {
   sessionState,
   severityLabel,
   severityOrder,
-} from '@/utils/status'
-import type { LlmComment, SessionDetailResponse, SessionItem } from '@/types'
+} from '@/utils/status';
+import type { LlmComment, SessionDetailResponse, SessionItem } from '@/types';
 
-const route = useRoute()
-const router = useRouter()
-const sessionId = String(route.params.id ?? '')
-const { t, tn } = useI18n()
+const route = useRoute();
+const router = useRouter();
+const sessionId = String(route.params.id ?? '');
+const { t, tn } = useI18n();
 
-const detail = ref<SessionDetailResponse | null>(null)
-const loading = ref(true)
-const error = ref('')
-const activeTab = ref<'findings' | 'files' | 'manifest'>('findings')
-const query = ref('')
-const categoryFilter = ref('')
-const severityFilter = ref('all')
-const deleteOpen = ref(false)
-const deleting = ref(false)
+const detail = ref<SessionDetailResponse | null>(null);
+const loading = ref(true);
+const error = ref('');
+const activeTab = ref<'findings' | 'files' | 'manifest'>('findings');
+const query = ref('');
+const categoryFilter = ref('');
+const severityFilter = ref('all');
+const deleteOpen = ref(false);
+const deleting = ref(false);
 
 const severityFilters = computed(() => [
   { value: 'all', label: t('sessionDetail.severity.all') },
@@ -350,162 +350,162 @@ const severityFilters = computed(() => [
   { value: 'high', label: severityLabel('high') },
   { value: 'medium', label: severityLabel('medium') },
   { value: 'low', label: severityLabel('low') },
-])
+]);
 
-const summary = computed(() => detail.value?.summary ?? null)
-const items = computed<SessionItem[]>(() => detail.value?.items ?? [])
-const comments = computed<LlmComment[]>(() => detail.value?.comments ?? [])
+const summary = computed(() => detail.value?.summary ?? null);
+const items = computed<SessionItem[]>(() => detail.value?.items ?? []);
+const comments = computed<LlmComment[]>(() => detail.value?.comments ?? []);
 const state = computed(() =>
   summary.value
     ? sessionState(summary.value)
     : { key: 'unknown', label: t('common.unknown'), tone: 'neutral' as const, pulse: false },
-)
-const manifest = computed(() => summary.value?.run_manifest ?? null)
-const failedItems = computed(() => (manifest.value?.coverage?.failed ?? []).slice(0, 20))
-const manifestJson = computed(() => JSON.stringify(manifest.value, null, 2))
+);
+const manifest = computed(() => summary.value?.run_manifest ?? null);
+const failedItems = computed(() => (manifest.value?.coverage?.failed ?? []).slice(0, 20));
+const manifestJson = computed(() => JSON.stringify(manifest.value, null, 2));
 const failureTitle = computed(() =>
   t('sessionDetail.callouts.failureTitle', {
     classification:
       manifest.value?.run_failure?.classification || t('sessionDetail.callouts.failureFallback'),
   }),
-)
+);
 
 const headerTitle = computed(() => {
-  if (!summary.value) return t('nav.session')
-  return sessionModeLabel(summary.value)
-})
+  if (!summary.value) return t('nav.session');
+  return sessionModeLabel(summary.value);
+});
 const headerDescription = computed(() => {
-  if (!summary.value) return ''
-  const parts = [t('sessionDetail.header.started', { date: formatDate(summary.value.start_time) })]
+  if (!summary.value) return '';
+  const parts = [t('sessionDetail.header.started', { date: formatDate(summary.value.start_time) })];
   if (summary.value.duration_ns) {
-    parts.push(t('sessionDetail.header.took', { duration: formatDurationNs(summary.value.duration_ns) }))
+    parts.push(t('sessionDetail.header.took', { duration: formatDurationNs(summary.value.duration_ns) }));
   }
-  if (summary.value.model) parts.push(t('sessionDetail.header.withModel', { model: summary.value.model }))
-  return t('sessionDetail.header.description', { parts: parts.join(' · ') })
-})
+  if (summary.value.model) parts.push(t('sessionDetail.header.withModel', { model: summary.value.model }));
+  return t('sessionDetail.header.description', { parts: parts.join(' · ') });
+});
 const severityHint = computed(() => {
-  const counts = { critical: 0, high: 0, medium: 0, low: 0 }
+  const counts = { critical: 0, high: 0, medium: 0, low: 0 };
   for (const comment of comments.value) {
-    const severity = normalizedSeverity(comment.severity)
-    if (severity !== 'unknown') counts[severity] += 1
+    const severity = normalizedSeverity(comment.severity);
+    if (severity !== 'unknown') counts[severity] += 1;
   }
   return t('sessionDetail.stats.severityHint', {
     critical: counts.critical,
     high: counts.high,
     medium: counts.medium,
-  })
-})
+  });
+});
 const canResume = computed(() =>
   Boolean(summary.value && ['commit', 'range'].includes(summary.value.review_mode ?? '')),
-)
+);
 
 const categories = computed(() =>
   Array.from(new Set(comments.value.map((comment) => (comment.category || 'other').toLowerCase()))).sort(),
-)
+);
 
 const filteredComments = computed(() => {
-  const term = query.value.trim().toLowerCase()
+  const term = query.value.trim().toLowerCase();
   return comments.value
     .filter((comment) => {
       if (severityFilter.value !== 'all' && normalizedSeverity(comment.severity) !== severityFilter.value) {
-        return false
+        return false;
       }
       if (categoryFilter.value && (comment.category || 'other').toLowerCase() !== categoryFilter.value) {
-        return false
+        return false;
       }
       if (term) {
-        const haystack = `${comment.path} ${comment.content} ${comment.suggestion_code ?? ''}`.toLowerCase()
-        if (!haystack.includes(term)) return false
+        const haystack = `${comment.path} ${comment.content} ${comment.suggestion_code ?? ''}`.toLowerCase();
+        if (!haystack.includes(term)) return false;
       }
-      return true
+      return true;
     })
     .sort((left, right) => {
-      if (left.path !== right.path) return left.path.localeCompare(right.path)
-      const leftSeverity = severityOrder[normalizedSeverity(left.severity) as keyof typeof severityOrder] ?? 9
-      const rightSeverity = severityOrder[normalizedSeverity(right.severity) as keyof typeof severityOrder] ?? 9
-      if (leftSeverity !== rightSeverity) return leftSeverity - rightSeverity
-      return (left.start_line ?? 0) - (right.start_line ?? 0)
-    })
-})
+      if (left.path !== right.path) return left.path.localeCompare(right.path);
+      const leftSeverity = severityOrder[normalizedSeverity(left.severity) as keyof typeof severityOrder] ?? 9;
+      const rightSeverity = severityOrder[normalizedSeverity(right.severity) as keyof typeof severityOrder] ?? 9;
+      if (leftSeverity !== rightSeverity) return leftSeverity - rightSeverity;
+      return (left.start_line ?? 0) - (right.start_line ?? 0);
+    });
+});
 
 const groupedComments = computed(() => {
-  const groups = new Map<string, LlmComment[]>()
+  const groups = new Map<string, LlmComment[]>();
   for (const comment of filteredComments.value) {
-    const list = groups.get(comment.path) ?? []
-    list.push(comment)
-    groups.set(comment.path, list)
+    const list = groups.get(comment.path) ?? [];
+    list.push(comment);
+    groups.set(comment.path, list);
   }
-  return Array.from(groups.entries()).map(([path, grouped]) => ({ path, comments: grouped }))
-})
+  return Array.from(groups.entries()).map(([path, grouped]) => ({ path, comments: grouped }));
+});
 
 const tabs = computed(() => [
   { value: 'findings' as const, label: t('sessionDetail.tabs.findings'), count: comments.value.length },
   { value: 'files' as const, label: t('sessionDetail.tabs.fileItems'), count: items.value.length },
   { value: 'manifest' as const, label: t('sessionDetail.tabs.manifest'), count: manifest.value ? 1 : 0 },
-])
+]);
 
 function commentKey(comment: LlmComment): string {
-  return `${comment.path}:${comment.start_line}:${comment.end_line}:${comment.content.slice(0, 24)}`
+  return `${comment.path}:${comment.start_line}:${comment.end_line}:${comment.content.slice(0, 24)}`;
 }
 
 function itemTypeLabel(type: string): string {
-  return (type || 'item').replace(/^review_/, '').replace(/_/g, ' ') || 'item'
+  return (type || 'item').replace(/^review_/, '').replace(/_/g, ' ') || 'item';
 }
 
 function itemTone(item: SessionItem): string {
-  if (item.error) return 'item-row__type--bad'
-  if (item.type.includes('failed')) return 'item-row__type--bad'
-  if (item.type.includes('done') || item.comments) return 'item-row__type--good'
-  return ''
+  if (item.error) return 'item-row__type--bad';
+  if (item.type.includes('failed')) return 'item-row__type--bad';
+  if (item.type.includes('done') || item.comments) return 'item-row__type--good';
+  return '';
 }
 
 function resumeReview(): void {
-  if (!summary.value) return
-  const query: Record<string, string> = { resume: summary.value.session_id }
+  if (!summary.value) return;
+  const query: Record<string, string> = { resume: summary.value.session_id };
   if (summary.value.review_mode === 'commit') {
-    query.mode = 'commit'
-    if (summary.value.diff_commit) query.commit = summary.value.diff_commit
+    query.mode = 'commit';
+    if (summary.value.diff_commit) query.commit = summary.value.diff_commit;
   } else {
-    query.mode = 'range'
-    if (summary.value.diff_from) query.from = summary.value.diff_from
-    if (summary.value.diff_to) query.to = summary.value.diff_to
+    query.mode = 'range';
+    if (summary.value.diff_from) query.from = summary.value.diff_from;
+    if (summary.value.diff_to) query.to = summary.value.diff_to;
   }
-  void router.push({ path: '/reviews', query })
+  void router.push({ path: '/reviews', query });
 }
 
 async function copySessionId(): Promise<void> {
-  const copied = await copyText(summary.value?.session_id ?? '')
-  if (copied) ElMessage.success(t('sessionDetail.actions.copied'))
-  else ElMessage.error(t('sessionDetail.actions.copyFailed'))
+  const copied = await copyText(summary.value?.session_id ?? '');
+  if (copied) ElMessage.success(t('sessionDetail.actions.copied'));
+  else ElMessage.error(t('sessionDetail.actions.copyFailed'));
 }
 
 async function confirmDelete(): Promise<void> {
-  if (!summary.value) return
-  deleting.value = true
+  if (!summary.value) return;
+  deleting.value = true;
   try {
-    await api.deleteSession(summary.value.session_id)
-    ElMessage.success(t('sessionDetail.actions.deleted'))
-    await router.push('/sessions')
+    await api.deleteSession(summary.value.session_id);
+    ElMessage.success(t('sessionDetail.actions.deleted'));
+    await router.push('/sessions');
   } catch (err) {
-    ElMessage.error(describeError(err))
+    ElMessage.error(describeError(err));
   } finally {
-    deleting.value = false
+    deleting.value = false;
   }
 }
 
 async function load(): Promise<void> {
-  loading.value = true
-  error.value = ''
+  loading.value = true;
+  error.value = '';
   try {
-    detail.value = await api.session(sessionId)
+    detail.value = await api.session(sessionId);
   } catch (err) {
-    error.value = describeError(err)
+    error.value = describeError(err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
-onMounted(load)
+onMounted(load);
 </script>
 
 <style scoped>

@@ -86,4 +86,4 @@ export const overview = {
 
   'overview.activity.title': '최근 활동',
   'overview.activity.subtitle': '이 콘솔에서 시작한 명령',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

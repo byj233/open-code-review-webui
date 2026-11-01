@@ -79,4 +79,4 @@ export const run = {
   'run.message.stopping': '実行を停止しています',
   'run.message.sessionCopied': 'セッション ID をコピーしました',
   'run.message.copyFailed': 'セッション ID をコピーできませんでした',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

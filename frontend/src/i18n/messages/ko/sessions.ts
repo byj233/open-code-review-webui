@@ -47,4 +47,4 @@ export const sessions = {
   'sessions.delete.description':
     '디스크에서 저장된 세션과 지적 사항을 삭제합니다. 리뷰 자체에는 영향이 없지만 기록은 복구할 수 없습니다.',
   'sessions.delete.success': '세션을 삭제했습니다',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

@@ -79,4 +79,4 @@ export const run = {
   'run.message.stopping': 'Остановка запуска',
   'run.message.sessionCopied': 'Идентификатор сеанса скопирован',
   'run.message.copyFailed': 'Не удалось скопировать идентификатор сеанса',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

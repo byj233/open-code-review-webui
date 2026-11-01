@@ -247,9 +247,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { computed, onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
 import {
   ArrowRight,
   InfoFilled,
@@ -257,30 +257,30 @@ import {
   Search,
   VideoPlay,
   WarningFilled,
-} from '@element-plus/icons-vue'
-import BrandMark from '@/components/BrandMark.vue'
-import EmptyState from '@/components/EmptyState.vue'
-import PageHeader from '@/components/PageHeader.vue'
-import { api } from '@/api/client'
-import { describeError } from '@/utils/format'
-import { useI18n } from '@/i18n'
-import { useMetaStore } from '@/stores/meta'
-import { jobPath } from '@/utils/routes'
-import { authLabel, sourceLabel } from '@/utils/status'
-import type { ProviderCard, ProvidersResponse } from '@/types'
+} from '@element-plus/icons-vue';
+import BrandMark from '@/components/BrandMark.vue';
+import EmptyState from '@/components/EmptyState.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import { api } from '@/api/client';
+import { describeError } from '@/utils/format';
+import { useI18n } from '@/i18n';
+import { useMetaStore } from '@/stores/meta';
+import { jobPath } from '@/utils/routes';
+import { authLabel, sourceLabel } from '@/utils/status';
+import type { ProviderCard, ProvidersResponse } from '@/types';
 
-const router = useRouter()
-const { t, tn } = useI18n()
-const { meta, refresh } = useMetaStore()
+const router = useRouter();
+const { t, tn } = useI18n();
+const { meta, refresh } = useMetaStore();
 
-const data = ref<ProvidersResponse | null>(null)
-const loading = ref(true)
-const error = ref('')
-const query = ref('')
-const configuredOnly = ref(false)
-const testing = ref(false)
+const data = ref<ProvidersResponse | null>(null);
+const loading = ref(true);
+const error = ref('');
+const query = ref('');
+const configuredOnly = ref(false);
+const testing = ref(false);
 
-type DialogMode = 'builtin' | 'custom' | 'new'
+type DialogMode = 'builtin' | 'custom' | 'new';
 
 const dialog = reactive({
   open: false,
@@ -293,19 +293,19 @@ const dialog = reactive({
   protocol: 'openai',
   saving: false,
   error: '',
-})
+});
 
-const active = computed(() => data.value?.active ?? meta.value?.config.active)
-const canTest = computed(() => Boolean(active.value?.model))
-const allCards = computed(() => [...(data.value?.providers ?? []), ...(data.value?.custom ?? [])])
-const configuredCount = computed(() => allCards.value.filter((card) => card.configured).length)
-const activeCard = computed(() => allCards.value.find((card) => card.name === active.value?.provider) ?? null)
+const active = computed(() => data.value?.active ?? meta.value?.config.active);
+const canTest = computed(() => Boolean(active.value?.model));
+const allCards = computed(() => [...(data.value?.providers ?? []), ...(data.value?.custom ?? [])]);
+const configuredCount = computed(() => allCards.value.filter((card) => card.configured).length);
+const activeCard = computed(() => allCards.value.find((card) => card.name === active.value?.provider) ?? null);
 
 const filteredCards = computed(() => {
-  const term = query.value.trim().toLowerCase()
+  const term = query.value.trim().toLowerCase();
   return allCards.value.filter((card) => {
-    if (configuredOnly.value && !card.configured) return false
-    if (!term) return true
+    if (configuredOnly.value && !card.configured) return false;
+    if (!term) return true;
     const haystack = [
       card.name,
       card.display_name,
@@ -316,136 +316,136 @@ const filteredCards = computed(() => {
     ]
       .filter(Boolean)
       .join(' ')
-      .toLowerCase()
-    return haystack.includes(term)
-  })
-})
+      .toLowerCase();
+    return haystack.includes(term);
+  });
+});
 
 const visibleBuiltins = computed(() =>
   filteredCards.value
     .filter((card) => !card.custom)
     .sort((left, right) => {
-      if (left.active !== right.active) return left.active ? -1 : 1
-      if (left.configured !== right.configured) return left.configured ? -1 : 1
-      return left.display_name.localeCompare(right.display_name)
+      if (left.active !== right.active) return left.active ? -1 : 1;
+      if (left.configured !== right.configured) return left.configured ? -1 : 1;
+      return left.display_name.localeCompare(right.display_name);
     }),
-)
-const visibleCustom = computed(() => filteredCards.value.filter((card) => card.custom))
+);
+const visibleCustom = computed(() => filteredCards.value.filter((card) => card.custom));
 
 const dialogModels = computed(() => {
-  const models = [...(dialog.card?.models ?? [])]
-  if (dialog.model && !models.includes(dialog.model)) models.unshift(dialog.model)
-  return models
-})
+  const models = [...(dialog.card?.models ?? [])];
+  if (dialog.model && !models.includes(dialog.model)) models.unshift(dialog.model);
+  return models;
+});
 const showsApiKey = computed(() => {
-  const card = dialog.card
-  if (dialog.mode === 'new') return true
-  if (!card) return false
-  return !card.ambient_auth && !card.external_auth
-})
+  const card = dialog.card;
+  if (dialog.mode === 'new') return true;
+  if (!card) return false;
+  return !card.ambient_auth && !card.external_auth;
+});
 const dialogTitle = computed(() => {
-  if (dialog.mode === 'new') return t('providers.dialog.titleAdd')
-  if (dialog.card?.active) return t('providers.dialog.titleActive')
-  return dialog.card ? t('providers.dialog.titleNamed', { name: dialog.card.display_name }) : t('providers.dialog.titleFallback')
-})
+  if (dialog.mode === 'new') return t('providers.dialog.titleAdd');
+  if (dialog.card?.active) return t('providers.dialog.titleActive');
+  return dialog.card ? t('providers.dialog.titleNamed', { name: dialog.card.display_name }) : t('providers.dialog.titleFallback');
+});
 const dialogIntro = computed(() => {
-  if (dialog.mode === 'new') return t('providers.dialog.introNew')
-  if (dialog.card?.active) return t('providers.dialog.introActive')
-  return t('providers.dialog.introDefault')
-})
+  if (dialog.mode === 'new') return t('providers.dialog.introNew');
+  if (dialog.card?.active) return t('providers.dialog.introActive');
+  return t('providers.dialog.introDefault');
+});
 const dialogKeyPlaceholder = computed(() =>
   dialog.mode !== 'new' && dialog.card?.key_set
     ? t('providers.dialog.keyStoredPlaceholder')
     : t('providers.dialog.keyPlaceholder'),
-)
+);
 
 function initial(card: ProviderCard): string {
-  const name = card.display_name || card.name
-  return name.charAt(0).toUpperCase()
+  const name = card.display_name || card.name;
+  return name.charAt(0).toUpperCase();
 }
 
 function hostOf(url?: string): string {
-  if (!url) return '--'
+  if (!url) return '--';
   try {
-    return new URL(url).host || url
+    return new URL(url).host || url;
   } catch {
-    return url.replace(/^https?:\/\//, '').split('/')[0]
+    return url.replace(/^https?:\/\//, '').split('/')[0];
   }
 }
 
 function protocolLabel(protocol?: string): string {
   switch (protocol) {
     case 'anthropic':
-      return t('providers.protocol.anthropicMessages')
+      return t('providers.protocol.anthropicMessages');
     case 'openai':
-      return t('providers.protocol.openaiCompatible')
+      return t('providers.protocol.openaiCompatible');
     case 'openai-responses':
-      return t('providers.protocol.openaiResponses')
+      return t('providers.protocol.openaiResponses');
     case 'anthropic-bedrock':
-      return t('providers.protocol.bedrock')
+      return t('providers.protocol.bedrock');
     default:
-      return protocol || t('providers.protocol.notSet')
+      return protocol || t('providers.protocol.notSet');
   }
 }
 
 function authDot(card: ProviderCard): string {
-  if (card.configured) return 'dot--green'
-  if (card.auth_mode === 'sign_in') return 'dot--amber'
-  return ''
+  if (card.configured) return 'dot--green';
+  if (card.auth_mode === 'sign_in') return 'dot--amber';
+  return '';
 }
 
 function openCard(card: ProviderCard): void {
-  dialog.open = true
-  dialog.mode = card.custom ? 'custom' : 'builtin'
-  dialog.card = card
-  dialog.name = card.name
-  dialog.model = card.model || card.models[0] || ''
-  dialog.apiKey = ''
-  dialog.url = card.base_url || ''
-  dialog.protocol = card.protocol || 'openai'
-  dialog.saving = false
-  dialog.error = ''
+  dialog.open = true;
+  dialog.mode = card.custom ? 'custom' : 'builtin';
+  dialog.card = card;
+  dialog.name = card.name;
+  dialog.model = card.model || card.models[0] || '';
+  dialog.apiKey = '';
+  dialog.url = card.base_url || '';
+  dialog.protocol = card.protocol || 'openai';
+  dialog.saving = false;
+  dialog.error = '';
 }
 
 function openNewCustom(): void {
-  dialog.open = true
-  dialog.mode = 'new'
-  dialog.card = null
-  dialog.name = ''
-  dialog.model = ''
-  dialog.apiKey = ''
-  dialog.url = ''
-  dialog.protocol = 'openai'
-  dialog.saving = false
-  dialog.error = ''
+  dialog.open = true;
+  dialog.mode = 'new';
+  dialog.card = null;
+  dialog.name = '';
+  dialog.model = '';
+  dialog.apiKey = '';
+  dialog.url = '';
+  dialog.protocol = 'openai';
+  dialog.saving = false;
+  dialog.error = '';
 }
 
 function validateDialog(): string {
-  if (!dialog.model.trim()) return t('providers.validation.modelRequired')
+  if (!dialog.model.trim()) return t('providers.validation.modelRequired');
   if (dialog.mode === 'new' || dialog.mode === 'custom') {
-    if (!dialog.url.trim()) return t('providers.validation.urlRequired')
-    if (!/^https?:\/\/[^\s]+$/i.test(dialog.url.trim())) return t('providers.validation.urlInvalid')
+    if (!dialog.url.trim()) return t('providers.validation.urlRequired');
+    if (!/^https?:\/\/[^\s]+$/i.test(dialog.url.trim())) return t('providers.validation.urlInvalid');
   }
   if (dialog.mode === 'new') {
     if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(dialog.name.trim())) {
-      return t('providers.validation.nameInvalid')
+      return t('providers.validation.nameInvalid');
     }
     if (allCards.value.some((card) => !card.custom && card.name === dialog.name.trim())) {
-      return t('providers.validation.nameReserved')
+      return t('providers.validation.nameReserved');
     }
   }
-  return ''
+  return '';
 }
 
 async function saveProvider(): Promise<void> {
-  const validation = validateDialog()
+  const validation = validateDialog();
   if (validation) {
-    dialog.error = validation
-    return
+    dialog.error = validation;
+    return;
   }
-  const card = dialog.card
-  dialog.saving = true
-  dialog.error = ''
+  const card = dialog.card;
+  dialog.saving = true;
+  dialog.error = '';
   try {
     await api.activateProvider({
       name: dialog.mode === 'new' ? dialog.name.trim() : card?.name ?? '',
@@ -454,49 +454,49 @@ async function saveProvider(): Promise<void> {
       url: dialog.mode === 'new' || dialog.mode === 'custom' ? dialog.url.trim() : undefined,
       protocol: dialog.mode === 'new' || dialog.mode === 'custom' ? dialog.protocol : undefined,
       create_custom: dialog.mode === 'new',
-    })
-    dialog.open = false
-    ElMessage.success(dialog.mode === 'new' ? t('providers.toast.added') : t('providers.toast.activated'))
-    await Promise.all([load(), refresh(true)])
+    });
+    dialog.open = false;
+    ElMessage.success(dialog.mode === 'new' ? t('providers.toast.added') : t('providers.toast.activated'));
+    await Promise.all([load(), refresh(true)]);
   } catch (err) {
-    dialog.error = describeError(err)
+    dialog.error = describeError(err);
   } finally {
-    dialog.saving = false
+    dialog.saving = false;
   }
 }
 
 async function testConnection(): Promise<void> {
-  testing.value = true
+  testing.value = true;
   try {
-    const job = await api.testConnection()
-    await router.push(jobPath(job.id, job.kind))
+    const job = await api.testConnection();
+    await router.push(jobPath(job.id, job.kind));
   } catch (err) {
-    ElMessage.error(describeError(err))
+    ElMessage.error(describeError(err));
   } finally {
-    testing.value = false
+    testing.value = false;
   }
 }
 
 function go(path: string): void {
-  void router.push(path)
+  void router.push(path);
 }
 
 async function load(): Promise<void> {
-  loading.value = true
-  error.value = ''
+  loading.value = true;
+  error.value = '';
   try {
-    data.value = await api.providers()
-    if (data.value.error) error.value = data.value.error
+    data.value = await api.providers();
+    if (data.value.error) error.value = data.value.error;
   } catch (err) {
-    error.value = describeError(err)
+    error.value = describeError(err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 onMounted(async () => {
-  await Promise.all([load(), refresh()])
-})
+  await Promise.all([load(), refresh()]);
+});
 </script>
 
 <style scoped>

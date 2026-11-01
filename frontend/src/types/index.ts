@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 alibaba/open-code-review Contributors
 
-export type JobStatus = 'running' | 'canceling' | 'succeeded' | 'failed' | 'canceled' | 'queued'
-export type JobKind = 'review' | 'scan' | 'llm-test'
-export type StreamName = 'stdout' | 'stderr'
-export type Severity = 'critical' | 'high' | 'medium' | 'low'
-export type ReviewMode = 'workspace' | 'commit' | 'range'
+export type JobStatus = 'running' | 'canceling' | 'succeeded' | 'failed' | 'canceled' | 'queued';
+export type JobKind = 'review' | 'scan' | 'llm-test';
+export type StreamName = 'stdout' | 'stderr';
+export type Severity = 'critical' | 'high' | 'medium' | 'low';
+export type ReviewMode = 'workspace' | 'commit' | 'range';
 
 export interface CommitInfo {
   hash: string

@@ -52,4 +52,4 @@ export const result = {
   'result.empty.title': 'No structured result',
   'result.empty.description':
     'This command did not return a JSON document. Check the activity log for its output.',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

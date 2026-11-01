@@ -102,4 +102,4 @@ export const config = {
 
   'config.toast.saved': '设置已保存',
   'config.toast.savedPrefix': '已保存：',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

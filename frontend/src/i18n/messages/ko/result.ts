@@ -52,4 +52,4 @@ export const result = {
   'result.empty.title': '구조화된 결과 없음',
   'result.empty.description':
     '이 명령은 JSON 문서를 반환하지 않았습니다. 출력은 활동 로그에서 확인하세요.',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

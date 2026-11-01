@@ -76,4 +76,4 @@ export const sessionDetail = {
   'sessionDetail.actions.copied': '세션 ID를 복사했습니다',
   'sessionDetail.actions.copyFailed': '세션 ID를 복사하지 못했습니다',
   'sessionDetail.actions.deleted': '세션을 삭제했습니다',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

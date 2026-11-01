@@ -47,4 +47,4 @@ export const sessions = {
   'sessions.delete.description':
     'This removes the saved session and its findings from disk. The review itself is not affected, but the history cannot be recovered.',
   'sessions.delete.success': 'Session deleted',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

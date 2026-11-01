@@ -154,4 +154,4 @@ export const shell = {
   'notFound.text': '路由可能已经变更，或者某个会话、运行已经过期。控制台的所有功能都可以从导航进入。',
   'notFound.backToOverview': '返回概览',
   'notFound.goBack': '返回上一页',
-} satisfies Record<string, string>
+} satisfies Record<string, string>;

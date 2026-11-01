@@ -62,9 +62,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
 import {
   Connection,
   EditPen,
@@ -74,17 +74,17 @@ import {
   Search,
   Setting,
   VideoPlay,
-} from '@element-plus/icons-vue'
-import { api } from '@/api/client'
-import { describeError } from '@/utils/format'
-import { jobPath } from '@/utils/routes'
-import { useI18n, type MessageKey } from '@/i18n'
-import type { Component } from 'vue'
+} from '@element-plus/icons-vue';
+import { api } from '@/api/client';
+import { describeError } from '@/utils/format';
+import { jobPath } from '@/utils/routes';
+import { useI18n, type MessageKey } from '@/i18n';
+import type { Component } from 'vue';
 
-const props = defineProps<{ open: boolean }>()
-const emit = defineEmits<{ 'update:open': [value: boolean] }>()
+const props = defineProps<{ open: boolean }>();
+const emit = defineEmits<{ 'update:open': [value: boolean] }>();
 
-type PaletteGroup = 'navigate' | 'actions'
+type PaletteGroup = 'navigate' | 'actions';
 
 interface PaletteItem {
   id: string
@@ -102,11 +102,11 @@ interface RenderedItem extends PaletteItem {
   groupLabel: string
 }
 
-const router = useRouter()
-const { t } = useI18n()
-const query = ref('')
-const activeId = ref('')
-const inputRef = ref<HTMLInputElement | null>(null)
+const router = useRouter();
+const { t } = useI18n();
+const query = ref('');
+const activeId = ref('');
+const inputRef = ref<HTMLInputElement | null>(null);
 
 const items: PaletteItem[] = [
   { id: 'overview', labelKey: 'palette.overview.label', hintKey: 'palette.overview.hint', group: 'navigate', icon: Grid, to: '/' },
@@ -117,20 +117,20 @@ const items: PaletteItem[] = [
   { id: 'settings', labelKey: 'palette.settings.label', hintKey: 'palette.settings.hint', group: 'navigate', icon: Setting, to: '/settings' },
   { id: 'rules', labelKey: 'palette.rules.label', hintKey: 'palette.rules.hint', group: 'navigate', icon: Reading, to: '/rules' },
   { id: 'test', labelKey: 'palette.test.label', hintKey: 'palette.test.hint', group: 'actions', icon: VideoPlay, action: 'test-connection' },
-]
+];
 
-const groupLabel = (group: PaletteGroup): string => t(`palette.group.${group}` as MessageKey)
+const groupLabel = (group: PaletteGroup): string => t(`palette.group.${group}` as MessageKey);
 
 const filtered = computed<PaletteItem[]>(() => {
-  const value = query.value.trim().toLowerCase()
-  if (!value) return items
+  const value = query.value.trim().toLowerCase();
+  if (!value) return items;
   return items.filter((item) =>
     `${t(item.labelKey)} ${t(item.hintKey)} ${groupLabel(item.group)}`.toLowerCase().includes(value),
-  )
-})
+  );
+});
 
 const grouped = computed<Array<{ label: string; items: RenderedItem[] }>>(() => {
-  const groups: Array<{ label: string; items: RenderedItem[] }> = []
+  const groups: Array<{ label: string; items: RenderedItem[] }> = [];
   for (const group of ['navigate', 'actions'] as const) {
     const groupItems = filtered.value
       .filter((item) => item.group === group)
@@ -139,77 +139,77 @@ const grouped = computed<Array<{ label: string; items: RenderedItem[] }>>(() => 
         label: t(item.labelKey),
         hint: t(item.hintKey),
         groupLabel: groupLabel(group),
-      }))
-    if (groupItems.length) groups.push({ label: groupLabel(group), items: groupItems })
+      }));
+    if (groupItems.length) groups.push({ label: groupLabel(group), items: groupItems });
   }
-  return groups
-})
+  return groups;
+});
 
 watch(query, () => {
   if (!filtered.value.some((item) => item.id === activeId.value)) {
-    activeId.value = filtered.value[0]?.id ?? ''
+    activeId.value = filtered.value[0]?.id ?? '';
   }
-})
+});
 
 watch(
   () => props.open,
   async (value) => {
     if (value) {
-      query.value = ''
-      activeId.value = items[0]?.id ?? ''
-      await nextTick()
-      inputRef.value?.focus()
+      query.value = '';
+      activeId.value = items[0]?.id ?? '';
+      await nextTick();
+      inputRef.value?.focus();
     }
   },
-)
+);
 
 function close(): void {
-  emit('update:open', false)
+  emit('update:open', false);
 }
 
 function move(delta: number): void {
-  const list = filtered.value
-  if (!list.length) return
-  const index = Math.max(0, list.findIndex((item) => item.id === activeId.value))
-  const next = (index + delta + list.length) % list.length
-  activeId.value = list[next].id
+  const list = filtered.value;
+  if (!list.length) return;
+  const index = Math.max(0, list.findIndex((item) => item.id === activeId.value));
+  const next = (index + delta + list.length) % list.length;
+  activeId.value = list[next].id;
 }
 
 function runActive(): void {
-  const item = filtered.value.find((entry) => entry.id === activeId.value) ?? filtered.value[0]
-  if (item) void execute(item)
+  const item = filtered.value.find((entry) => entry.id === activeId.value) ?? filtered.value[0];
+  if (item) void execute(item);
 }
 
 async function execute(item: PaletteItem): Promise<void> {
-  close()
+  close();
   if (item.to) {
-    await router.push(item.to)
-    return
+    await router.push(item.to);
+    return;
   }
   if (item.action === 'test-connection') {
     try {
-      const job = await api.testConnection()
-      await router.push(jobPath(job.id, job.kind))
+      const job = await api.testConnection();
+      await router.push(jobPath(job.id, job.kind));
     } catch (error) {
-      ElMessage.error(describeError(error))
+      ElMessage.error(describeError(error));
     }
   }
 }
 
 function onKeydown(event: KeyboardEvent): void {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-    event.preventDefault()
-    emit('update:open', !props.open)
-    return
+    event.preventDefault();
+    emit('update:open', !props.open);
+    return;
   }
   if (event.key === 'Escape' && props.open) {
-    event.preventDefault()
-    close()
+    event.preventDefault();
+    close();
   }
 }
 
-onMounted(() => window.addEventListener('keydown', onKeydown))
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
+onMounted(() => window.addEventListener('keydown', onKeydown));
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 </script>
 
 <style scoped>

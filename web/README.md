@@ -75,6 +75,34 @@ package embeds with `//go:embed`. Vite empties the directory on every build and
 a small close-bundle hook restores `keep.txt`, so a clean checkout still
 compiles.
 
+### Internationalization
+
+The console ships English and Simplified Chinese. Copy lives in
+`src/i18n/messages/en/<feature>.ts`, one slice per page or shared component;
+`messages/en.ts` merges the slices and its key union is the `MessageKey` type
+that `t()` accepts, so a typo in a component fails `npm run typecheck`.
+`messages/zh.ts` is typed `Record<MessageKey, string>`, which makes a missing
+translation a compile error rather than a silent English fallback.
+
+Components read copy through `useI18n()`:
+
+```ts
+const { t, tn } = useI18n()
+t('review.form.mode')          // plain message
+tn('review.files', 3)          // looks up review.files.one / .other
+```
+
+The first visit follows `navigator.languages`, falls back to English, and the
+picker in the topbar stores the choice under `ocr-locale` in `localStorage`.
+`<html lang>` and Element Plus's own locale switch with it, and
+`src/utils/format.ts` builds its `Intl` formatters for the active locale.
+
+To add a locale, copy `messages/zh/` to `messages/<code>/`, translate the
+slices, then register the code in `src/i18n/index.ts`: the `LocaleCode` union,
+`LOCALES`, the `catalogue`, and the Element Plus language pack. That directory
+is exempt from `make english-check` (see `allowedPrefixes` in
+`scripts/verify-english-only.go`); do not put translated copy anywhere else.
+
 ### Layout
 
 ```
@@ -84,6 +112,7 @@ web/
     api/client.ts         typed fetch wrapper and SSE URL helper
     composables/          theme, job stream
     components/           shell, findings, log console, markdown, cards
+    i18n/                 locale state, message slices per feature
     views/                overview, review, scan, run, sessions, providers,
                           settings, rules, not found
     styles/theme.css      Claude-style tokens and Element Plus overrides

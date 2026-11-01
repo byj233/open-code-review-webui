@@ -2,18 +2,18 @@
 <template>
   <div class="page">
     <PageHeader
-      eyebrow="Setup"
-      title="Providers"
-      description="Choose the model that reviews your code. Keys stay in ~/.opencodereview/config.json and are never returned to this page."
+      :eyebrow="t('nav.group.setup')"
+      :title="t('nav.providers')"
+      :description="t('providers.page.description')"
     >
       <template #actions>
         <el-button @click="openNewCustom">
           <el-icon class="btn-icon"><Plus /></el-icon>
-          Custom provider
+          {{ t('providers.actions.customProvider') }}
         </el-button>
         <el-button type="primary" :disabled="!canTest" :loading="testing" @click="testConnection">
           <el-icon class="btn-icon"><VideoPlay /></el-icon>
-          Test connection
+          {{ t('providers.actions.testConnection') }}
         </el-button>
       </template>
     </PageHeader>
@@ -22,7 +22,7 @@
       <el-icon class="callout__icon"><WarningFilled /></el-icon>
       <div class="callout__content">
         <span>{{ error }}</span>
-        <el-button size="small" @click="load">Retry</el-button>
+        <el-button size="small" @click="load">{{ t('common.retry') }}</el-button>
       </div>
     </div>
 
@@ -31,9 +31,9 @@
         <BrandMark :size="24" />
       </div>
       <div class="active-banner__body">
-        <p class="eyebrow">{{ active?.configured ? 'Active provider' : 'No model configured' }}</p>
-        <h2 class="active-banner__title">{{ active?.provider_label || 'Choose a provider below' }}</h2>
-        <p class="active-banner__model mono">{{ active?.model || 'No model selected' }}</p>
+        <p class="eyebrow">{{ active?.configured ? t('providers.banner.active') : t('providers.banner.noModelConfigured') }}</p>
+        <h2 class="active-banner__title">{{ active?.provider_label || t('providers.banner.choose') }}</h2>
+        <p class="active-banner__model mono">{{ active?.model || t('providers.banner.noModel') }}</p>
         <div class="active-banner__meta">
           <span class="chip">
             <span class="dot" :class="active?.configured ? 'dot--green' : 'dot--amber'" />
@@ -46,31 +46,31 @@
       </div>
       <div class="active-banner__actions">
         <el-button v-if="canTest" size="small" :loading="testing" @click="testConnection">
-          Test connection
+          {{ t('providers.actions.testConnection') }}
         </el-button>        <el-button v-if="activeCard" size="small" type="primary" @click="openCard(activeCard)">
-          Change model
+          {{ t('providers.banner.changeModel') }}
         </el-button>
-        <el-button v-else size="small" @click="go('/settings')">Open settings</el-button>
+        <el-button v-else size="small" @click="go('/settings')">{{ t('providers.banner.openSettings') }}</el-button>
       </div>
     </section>
 
     <div class="provider-toolbar">
       <div class="provider-toolbar__search">
-        <el-input v-model="query" clearable placeholder="Search providers, models, or env vars">
+        <el-input v-model="query" clearable :placeholder="t('providers.toolbar.searchPlaceholder')">
           <template #prefix><el-icon><Search /></el-icon></template>
         </el-input>
       </div>
       <label class="configured-toggle">
         <el-switch v-model="configuredOnly" size="small" />
-        <span>Configured only</span>
+        <span>{{ t('providers.toolbar.configuredOnly') }}</span>
       </label>
-      <span class="provider-toolbar__count">{{ configuredCount }} of {{ allCards.length }} configured</span>
+      <span class="provider-toolbar__count">{{ t('providers.toolbar.configuredCount', { configured: configuredCount, total: allCards.length }) }}</span>
     </div>
 
     <section class="provider-section">
       <header class="provider-section__head">
-        <h2 class="section-title">Built-in providers</h2>
-        <p class="provider-section__sub">Presets ship with endpoints, protocol, and suggested models.</p>
+        <h2 class="section-title">{{ t('providers.builtin.title') }}</h2>
+        <p class="provider-section__sub">{{ t('providers.builtin.subtitle') }}</p>
       </header>
 
       <div v-if="loading" class="provider-grid">
@@ -92,13 +92,13 @@
               <h3 class="provider-card__name">{{ card.display_name }}</h3>
               <p class="provider-card__protocol">{{ protocolLabel(card.protocol) }}</p>
             </div>
-            <span v-if="card.active" class="provider-card__active">Active</span>
+            <span v-if="card.active" class="provider-card__active">{{ t('providers.card.active') }}</span>
           </header>
 
           <div class="provider-card__models">
             <span v-for="model in card.models.slice(0, 3)" :key="model" class="model-chip mono">{{ model }}</span>
             <span v-if="card.models.length > 3" class="model-chip model-chip--more">+{{ card.models.length - 3 }}</span>
-            <span v-if="!card.models.length" class="model-chip model-chip--empty">Model list not preset</span>
+            <span v-if="!card.models.length" class="model-chip model-chip--empty">{{ t('providers.card.modelListNotPreset') }}</span>
           </div>
 
           <p v-if="card.base_url" class="provider-card__endpoint mono" :title="card.base_url">{{ hostOf(card.base_url) }}</p>
@@ -110,7 +110,7 @@
               <span v-if="card.env_var" class="provider-card__env mono">{{ card.env_var }}</span>
             </span>
             <el-button size="small" text @click="openCard(card)">
-              {{ card.active ? 'Configure' : card.configured ? 'Use' : 'Set up' }}
+              {{ card.active ? t('providers.card.configure') : card.configured ? t('providers.card.use') : t('providers.card.setUp') }}
               <el-icon class="btn-icon-right"><ArrowRight /></el-icon>
             </el-button>
           </footer>
@@ -119,15 +119,15 @@
 
       <EmptyState
         v-else
-        title="No built-in providers match"
-        description="Clear the search or turn off the configured-only filter."
+        :title="t('providers.builtin.emptyTitle')"
+        :description="t('providers.builtin.emptyDescription')"
       />
     </section>
 
     <section class="provider-section">
       <header class="provider-section__head">
-        <h2 class="section-title">Custom providers</h2>
-        <p class="provider-section__sub">Any OpenAI-compatible or Anthropic-compatible endpoint.</p>
+        <h2 class="section-title">{{ t('providers.custom.title') }}</h2>
+        <p class="provider-section__sub">{{ t('providers.custom.subtitle') }}</p>
       </header>
 
       <div class="provider-grid">
@@ -143,12 +143,12 @@
               <h3 class="provider-card__name">{{ card.name }}</h3>
               <p class="provider-card__protocol">{{ protocolLabel(card.protocol) }}</p>
             </div>
-            <span v-if="card.active" class="provider-card__active">Active</span>
+            <span v-if="card.active" class="provider-card__active">{{ t('providers.card.active') }}</span>
           </header>
 
           <div class="provider-card__models">
             <span v-for="model in card.models.slice(0, 3)" :key="model" class="model-chip mono">{{ model }}</span>
-            <span v-if="!card.models.length" class="model-chip model-chip--empty">{{ card.model || 'No models yet' }}</span>
+            <span v-if="!card.models.length" class="model-chip model-chip--empty">{{ card.model || t('providers.card.noModelsYet') }}</span>
           </div>
           <p v-if="card.base_url" class="provider-card__endpoint mono" :title="card.base_url">{{ hostOf(card.base_url) }}</p>
 
@@ -158,7 +158,7 @@
               {{ authLabel(card.auth_mode) }}
             </span>
             <el-button size="small" text @click="openCard(card)">
-              Configure
+              {{ t('providers.card.configure') }}
               <el-icon class="btn-icon-right"><ArrowRight /></el-icon>
             </el-button>
           </footer>
@@ -166,8 +166,8 @@
 
         <button class="add-card" type="button" @click="openNewCustom">
           <span class="add-card__icon"><el-icon><Plus /></el-icon></span>
-          <span class="add-card__title">Add a custom provider</span>
-          <span class="add-card__text">Gateway, local proxy, or a private OpenAI-compatible endpoint.</span>
+          <span class="add-card__title">{{ t('providers.custom.addTitle') }}</span>
+          <span class="add-card__text">{{ t('providers.custom.addText') }}</span>
         </button>
       </div>
     </section>
@@ -175,42 +175,42 @@
     <el-dialog v-model="dialog.open" :title="dialogTitle" width="540px" append-to-body :close-on-click-modal="!dialog.saving">
       <div class="dialog-intro">
         <p>{{ dialogIntro }}</p>
-        <p v-if="dialog.card?.active" class="dialog-intro__active">This provider is currently active.</p>
+        <p v-if="dialog.card?.active" class="dialog-intro__active">{{ t('providers.dialog.currentlyActive') }}</p>
       </div>
 
       <el-form label-position="top" class="dialog-form" @submit.prevent="saveProvider">
-        <el-form-item v-if="dialog.mode === 'new'" label="Provider name">
+        <el-form-item v-if="dialog.mode === 'new'" :label="t('providers.dialog.nameLabel')">
           <el-input v-model="dialog.name" placeholder="my-gateway" maxlength="64" />
-          <p class="dialog-hint">Letters, digits, dots, and dashes. Used in config keys.</p>
+          <p class="dialog-hint">{{ t('providers.dialog.nameHint') }}</p>
         </el-form-item>
 
-        <el-form-item label="Model">
+        <el-form-item :label="t('providers.dialog.modelLabel')">
           <el-select
             v-model="dialog.model"
             class="full-width"
             filterable
             allow-create
             default-first-option
-            placeholder="Select or type a model id"
+            :placeholder="t('providers.dialog.modelPlaceholder')"
           >
             <el-option v-for="model in dialogModels" :key="model" :label="model" :value="model" />
           </el-select>
         </el-form-item>
 
         <template v-if="dialog.mode === 'new' || dialog.mode === 'custom'">
-          <el-form-item label="Endpoint URL">
+          <el-form-item :label="t('providers.dialog.urlLabel')">
             <el-input v-model="dialog.url" placeholder="https://gateway.internal.com/v1" />
           </el-form-item>
-          <el-form-item label="Protocol">
+          <el-form-item :label="t('providers.dialog.protocolLabel')">
             <el-select v-model="dialog.protocol" class="full-width">
-              <el-option label="OpenAI chat completions" value="openai" />
-              <el-option label="OpenAI responses" value="openai-responses" />
-              <el-option label="Anthropic messages" value="anthropic" />
+              <el-option :label="t('providers.protocol.openaiChat')" value="openai" />
+              <el-option :label="t('providers.protocol.openaiResponses')" value="openai-responses" />
+              <el-option :label="t('providers.protocol.anthropicMessages')" value="anthropic" />
             </el-select>
           </el-form-item>
         </template>
 
-        <el-form-item v-if="showsApiKey" label="API key">
+        <el-form-item v-if="showsApiKey" :label="t('providers.dialog.apiKeyLabel')">
           <el-input
             v-model="dialog.apiKey"
             type="password"
@@ -219,23 +219,17 @@
             :placeholder="dialogKeyPlaceholder"
           />
           <p class="dialog-hint">
-            {{
-              dialog.mode === 'new'
-                ? 'Optional at this step; you can add it later.'
-                : 'Leave blank to keep the stored key. Keys are never shown in this console.'
-            }}
+            {{ dialog.mode === 'new' ? t('providers.dialog.keyOptionalHint') : t('providers.dialog.keyKeepHint') }}
           </p>
         </el-form-item>
 
         <div v-else class="dialog-note">
           <el-icon><InfoFilled /></el-icon>
           <span v-if="dialog.card?.ambient_auth">
-            This provider authenticates through the ambient AWS credential chain. Set your AWS
-            region and profile in Settings if needed.
+            {{ t('providers.dialog.ambientAuthNote') }}
           </span>
           <span v-else>
-            This provider uses an interactive sign-in. Run <span class="code-inline">ocr auth login</span>
-            in a terminal, then return here.
+            {{ t('providers.dialog.signInBefore') }}<span class="code-inline">ocr auth login</span>{{ t('providers.dialog.signInAfter') }}
           </span>
         </div>
 
@@ -243,9 +237,9 @@
       </el-form>
 
       <template #footer>
-        <el-button :disabled="dialog.saving" @click="dialog.open = false">Cancel</el-button>
+        <el-button :disabled="dialog.saving" @click="dialog.open = false">{{ t('common.cancel') }}</el-button>
         <el-button type="primary" :loading="dialog.saving" @click="saveProvider">
-          {{ dialog.mode === 'new' ? 'Add provider' : dialog.card?.active ? 'Save model' : 'Use provider' }}
+          {{ dialog.mode === 'new' ? t('providers.dialog.add') : dialog.card?.active ? t('providers.dialog.saveModel') : t('providers.dialog.useProvider') }}
         </el-button>
       </template>
     </el-dialog>
@@ -268,11 +262,13 @@ import BrandMark from '@/components/BrandMark.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { api, errorMessage } from '@/api/client'
+import { useI18n } from '@/i18n'
 import { useMetaStore } from '@/stores/meta'
 import { authLabel, sourceLabel } from '@/utils/status'
 import type { ProviderCard, ProvidersResponse } from '@/types'
 
 const router = useRouter()
+const { t, tn } = useI18n()
 const { meta, refresh } = useMetaStore()
 
 const data = ref<ProvidersResponse | null>(null)
@@ -346,17 +342,19 @@ const showsApiKey = computed(() => {
   return !card.ambient_auth && !card.external_auth
 })
 const dialogTitle = computed(() => {
-  if (dialog.mode === 'new') return 'Add custom provider'
-  if (dialog.card?.active) return 'Configure active provider'
-  return dialog.card ? `Configure ${dialog.card.display_name}` : 'Configure provider'
+  if (dialog.mode === 'new') return t('providers.dialog.titleAdd')
+  if (dialog.card?.active) return t('providers.dialog.titleActive')
+  return dialog.card ? t('providers.dialog.titleNamed', { name: dialog.card.display_name }) : t('providers.dialog.titleFallback')
 })
 const dialogIntro = computed(() => {
-  if (dialog.mode === 'new') return 'Point the console at an endpoint you control. Protocol and URL are stored in custom_providers.'
-  if (dialog.card?.active) return 'Changing the model writes it to the active provider. Stored keys are kept unless you paste a new one.'
-  return 'Select the model to use for this provider, then enable it for review and scan runs.'
+  if (dialog.mode === 'new') return t('providers.dialog.introNew')
+  if (dialog.card?.active) return t('providers.dialog.introActive')
+  return t('providers.dialog.introDefault')
 })
 const dialogKeyPlaceholder = computed(() =>
-  dialog.mode !== 'new' && dialog.card?.key_set ? 'Stored key present - paste to replace' : 'Paste an API key',
+  dialog.mode !== 'new' && dialog.card?.key_set
+    ? t('providers.dialog.keyStoredPlaceholder')
+    : t('providers.dialog.keyPlaceholder'),
 )
 
 function initial(card: ProviderCard): string {
@@ -376,15 +374,15 @@ function hostOf(url?: string): string {
 function protocolLabel(protocol?: string): string {
   switch (protocol) {
     case 'anthropic':
-      return 'Anthropic messages'
+      return t('providers.protocol.anthropicMessages')
     case 'openai':
-      return 'OpenAI compatible'
+      return t('providers.protocol.openaiCompatible')
     case 'openai-responses':
-      return 'OpenAI responses'
+      return t('providers.protocol.openaiResponses')
     case 'anthropic-bedrock':
-      return 'AWS Bedrock'
+      return t('providers.protocol.bedrock')
     default:
-      return protocol || 'Protocol not set'
+      return protocol || t('providers.protocol.notSet')
   }
 }
 
@@ -421,17 +419,17 @@ function openNewCustom(): void {
 }
 
 function validateDialog(): string {
-  if (!dialog.model.trim()) return 'Choose a model for this provider.'
+  if (!dialog.model.trim()) return t('providers.validation.modelRequired')
   if (dialog.mode === 'new' || dialog.mode === 'custom') {
-    if (!dialog.url.trim()) return 'An endpoint URL is required.'
-    if (!/^https?:\/\/[^\s]+$/i.test(dialog.url.trim())) return 'The endpoint must start with http:// or https://.'
+    if (!dialog.url.trim()) return t('providers.validation.urlRequired')
+    if (!/^https?:\/\/[^\s]+$/i.test(dialog.url.trim())) return t('providers.validation.urlInvalid')
   }
   if (dialog.mode === 'new') {
     if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(dialog.name.trim())) {
-      return 'Provider names may contain letters, digits, dots, and dashes.'
+      return t('providers.validation.nameInvalid')
     }
     if (allCards.value.some((card) => !card.custom && card.name === dialog.name.trim())) {
-      return 'That name belongs to a built-in provider.'
+      return t('providers.validation.nameReserved')
     }
   }
   return ''
@@ -456,7 +454,7 @@ async function saveProvider(): Promise<void> {
       create_custom: dialog.mode === 'new',
     })
     dialog.open = false
-    ElMessage.success(dialog.mode === 'new' ? 'Custom provider added' : 'Provider activated')
+    ElMessage.success(dialog.mode === 'new' ? t('providers.toast.added') : t('providers.toast.activated'))
     await Promise.all([load(), refresh(true)])
   } catch (err) {
     dialog.error = errorMessage(err)

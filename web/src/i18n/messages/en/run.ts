@@ -1,0 +1,83 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 alibaba/open-code-review Contributors
+
+export const run = {
+  'run.kind.scan': 'Repository scan',
+  'run.kind.llmTest': 'Connection test',
+  'run.kind.review': 'Code review',
+
+  'run.header.eyebrow': '{kind} run',
+  'run.header.description': 'Started {time} from the Web Console.',
+  'run.header.started': 'started {time}',
+  'run.header.exit': 'exit {code}',
+  'run.header.liveStream': 'live stream',
+  'run.header.polling': 'polling',
+  'run.header.stop': 'Stop run',
+  'run.header.openSession': 'Open session',
+  'run.header.runAgain': 'Run again',
+  'run.header.backToScan': 'Back to scan',
+  'run.header.backToProviders': 'Back to providers',
+  'run.header.backToReview': 'Back to review',
+
+  'run.unavailable.title': 'Run not available',
+  'run.unavailable.description': 'This run may have expired or the console was restarted.',
+
+  'run.log.title': '{kind} output',
+
+  'run.details.title': 'Run details',
+  'run.details.subtitle': 'Command, timing, and output location',
+  'run.details.status': 'Status',
+  'run.details.started': 'Started',
+  'run.details.duration': 'Duration',
+  'run.details.exitCode': 'Exit code',
+  'run.details.model': 'Model',
+  'run.details.session': 'Session',
+  'run.details.runId': 'Run id',
+  'run.details.copySession': 'Copy session id',
+
+  'run.live.currentStep': 'Current step',
+  'run.live.subtitle': 'Latest line from the run',
+  'run.live.waiting': 'Waiting for output…',
+  'run.live.streaming': 'Streaming progress from the CLI',
+  'run.live.fallback': 'Falling back to polling',
+
+  'run.checks.title': 'What to check',
+  'run.checks.provider': 'Provider and model are configured on the Providers page.',
+  'run.checks.apiKey': 'The API key is valid and the endpoint is reachable.',
+  'run.checks.refs': 'The selected refs exist and contain reviewable changes.',
+  'run.checks.openProviders': 'Open providers',
+  'run.checks.openSettings': 'Open settings',
+
+  'run.result.title': 'Results',
+  'run.result.runningDescription': 'The result panel fills in when the command exits.',
+  'run.result.description': 'Structured output from the CLI, rendered for review.',
+  'run.result.partial': 'partial output',
+  'run.result.waitingTitle': '{kind} in progress',
+  'run.result.progressLines.one': '{count} progress line received so far.',
+  'run.result.progressLines.other': '{count} progress lines received so far.',
+  'run.result.starting': 'The command is starting.',
+  'run.result.failedTitle': 'The run did not finish cleanly.',
+  'run.result.failedFallback': 'See the activity log for details.',
+  'run.result.failedFooter': 'Any findings produced before the failure are shown below.',
+  'run.result.canceled': 'Run canceled. Findings produced before cancellation are shown below.',
+  'run.result.canceledTitle': 'Run canceled.',
+  'run.result.commandFailed': 'The command failed.',
+  'run.result.noResult': 'No structured result was produced. The activity log above contains the details.',
+  'run.result.noResultFinished': 'This run finished without a structured result. The activity log above contains its output.',
+
+  'run.connection.verifiedTitle': 'Connection verified',
+  'run.connection.failedTitle': 'Connection test failed',
+  'run.connection.verifiedText': 'The provider accepted the test conversation. You can run a review or scan now.',
+  'run.connection.failedText': 'The provider did not complete the test request. Check the error and the activity log.',
+  'run.connection.fullOutput': 'Full test output',
+  'run.connection.runReview': 'Run a review',
+
+  'run.confirm.message': 'Stop this run? The command will be terminated and partial output will be kept.',
+  'run.confirm.title': 'Stop run',
+  'run.confirm.confirm': 'Stop run',
+  'run.confirm.cancel': 'Keep running',
+
+  'run.message.stopping': 'Stopping the run',
+  'run.message.sessionCopied': 'Session id copied',
+  'run.message.copyFailed': 'Could not copy the session id',
+} satisfies Record<string, string>

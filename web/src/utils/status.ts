@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 alibaba/open-code-review Contributors
 
+import { t } from '@/i18n'
+import type { MessageKey } from '@/i18n'
 import type { JobStatus, SessionSummary, Severity } from '@/types'
 
 export type Tone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger'
@@ -11,17 +13,25 @@ export interface StatusMeta {
   pulse: boolean
 }
 
-const jobStatusMap: Record<JobStatus, StatusMeta> = {
-  queued: { label: 'Queued', tone: 'neutral', pulse: false },
-  running: { label: 'Running', tone: 'accent', pulse: true },
-  canceling: { label: 'Stopping', tone: 'warning', pulse: true },
-  succeeded: { label: 'Completed', tone: 'success', pulse: false },
-  failed: { label: 'Failed', tone: 'danger', pulse: false },
-  canceled: { label: 'Canceled', tone: 'neutral', pulse: false },
+function meta(key: MessageKey, tone: Tone, pulse = false): StatusMeta {
+  return { label: t(key), tone, pulse }
 }
 
 export function jobStatusMeta(status?: string): StatusMeta {
-  return jobStatusMap[(status as JobStatus) ?? 'queued'] ?? jobStatusMap.queued
+  switch ((status as JobStatus) ?? 'queued') {
+    case 'running':
+      return meta('status.running', 'accent', true)
+    case 'canceling':
+      return meta('status.canceling', 'warning', true)
+    case 'succeeded':
+      return meta('status.succeeded', 'success')
+    case 'failed':
+      return meta('status.failed', 'danger')
+    case 'canceled':
+      return meta('status.canceled', 'neutral')
+    default:
+      return meta('status.queued', 'neutral')
+  }
 }
 
 export interface SessionStateMeta extends StatusMeta {
@@ -30,36 +40,36 @@ export interface SessionStateMeta extends StatusMeta {
 
 export function sessionState(summary: SessionSummary): SessionStateMeta {
   if (summary.aborted && !summary.end_time) {
-    return { key: 'interrupted', label: 'Interrupted', tone: 'danger', pulse: false }
+    return { key: 'interrupted', ...meta('status.interrupted', 'danger') }
   }
   const terminal = summary.run_manifest?.terminal_state
   switch (terminal) {
     case 'complete':
-      return { key: 'complete', label: 'Complete', tone: 'success', pulse: false }
+      return { key: 'complete', ...meta('status.complete', 'success') }
     case 'partial':
-      return { key: 'partial', label: 'Partial', tone: 'warning', pulse: false }
+      return { key: 'partial', ...meta('status.partial', 'warning') }
     case 'failed':
-      return { key: 'failed', label: 'Failed', tone: 'danger', pulse: false }
+      return { key: 'failed', ...meta('status.failed', 'danger') }
     case 'skipped':
-      return { key: 'skipped', label: 'Skipped', tone: 'neutral', pulse: false }
+      return { key: 'skipped', ...meta('status.skipped', 'neutral') }
     default:
       break
   }
   if (summary.aborted) {
-    return { key: 'aborted', label: 'Interrupted', tone: 'warning', pulse: false }
+    return { key: 'aborted', ...meta('status.interrupted', 'warning') }
   }
   if (summary.legacy) {
-    return { key: 'legacy', label: 'Legacy', tone: 'neutral', pulse: false }
+    return { key: 'legacy', ...meta('status.legacy', 'neutral') }
   }
-  return { key: 'recorded', label: 'Recorded', tone: 'neutral', pulse: false }
+  return { key: 'recorded', ...meta('status.recorded', 'neutral') }
 }
 
 export function sessionModeLabel(summary: SessionSummary): string {
   if (summary.review_mode === 'scan') {
-    return 'Repository scan'
+    return t('status.mode.scan')
   }
   if (summary.review_mode === 'commit' && summary.diff_commit) {
-    return `Commit ${summary.diff_commit.slice(0, 10)}`
+    return t('status.mode.commit', { id: summary.diff_commit.slice(0, 10) })
   }
   if (summary.review_mode === 'range' && summary.diff_from && summary.diff_to) {
     return `${summary.diff_from}..${summary.diff_to}`
@@ -67,47 +77,47 @@ export function sessionModeLabel(summary: SessionSummary): string {
   if (summary.diff_from && summary.diff_to) {
     return `${summary.diff_from}..${summary.diff_to}`
   }
-  return 'Workspace changes'
+  return t('status.mode.workspace')
 }
 
 export function authLabel(mode?: string): string {
   switch (mode) {
     case 'api_key':
-      return 'API key stored'
+      return t('status.auth.apiKey')
     case 'env':
-      return 'Environment variable'
+      return t('status.auth.env')
     case 'ambient':
-      return 'Cloud credentials'
+      return t('status.auth.ambient')
     case 'sign_in':
-      return 'Sign-in required'
+      return t('status.auth.signIn')
     default:
-      return 'Not configured'
+      return t('status.auth.none')
   }
 }
 
 export function sourceLabel(source?: string): string {
   switch (source) {
     case 'provider':
-      return 'Provider'
+      return t('status.source.provider')
     case 'legacy':
-      return 'Custom endpoint'
+      return t('status.source.legacy')
     case 'ocr-env':
-      return 'OCR environment'
+      return t('status.source.ocrEnv')
     case 'claude-env':
-      return 'Claude Code environment'
+      return t('status.source.claudeEnv')
     default:
-      return 'Not configured'
+      return t('status.source.none')
   }
 }
 
 export function modeLabel(mode?: string): string {
   switch (mode) {
     case 'commit':
-      return 'Commit'
+      return t('status.reviewMode.commit')
     case 'range':
-      return 'Branch range'
+      return t('status.reviewMode.range')
     default:
-      return 'Working tree'
+      return t('status.reviewMode.workspace')
   }
 }
 
@@ -127,8 +137,18 @@ export function normalizedSeverity(severity?: string): Severity | 'unknown' {
 }
 
 export function severityLabel(severity?: string): string {
-  const normalized = normalizedSeverity(severity)
-  return normalized === 'unknown' ? 'Note' : normalized
+  switch (normalizedSeverity(severity)) {
+    case 'critical':
+      return t('status.severity.critical')
+    case 'high':
+      return t('status.severity.high')
+    case 'medium':
+      return t('status.severity.medium')
+    case 'low':
+      return t('status.severity.low')
+    default:
+      return t('status.severity.note')
+  }
 }
 
 export function categoryLabel(category?: string): string {
@@ -138,21 +158,21 @@ export function categoryLabel(category?: string): string {
 export function excludeReasonLabel(reason?: string): string {
   switch (reason) {
     case 'user_exclude':
-      return 'Excluded by rule'
+      return t('status.exclude.userExclude')
     case 'unsupported_ext':
-      return 'Unsupported extension'
+      return t('status.exclude.unsupportedExt')
     case 'default_path':
-      return 'Default path filter'
+      return t('status.exclude.defaultPath')
     case 'secret_exclude':
-      return 'Secret path'
+      return t('status.exclude.secretExclude')
     case 'provider_directory':
-      return 'Vendor directory'
+      return t('status.exclude.providerDirectory')
     case 'deleted':
-      return 'Deleted file'
+      return t('status.exclude.deleted')
     case 'binary':
-      return 'Binary file'
+      return t('status.exclude.binary')
     case 'too_large':
-      return 'Too large'
+      return t('status.exclude.tooLarge')
     default:
       return reason ? reason.replace(/[_-]+/g, ' ') : ''
   }
@@ -161,14 +181,14 @@ export function excludeReasonLabel(reason?: string): string {
 export function manifestStateLabel(state?: string): string {
   switch (state) {
     case 'complete':
-      return 'Complete'
+      return t('status.complete')
     case 'partial':
-      return 'Partial'
+      return t('status.partial')
     case 'failed':
-      return 'Failed'
+      return t('status.failed')
     case 'skipped':
-      return 'Skipped'
+      return t('status.skipped')
     default:
-      return state || 'Unknown'
+      return state || t('common.unknown')
   }
 }

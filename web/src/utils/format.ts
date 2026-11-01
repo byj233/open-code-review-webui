@@ -1,34 +1,65 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 alibaba/open-code-review Contributors
 
-const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-})
+import { locale, t } from '@/i18n'
 
-const dateFormatter = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-})
+const dateTimeFormatters = new Map<string, Intl.DateTimeFormat>()
+const dateFormatters = new Map<string, Intl.DateTimeFormat>()
+const numberFormatters = new Map<string, Intl.NumberFormat>()
+const compactFormatters = new Map<string, Intl.NumberFormat>()
 
-const numberFormatter = new Intl.NumberFormat('en-US')
+function intlLocale(): string {
+  return locale.value === 'zh' ? 'zh-CN' : 'en-US'
+}
+
+function cached<T>(cache: Map<string, T>, build: (tag: string) => T): T {
+  const tag = intlLocale()
+  let formatter = cache.get(tag)
+  if (!formatter) {
+    formatter = build(tag)
+    cache.set(tag, formatter)
+  }
+  return formatter
+}
+
+function dateTimeFormatter(): Intl.DateTimeFormat {
+  return cached(
+    dateTimeFormatters,
+    (tag) =>
+      new Intl.DateTimeFormat(tag, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+  )
+}
+
+function dateFormatter(): Intl.DateTimeFormat {
+  return cached(
+    dateFormatters,
+    (tag) =>
+      new Intl.DateTimeFormat(tag, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+  )
+}
 
 export function formatDate(value?: string | null): string {
   if (!value) return '--'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
-  return dateTimeFormatter.format(date)
+  return dateTimeFormatter().format(date)
 }
 
 export function formatDateShort(value?: string | null): string {
   if (!value) return '--'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
-  return dateFormatter.format(date)
+  return dateFormatter().format(date)
 }
 
 export function formatRelative(value?: string | null): string {
@@ -36,24 +67,24 @@ export function formatRelative(value?: string | null): string {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
   const diff = Date.now() - date.getTime()
-  if (diff < 45_000) return 'just now'
-  if (diff < 3_600_000) return `${Math.max(1, Math.round(diff / 60_000))}m ago`
-  if (diff < 86_400_000) return `${Math.round(diff / 3_600_000)}h ago`
-  if (diff < 604_800_000) return `${Math.round(diff / 86_400_000)}d ago`
+  if (diff < 45_000) return t('common.justNow')
+  if (diff < 3_600_000) return t('format.minutesAgo', { count: Math.max(1, Math.round(diff / 60_000)) })
+  if (diff < 86_400_000) return t('format.hoursAgo', { count: Math.round(diff / 3_600_000) })
+  if (diff < 604_800_000) return t('format.daysAgo', { count: Math.round(diff / 86_400_000) })
   return formatDateShort(value)
 }
 
 export function formatCount(value?: number | null): string {
   if (value == null || Number.isNaN(value)) return '0'
-  return numberFormatter.format(value)
+  return cached(numberFormatters, (tag) => new Intl.NumberFormat(tag)).format(value)
 }
 
 export function formatCompact(value?: number | null): string {
   if (value == null || Number.isNaN(value)) return '0'
-  return new Intl.NumberFormat('en-US', {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  }).format(value)
+  return cached(
+    compactFormatters,
+    (tag) => new Intl.NumberFormat(tag, { notation: 'compact', maximumFractionDigits: 1 }),
+  ).format(value)
 }
 
 export function formatDurationMs(ms?: number | null): string {

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 alibaba/open-code-review Contributors
 
+import { t } from '@/i18n'
 import type {
   ActivateProviderResponse,
   ConfigApplyResponse,
@@ -48,7 +49,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   try {
     response = await fetch(path, { ...init, method, headers })
   } catch {
-    throw new ApiError('The console server is unreachable. Is `ocr web` still running?', 0)
+    throw new ApiError(t('errors.unreachable'), 0)
   }
 
   if (!response.ok) {

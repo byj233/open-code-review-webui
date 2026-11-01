@@ -5,14 +5,11 @@
       <BrandMark :size="30" />
     </div>
     <p class="eyebrow eyebrow--accent">404</p>
-    <h1 class="not-found__title">This page is not part of the review.</h1>
-    <p class="not-found__text">
-      The route may have moved, or a session or run has expired. Everything the console can do is
-      reachable from the navigation.
-    </p>
+    <h1 class="not-found__title">{{ t('notFound.title') }}</h1>
+    <p class="not-found__text">{{ t('notFound.text') }}</p>
     <div class="not-found__actions">
-      <el-button type="primary" @click="router.push('/')">Back to overview</el-button>
-      <el-button @click="router.back()">Go back</el-button>
+      <el-button type="primary" @click="router.push('/')">{{ t('notFound.backToOverview') }}</el-button>
+      <el-button @click="router.back()">{{ t('notFound.goBack') }}</el-button>
     </div>
   </div>
 </template>
@@ -20,8 +17,10 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import BrandMark from '@/components/BrandMark.vue'
+import { useI18n } from '@/i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 </script>
 
 <style scoped>

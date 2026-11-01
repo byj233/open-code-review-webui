@@ -4,17 +4,17 @@
     <header class="log__bar">
       <div class="log__title-row">
         <span class="log__light" :class="{ 'log__light--live': running }" />
-        <span class="log__title">{{ title }}</span>
-        <span v-if="running" class="log__live">live</span>
+        <span class="log__title">{{ titleText }}</span>
+        <span v-if="running" class="log__live">{{ t('logs.header.live') }}</span>
       </div>
       <div class="log__actions">
         <button class="log__button" type="button" :aria-pressed="follow" @click="follow = !follow">
           <el-icon><Bottom /></el-icon>
-          {{ follow ? 'Following' : 'Follow' }}
+          {{ follow ? t('logs.actions.following') : t('logs.actions.follow') }}
         </button>
-        <button class="log__button" type="button" aria-label="Copy log" @click="copyLog">
+        <button class="log__button" type="button" :aria-label="t('logs.actions.copy')" @click="copyLog">
           <el-icon><CopyDocument /></el-icon>
-          Copy
+          {{ t('common.copy') }}
         </button>
       </div>
     </header>
@@ -22,8 +22,8 @@
     <div ref="bodyRef" class="log__body" :style="{ height: heightStyle }" @scroll="onScroll">
       <div v-if="!lines.length" class="log__empty">
         <span v-if="running" class="log__cursor" />
-        <span v-if="running">Starting the command, waiting for output…</span>
-        <span v-else>No output was recorded for this run.</span>
+        <span v-if="running">{{ t('logs.empty.starting') }}</span>
+        <span v-else>{{ t('logs.empty.none') }}</span>
       </div>
       <div v-else class="log__lines" role="log" aria-live="polite">
         <div
@@ -42,18 +42,18 @@
         </div>
       </div>
       <button v-if="!follow" class="log__jump" type="button" @click="jumpToLatest">
-        Jump to latest
+        {{ t('logs.actions.jumpToLatest') }}
         <el-icon><ArrowDown /></el-icon>
       </button>
     </div>
 
     <footer class="log__foot">
-      <span>{{ formatCount(lines.length) }} lines</span>
-      <span v-if="truncated">Older output was trimmed</span>
+      <span>{{ tn('logs.footer.lineCount', lines.length, { count: formatCount(lines.length) }) }}</span>
+      <span v-if="truncated">{{ t('logs.footer.trimmed') }}</span>
       <span class="log__foot-spacer" />
       <span class="log__foot-state">
         <span class="dot" :class="running ? 'dot--accent dot--pulse' : 'dot--green'" />
-        {{ running ? 'Command running' : 'Output complete' }}
+        {{ running ? t('logs.footer.running') : t('logs.footer.complete') }}
       </span>
     </footer>
   </section>
@@ -63,6 +63,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { ArrowDown, Bottom, CopyDocument } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from '@/i18n'
 import { copyText } from '@/utils/clipboard'
 import { formatCount, formatDate } from '@/utils/format'
 import type { JobLogLine } from '@/types'
@@ -75,11 +76,15 @@ const props = withDefaults(
     height?: number | string
     truncated?: boolean
   }>(),
-  { running: false, title: 'Activity log', height: 460, truncated: false },
+  { running: false, height: 460, truncated: false },
 )
+
+const { t, tn } = useI18n()
 
 const bodyRef = ref<HTMLElement | null>(null)
 const follow = ref(true)
+
+const titleText = computed(() => props.title ?? t('logs.header.title'))
 
 const heightStyle = computed(() =>
   typeof props.height === 'number' ? `${props.height}px` : props.height,
@@ -125,8 +130,8 @@ watch(
 async function copyLog(): Promise<void> {
   const text = props.lines.map((line) => line.text).join('\n')
   const copied = await copyText(text)
-  if (copied) ElMessage.success('Log copied')
-  else ElMessage.error('Could not copy the log')
+  if (copied) ElMessage.success(t('logs.actions.copied'))
+  else ElMessage.error(t('logs.actions.copyFailed'))
 }
 </script>
 

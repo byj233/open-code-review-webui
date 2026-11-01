@@ -10,34 +10,34 @@
         <span class="finding__line">{{ lineLabel }}</span>
       </span>
       <span class="spacer" />
-      <el-tooltip content="Copy finding" placement="top" :show-after="300">
-        <button class="finding__copy" type="button" aria-label="Copy finding" @click="copyFinding">
+      <el-tooltip :content="t('finding.actions.copy')" placement="top" :show-after="300">
+        <button class="finding__copy" type="button" :aria-label="t('finding.actions.copy')" @click="copyFinding">
           <el-icon><CopyDocument /></el-icon>
         </button>
       </el-tooltip>
     </header>
 
     <div class="finding__body">
-      <MarkdownView :text="comment.content" empty-text="No description was recorded for this finding." />
+      <MarkdownView :text="comment.content" :empty-text="t('finding.body.empty')" />
     </div>
 
     <div v-if="comment.existing_code || comment.suggestion_code" class="finding__code">
       <div class="finding__code-head">
-        <span>Suggested change</span>
-        <span class="finding__code-hint">Review before applying</span>
+        <span>{{ t('finding.change.title') }}</span>
+        <span class="finding__code-hint">{{ t('finding.change.hint') }}</span>
       </div>
       <div class="code-compare" :class="{ 'code-compare--single': !comment.existing_code || !comment.suggestion_code }">
         <section v-if="comment.existing_code" class="code-block code-block--current">
           <header class="code-block__head">
-            <span>Current</span>
+            <span>{{ t('finding.code.current') }}</span>
             <span class="mono">{{ lineLabel }}</span>
           </header>
           <pre><code>{{ comment.existing_code }}</code></pre>
         </section>
         <section v-if="comment.suggestion_code" class="code-block code-block--suggested">
           <header class="code-block__head">
-            <span>Suggested</span>
-            <span class="mono">replacement</span>
+            <span>{{ t('finding.code.suggested') }}</span>
+            <span class="mono">{{ t('finding.code.replacement') }}</span>
           </header>
           <pre><code>{{ comment.suggestion_code }}</code></pre>
         </section>
@@ -47,7 +47,7 @@
     <details v-if="comment.thinking" class="finding__thinking">
       <summary>
         <el-icon><MagicStick /></el-icon>
-        Model reasoning
+        {{ t('finding.thinking.title') }}
       </summary>
       <MarkdownView :text="comment.thinking" />
     </details>
@@ -59,11 +59,14 @@ import { computed } from 'vue'
 import { CopyDocument, Document, MagicStick } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import MarkdownView from '@/components/MarkdownView.vue'
+import { useI18n } from '@/i18n'
 import { copyText } from '@/utils/clipboard'
 import { categoryLabel, normalizedSeverity, severityLabel } from '@/utils/status'
 import type { LlmComment } from '@/types'
 
 const props = defineProps<{ comment: LlmComment }>()
+
+const { t, tn } = useI18n()
 
 const severity = computed(() => {
   const value = normalizedSeverity(props.comment.severity)
@@ -80,11 +83,11 @@ async function copyFinding(): Promise<void> {
   const comment = props.comment
   const header = `${comment.path}:${lineLabel.value}`
   const text = [header, '', comment.content]
-  if (comment.existing_code) text.push('', 'Current:', comment.existing_code)
-  if (comment.suggestion_code) text.push('', 'Suggested:', comment.suggestion_code)
+  if (comment.existing_code) text.push('', t('finding.copy.current'), comment.existing_code)
+  if (comment.suggestion_code) text.push('', t('finding.copy.suggested'), comment.suggestion_code)
   const copied = await copyText(text.join('\n'))
-  if (copied) ElMessage.success('Finding copied')
-  else ElMessage.error('Could not copy the finding')
+  if (copied) ElMessage.success(t('finding.actions.copied'))
+  else ElMessage.error(t('finding.actions.copyFailed'))
 }
 </script>
 

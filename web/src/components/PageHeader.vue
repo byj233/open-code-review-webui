@@ -4,7 +4,7 @@
     <div class="page-header__main">
       <router-link v-if="backTo" :to="backTo" class="back-link">
         <el-icon><ArrowLeft /></el-icon>
-        {{ backLabel || 'Back' }}
+        {{ backLabel || t('pageHeader.back') }}
       </router-link>
       <p v-if="eyebrow" class="eyebrow" :class="{ 'eyebrow--accent': accentEyebrow }">{{ eyebrow }}</p>
       <h1 class="page-title">{{ title }}</h1>
@@ -21,6 +21,9 @@
 
 <script setup lang="ts">
 import { ArrowLeft } from '@element-plus/icons-vue'
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
 
 withDefaults(
   defineProps<{

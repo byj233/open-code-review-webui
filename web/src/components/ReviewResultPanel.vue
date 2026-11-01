@@ -4,7 +4,7 @@
     <template v-if="preview">
       <div class="summary-grid">
         <div class="summary-tile">
-          <span class="summary-tile__label">Files changed</span>
+          <span class="summary-tile__label">{{ t('result.preview.filesChanged') }}</span>
           <span class="summary-tile__value">{{ formatCount(preview.total_files) }}</span>
           <span class="summary-tile__hint">
             <span class="add">+{{ formatCount(preview.total_insertions) }}</span>
@@ -12,25 +12,25 @@
           </span>
         </div>
         <div class="summary-tile">
-          <span class="summary-tile__label">Will review</span>
+          <span class="summary-tile__label">{{ t('result.preview.willReview') }}</span>
           <span class="summary-tile__value">{{ formatCount(preview.reviewable_count) }}</span>
-          <span class="summary-tile__hint">sent to the model</span>
+          <span class="summary-tile__hint">{{ t('result.preview.sentToModel') }}</span>
         </div>
         <div class="summary-tile">
-          <span class="summary-tile__label">Excluded</span>
+          <span class="summary-tile__label">{{ t('result.preview.excluded') }}</span>
           <span class="summary-tile__value">{{ formatCount(preview.excluded_count) }}</span>
-          <span class="summary-tile__hint">filtered before dispatch</span>
+          <span class="summary-tile__hint">{{ t('result.preview.filteredBeforeDispatch') }}</span>
         </div>
       </div>
 
       <div class="panel">
         <div class="panel__head">
           <div>
-            <h3 class="panel__title">Files in scope</h3>
-            <p class="panel__sub">No model tokens were spent generating this preview.</p>
+            <h3 class="panel__title">{{ t('result.preview.filesInScope') }}</h3>
+            <p class="panel__sub">{{ t('result.preview.noTokensSpent') }}</p>
           </div>
           <div class="toolbar">
-            <el-input v-model="previewQuery" size="small" clearable placeholder="Filter files" class="toolbar__search" />
+            <el-input v-model="previewQuery" size="small" clearable :placeholder="t('result.preview.filterPlaceholder')" class="toolbar__search" />
             <div class="segmented">
               <button
                 v-for="option in previewFilters"
@@ -51,7 +51,7 @@
             <span class="preview-row__status" :class="previewStatusClass(file)">{{ previewStatusLetter(file.status) }}</span>
             <span class="preview-row__path mono" :title="file.path">{{ file.path }}</span>
             <span v-if="!file.will_review" class="preview-row__reason">{{ excludeReasonLabel(file.exclude_reason) }}</span>
-            <span v-else class="preview-row__will">will review</span>
+            <span v-else class="preview-row__will">{{ t('result.preview.willReviewRow') }}</span>
             <span class="preview-row__lines">
               <span class="add">+{{ file.insertions }}</span>
               <span class="del">-{{ file.deletions }}</span>
@@ -60,8 +60,8 @@
         </div>
         <EmptyState
           v-else
-          title="No files match"
-          :description="preview.files.length ? 'Try clearing the filter.' : 'No reviewable changes were found for this scope.'"
+          :title="t('result.preview.noFilesMatch')"
+          :description="preview.files.length ? t('result.preview.tryClearingFilter') : t('result.preview.noReviewableChanges')"
         />
       </div>
     </template>
@@ -74,26 +74,31 @@
 
       <div class="summary-grid summary-grid--review">
         <div class="summary-tile">
-          <span class="summary-tile__label">Files reviewed</span>
+          <span class="summary-tile__label">{{ t('result.review.filesReviewed') }}</span>
           <span class="summary-tile__value">{{ formatCount(review.summary?.files_reviewed ?? completedFiles) }}</span>
           <span class="summary-tile__hint">{{ coverageText }}</span>
         </div>
         <div class="summary-tile">
-          <span class="summary-tile__label">Findings</span>
+          <span class="summary-tile__label">{{ t('result.review.findings') }}</span>
           <span class="summary-tile__value">{{ formatCount(review.comments?.length ?? 0) }}</span>
-          <span class="summary-tile__hint">{{ severityCounts.critical }} critical · {{ severityCounts.high }} high</span>
-        </div>
-        <div class="summary-tile">
-          <span class="summary-tile__label">Tokens</span>
-          <span class="summary-tile__value">{{ formatCompact(review.summary?.total_tokens ?? 0) }}</span>
           <span class="summary-tile__hint">
-            {{ formatCompact(review.summary?.input_tokens ?? 0) }} in · {{ formatCompact(review.summary?.output_tokens ?? 0) }} out
+            {{ t('result.review.severityHint', { critical: severityCounts.critical, high: severityCounts.high }) }}
           </span>
         </div>
         <div class="summary-tile">
-          <span class="summary-tile__label">Elapsed</span>
+          <span class="summary-tile__label">{{ t('result.review.tokens') }}</span>
+          <span class="summary-tile__value">{{ formatCompact(review.summary?.total_tokens ?? 0) }}</span>
+          <span class="summary-tile__hint">
+            {{ t('result.review.tokenHint', {
+              input: formatCompact(review.summary?.input_tokens ?? 0),
+              output: formatCompact(review.summary?.output_tokens ?? 0),
+            }) }}
+          </span>
+        </div>
+        <div class="summary-tile">
+          <span class="summary-tile__label">{{ t('result.review.elapsed') }}</span>
           <span class="summary-tile__value summary-tile__value--small">{{ review.summary?.elapsed || '--' }}</span>
-          <span class="summary-tile__hint">{{ review.llm?.model || 'model not recorded' }}</span>
+          <span class="summary-tile__hint">{{ review.llm?.model || t('result.review.modelNotRecorded') }}</span>
         </div>
       </div>
 
@@ -110,7 +115,7 @@
       <div v-if="review.warnings?.length" class="warnings">
         <div class="warnings__head">
           <el-icon><WarningFilled /></el-icon>
-          {{ review.warnings.length }} warning{{ review.warnings.length === 1 ? '' : 's' }}
+          {{ tn('result.review.warningCount', review.warnings.length) }}
         </div>
         <ul class="warnings__list">
           <li v-for="(warning, index) in review.warnings" :key="index">
@@ -123,13 +128,13 @@
       <div v-if="review.comments?.length" class="panel">
         <div class="panel__head">
           <div>
-            <h3 class="panel__title">Findings</h3>
-            <p class="panel__sub">{{ filteredComments.length }} of {{ review.comments.length }} shown</p>
+            <h3 class="panel__title">{{ t('result.review.findings') }}</h3>
+            <p class="panel__sub">{{ t('result.findings.showing', { shown: filteredComments.length, total: review.comments.length }) }}</p>
           </div>
           <div class="toolbar toolbar--wrap">
-            <el-input v-model="commentQuery" size="small" clearable placeholder="Filter findings" class="toolbar__search" />
-            <el-select v-model="categoryFilter" size="small" class="toolbar__select" placeholder="All categories">
-              <el-option label="All categories" value="" />
+            <el-input v-model="commentQuery" size="small" clearable :placeholder="t('result.findings.filterPlaceholder')" class="toolbar__search" />
+            <el-select v-model="categoryFilter" size="small" class="toolbar__select" :placeholder="t('result.findings.allCategories')">
+              <el-option :label="t('result.findings.allCategories')" value="" />
               <el-option v-for="category in categories" :key="category" :label="categoryLabel(category)" :value="category" />
             </el-select>
             <div class="segmented">
@@ -151,7 +156,7 @@
           <section v-for="group in groupedComments" :key="group.path" class="file-group">
             <header class="file-group__head">
               <span class="file-group__path mono" :title="group.path">{{ group.path }}</span>
-              <span class="file-group__count">{{ group.comments.length }} finding{{ group.comments.length === 1 ? '' : 's' }}</span>
+              <span class="file-group__count">{{ tn('result.findings.fileCount', group.comments.length) }}</span>
             </header>
             <div class="file-group__body">
               <FindingCard v-for="comment in group.comments" :key="commentKey(comment)" :comment="comment" />
@@ -160,22 +165,22 @@
         </div>
         <EmptyState
           v-else
-          title="Nothing matches these filters"
-          description="Clear the search or choose a different severity."
+          :title="t('result.findings.noMatchesTitle')"
+          :description="t('result.findings.noMatchesText')"
         />
       </div>
 
       <EmptyState
         v-else
-        title="No findings. Looks good to me."
-        description="The review completed without reporting a comment for the selected files."
+        :title="t('result.findings.emptyTitle')"
+        :description="t('result.findings.emptyText')"
       />
 
       <div v-if="review.project_summary" class="panel">
         <div class="panel__head">
           <div>
-            <h3 class="panel__title">Project summary</h3>
-            <p class="panel__sub">Written by the scan's summary pass</p>
+            <h3 class="panel__title">{{ t('result.projectSummary.title') }}</h3>
+            <p class="panel__sub">{{ t('result.projectSummary.subtitle') }}</p>
           </div>
         </div>
         <div class="panel__body">
@@ -186,35 +191,35 @@
       <div v-if="manifest" class="panel">
         <div class="panel__head">
           <div>
-            <h3 class="panel__title">Coverage</h3>
-            <p class="panel__sub">Frozen manifest of what this run covered</p>
+            <h3 class="panel__title">{{ t('result.coverage.title') }}</h3>
+            <p class="panel__sub">{{ t('result.coverage.subtitle') }}</p>
           </div>
           <span class="chip">{{ manifestStateLabel(manifest.terminal_state) }}</span>
         </div>
         <div class="coverage">
           <div class="coverage__item">
             <span class="coverage__value">{{ manifest.coverage?.selected?.length ?? 0 }}</span>
-            <span class="coverage__label">selected</span>
+            <span class="coverage__label">{{ t('result.coverage.selected') }}</span>
           </div>
           <div class="coverage__item">
             <span class="coverage__value">{{ manifest.coverage?.completed?.length ?? 0 }}</span>
-            <span class="coverage__label">completed</span>
+            <span class="coverage__label">{{ t('result.coverage.completed') }}</span>
           </div>
           <div class="coverage__item">
             <span class="coverage__value">{{ manifest.coverage?.reused?.length ?? 0 }}</span>
-            <span class="coverage__label">reused</span>
+            <span class="coverage__label">{{ t('result.coverage.reused') }}</span>
           </div>
           <div class="coverage__item" :class="{ 'coverage__item--bad': (manifest.coverage?.failed?.length ?? 0) > 0 }">
             <span class="coverage__value">{{ manifest.coverage?.failed?.length ?? 0 }}</span>
-            <span class="coverage__label">failed</span>
+            <span class="coverage__label">{{ t('result.coverage.failed') }}</span>
           </div>
           <div class="coverage__item">
             <span class="coverage__value">{{ manifest.coverage?.waived?.length ?? 0 }}</span>
-            <span class="coverage__label">waived</span>
+            <span class="coverage__label">{{ t('result.coverage.waived') }}</span>
           </div>
         </div>
         <div v-if="manifest.run_failure" class="coverage-failure">
-          <strong>{{ manifest.run_failure.classification || 'Run failure' }}</strong>
+          <strong>{{ manifest.run_failure.classification || t('result.coverage.runFailure') }}</strong>
           <span>{{ manifest.run_failure.reason }}</span>
         </div>
         <ul v-if="failedItems.length" class="failed-list">
@@ -229,8 +234,8 @@
 
     <EmptyState
       v-else
-      title="No structured result"
-      description="This command did not return a JSON document. Check the activity log for its output."
+      :title="t('result.empty.title')"
+      :description="t('result.empty.description')"
     />
   </div>
 </template>
@@ -258,10 +263,13 @@ import type {
   PreviewResult,
   ReviewResult,
 } from '@/types'
+import { useI18n } from '@/i18n'
 
 const props = defineProps<{
   result: ReviewResult | PreviewResult | null
 }>()
+
+const { t, tn } = useI18n()
 
 const severityFilter = ref('all')
 const categoryFilter = ref('')
@@ -269,18 +277,18 @@ const commentQuery = ref('')
 const previewFilter = ref<'all' | 'review' | 'excluded'>('all')
 const previewQuery = ref('')
 
-const severityFilters = [
-  { value: 'all', label: 'All' },
-  { value: 'critical', label: 'Critical' },
-  { value: 'high', label: 'High' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'low', label: 'Low' },
-]
-const previewFilters = [
-  { value: 'all', label: 'All' },
-  { value: 'review', label: 'Will review' },
-  { value: 'excluded', label: 'Excluded' },
-] as const
+const severityFilters = computed(() => [
+  { value: 'all' as const, label: t('result.filters.all') },
+  { value: 'critical' as const, label: t('status.severity.critical') },
+  { value: 'high' as const, label: t('status.severity.high') },
+  { value: 'medium' as const, label: t('status.severity.medium') },
+  { value: 'low' as const, label: t('status.severity.low') },
+])
+const previewFilters = computed(() => [
+  { value: 'all' as const, label: t('result.filters.all') },
+  { value: 'review' as const, label: t('result.preview.willReview') },
+  { value: 'excluded' as const, label: t('result.preview.excluded') },
+])
 
 const preview = computed<PreviewResult | null>(() => {
   const value = props.result as PreviewResult | null
@@ -301,10 +309,10 @@ const completedFiles = computed(() => manifest.value?.coverage?.completed?.lengt
 const failedItems = computed(() => (manifest.value?.coverage?.failed ?? []).slice(0, 12))
 
 const coverageText = computed(() => {
-  if (!manifest.value?.coverage) return 'coverage not recorded'
+  if (!manifest.value?.coverage) return t('result.review.coverageNotRecorded')
   const selected = manifest.value.coverage.selected?.length ?? 0
   const completed = manifest.value.coverage.completed?.length ?? 0
-  return `${completed} of ${selected} selected`
+  return t('result.review.coverageSelected', { completed, selected })
 })
 
 const severityCounts = computed(() => {

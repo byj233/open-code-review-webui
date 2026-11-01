@@ -1,22 +1,24 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <template>
-  <div class="app-shell">
-    <div v-if="mobileOpen" class="sidebar-backdrop" @click="mobileOpen = false" />
-    <AppSidebar :open="mobileOpen" @navigate="mobileOpen = false" @palette="paletteOpen = true" />
+  <el-config-provider :locale="elementLocale">
+    <div class="app-shell">
+      <div v-if="mobileOpen" class="sidebar-backdrop" @click="mobileOpen = false" />
+      <AppSidebar :open="mobileOpen" @navigate="mobileOpen = false" @palette="paletteOpen = true" />
 
-    <div class="app-main">
-      <AppTopbar @open-menu="mobileOpen = true" @open-palette="paletteOpen = true" />
-      <main class="app-content">
-        <router-view v-slot="{ Component }">
-          <transition name="page" mode="out-in">
-            <component :is="Component" :key="$route.path" />
-          </transition>
-        </router-view>
-      </main>
+      <div class="app-main">
+        <AppTopbar @open-menu="mobileOpen = true" @open-palette="paletteOpen = true" />
+        <main class="app-content">
+          <router-view v-slot="{ Component }">
+            <transition name="page" mode="out-in">
+              <component :is="Component" :key="$route.path" />
+            </transition>
+          </router-view>
+        </main>
+      </div>
+
+      <CommandPalette v-model:open="paletteOpen" />
     </div>
-
-    <CommandPalette v-model:open="paletteOpen" />
-  </div>
+  </el-config-provider>
 </template>
 
 <script setup lang="ts">
@@ -26,6 +28,7 @@ import AppSidebar from '@/components/AppSidebar.vue'
 import AppTopbar from '@/components/AppTopbar.vue'
 import CommandPalette from '@/components/CommandPalette.vue'
 import { useMetaStore } from '@/stores/meta'
+import { elementLocale } from '@/i18n'
 
 const paletteOpen = ref(false)
 const mobileOpen = ref(false)

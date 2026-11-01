@@ -3,8 +3,8 @@
   <div class="command-bar" :title="command">
     <span class="command-bar__prompt">$</span>
     <span class="command-bar__text">{{ command }}</span>
-    <el-tooltip content="Copy command" placement="top" :show-after="350">
-      <button class="command-bar__copy" type="button" aria-label="Copy command" @click="copy">
+    <el-tooltip :content="t('command.copy')" placement="top" :show-after="350">
+      <button class="command-bar__copy" type="button" :aria-label="t('command.copy')" @click="copy">
         <el-icon><CopyDocument /></el-icon>
       </button>
     </el-tooltip>
@@ -15,13 +15,15 @@
 import { CopyDocument } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { copyText } from '@/utils/clipboard'
+import { useI18n } from '@/i18n'
 
 const props = defineProps<{ command: string }>()
+const { t } = useI18n()
 
 async function copy(): Promise<void> {
   const copied = await copyText(props.command)
-  if (copied) ElMessage.success('Command copied')
-  else ElMessage.error('Could not copy the command')
+  if (copied) ElMessage.success(t('command.copied'))
+  else ElMessage.error(t('command.copyFailed'))
 }
 </script>
 

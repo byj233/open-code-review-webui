@@ -2,14 +2,14 @@
 <template>
   <div class="page">
     <PageHeader
-      eyebrow="Reference"
-      title="Review rules"
-      description="Built-in language rules decide what the model pays attention to. Project and global rules can override them; this page shows the system layer and resolves a path against every layer."
+      :eyebrow="t('rules.header.eyebrow')"
+      :title="t('nav.rules')"
+      :description="t('rules.header.description')"
     >
       <template #actions>
         <el-button text :loading="loading" @click="load">
           <el-icon class="btn-icon"><Refresh /></el-icon>
-          Reload
+          {{ t('rules.header.reload') }}
         </el-button>
       </template>
     </PageHeader>
@@ -23,12 +23,12 @@
       <section class="card rules-list">
         <header class="rules-list__head">
           <div>
-            <h2 class="card-title">Built-in rules</h2>
-            <p class="card-subtitle">{{ patternCount }} patterns plus the default fallback</p>
+            <h2 class="card-title">{{ t('rules.list.title') }}</h2>
+            <p class="card-subtitle">{{ t('rules.list.subtitle', { count: patternCount }) }}</p>
           </div>
         </header>
         <div class="rules-list__search">
-          <el-input v-model="query" clearable placeholder="Search patterns or rule text">
+          <el-input v-model="query" clearable :placeholder="t('rules.list.searchPlaceholder')">
             <template #prefix><el-icon><Search /></el-icon></template>
           </el-input>
         </div>
@@ -49,8 +49,8 @@
           >
             <span class="rule-row__icon"><el-icon><Document /></el-icon></span>
             <span class="rule-row__body">
-              <span class="rule-row__pattern">Default fallback</span>
-              <span class="rule-row__meta">Used when no pattern matches</span>
+              <span class="rule-row__pattern">{{ t('rules.list.defaultTitle') }}</span>
+              <span class="rule-row__meta">{{ t('rules.list.defaultHint') }}</span>
             </span>
             <el-icon class="rule-row__arrow"><ArrowRight /></el-icon>
           </button>
@@ -73,26 +73,26 @@
 
           <EmptyState
             v-if="!filteredPatterns.length && !defaultVisible"
-            title="No rules match"
-            description="Clear the search to see every built-in rule."
+            :title="t('rules.list.emptyTitle')"
+            :description="t('rules.list.emptyDescription')"
           />
         </div>
 
         <footer class="rules-list__foot">
-          <span>{{ rules?.patterns.length ?? 0 }} built-in patterns</span>
+          <span>{{ t('rules.list.footer', { count: patternCount }) }}</span>
           <span class="mono">~/.opencodereview/rule.json</span>
         </footer>
       </section>
 
       <div class="stack rules-detail">
         <SurfaceCard
-          title="Which rule applies?"
-          subtitle="Resolve a path across custom, project, global, and system layers"
+          :title="t('rules.lookup.title')"
+          :subtitle="t('rules.lookup.subtitle')"
         >
           <form class="lookup" @submit.prevent="checkPathRule">
             <el-input
               v-model="checkPath"
-              placeholder="e.g. src/main/java/com/example/Foo.java"
+              :placeholder="t('rules.lookup.placeholder')"
               maxlength="500"
             >
               <template #prefix><el-icon><Aim /></el-icon></template>
@@ -103,16 +103,16 @@
               :loading="checking"
               :disabled="!checkPath.trim()"
             >
-              Find rule
+              {{ t('rules.lookup.submit') }}
             </el-button>
           </form>
-          <p class="lookup__hint">Reads the same resolver the review uses. No model call is made.</p>
+          <p class="lookup__hint">{{ t('rules.lookup.hint') }}</p>
 
           <div v-if="checkResult" class="lookup-result">
             <div class="lookup-result__meta">
               <span class="chip chip--accent">{{ sourceName(checkResult.source) }}</span>
               <span class="chip chip--mono">{{ checkResult.pattern }}</span>
-              <span v-if="checkResult.sniffed_as" class="chip">content sniff: {{ checkResult.sniffed_as }}</span>
+              <span v-if="checkResult.sniffed_as" class="chip">{{ t('rules.lookup.contentSniff', { value: checkResult.sniffed_as }) }}</span>
             </div>
             <div class="lookup-result__rule">
               <MarkdownView :text="checkResult.rule" />
@@ -121,7 +121,7 @@
           <p v-else-if="checkError" class="lookup__error">{{ checkError }}</p>
           <div v-else class="lookup-empty">
             <el-icon><InfoFilled /></el-icon>
-            Enter a repo-relative file path to see which rule the agent would use.
+            {{ t('rules.lookup.empty') }}
           </div>
         </SurfaceCard>
 
@@ -129,13 +129,17 @@
           <template #actions>
             <el-button size="small" text @click="copyRule">
               <el-icon class="btn-icon"><CopyDocument /></el-icon>
-              Copy rule
+              {{ t('rules.detail.copy') }}
             </el-button>
           </template>
           <div v-if="selectedRule" class="rule-content">
             <MarkdownView :text="selectedRule" />
           </div>
-          <EmptyState v-else title="Select a rule" description="Choose a pattern from the list to read its guidance." />
+          <EmptyState
+            v-else
+            :title="t('rules.detail.emptyTitle')"
+            :description="t('rules.detail.emptyDescription')"
+          />
         </SurfaceCard>
       </div>
     </div>
@@ -161,8 +165,11 @@ import MarkdownView from '@/components/MarkdownView.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SurfaceCard from '@/components/SurfaceCard.vue'
 import { api, errorMessage } from '@/api/client'
+import { useI18n } from '@/i18n'
 import { copyText } from '@/utils/clipboard'
 import type { RuleCheckResponse, RulesResponse } from '@/types'
+
+const { t, tn } = useI18n()
 
 const rules = ref<RulesResponse | null>(null)
 const loading = ref(true)
@@ -199,33 +206,35 @@ const selectedRule = computed(() =>
   selected.value < 0 ? rules.value?.default_rule ?? '' : selectedPattern.value?.rule ?? '',
 )
 const selectedTitle = computed(() =>
-  selected.value < 0 ? 'Default fallback rule' : selectedPattern.value?.pattern || 'Rule',
+  selected.value < 0
+    ? t('rules.detail.defaultTitle')
+    : selectedPattern.value?.pattern || t('rules.detail.genericTitle'),
 )
 const selectedSubtitle = computed(() =>
   selected.value < 0
-    ? 'Applies when no path pattern matches'
-    : `Built-in pattern ${selectedPattern.value?.pattern ?? ''}`,
+    ? t('rules.detail.defaultSubtitle')
+    : t('rules.detail.patternSubtitle', { pattern: selectedPattern.value?.pattern ?? '' }),
 )
 
 function ruleHint(pattern: string): string {
-  if (pattern.includes('{')) return 'Brace-expanded into multiple path patterns'
-  if (pattern.includes('pom.xml') || pattern.includes('Cargo.toml')) return 'Project manifest guidance'
-  if (pattern.includes('*.xml')) return 'XML mapping guidance'
-  return 'First matching pattern wins'
+  if (pattern.includes('{')) return t('rules.hint.braceExpanded')
+  if (pattern.includes('pom.xml') || pattern.includes('Cargo.toml')) return t('rules.hint.projectManifest')
+  if (pattern.includes('*.xml')) return t('rules.hint.xmlMapping')
+  return t('rules.hint.firstMatch')
 }
 
 function sourceName(source: string): string {
   switch (source) {
     case 'custom':
-      return 'Custom rule'
+      return t('rules.source.custom')
     case 'project':
-      return 'Project rule'
+      return t('rules.source.project')
     case 'global':
-      return 'Global rule'
+      return t('rules.source.global')
     case 'system':
-      return 'Built-in system rule'
+      return t('rules.source.system')
     default:
-      return source || 'Rule'
+      return source || t('rules.source.fallback')
   }
 }
 
@@ -246,8 +255,8 @@ async function checkPathRule(): Promise<void> {
 
 async function copyRule(): Promise<void> {
   const copied = await copyText(selectedRule.value)
-  if (copied) ElMessage.success('Rule copied')
-  else ElMessage.error('Could not copy the rule')
+  if (copied) ElMessage.success(t('rules.message.copied'))
+  else ElMessage.error(t('rules.message.copyFailed'))
 }
 
 async function load(): Promise<void> {

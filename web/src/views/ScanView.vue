@@ -2,16 +2,16 @@
 <template>
   <div class="page">
     <PageHeader
-      eyebrow="Repository scan"
-      title="Scan a codebase"
-      description="Review complete files instead of a diff. Useful for auditing an unfamiliar repository, generated code, or directories with no meaningful Git history."
+      :eyebrow="t('nav.scan')"
+      :title="t('scan.header.title')"
+      :description="t('scan.header.description')"
     >
       <template #actions>
         <el-button text @click="resetForm">
           <el-icon class="btn-icon"><Refresh /></el-icon>
-          Reset
+          {{ t('common.reset') }}
         </el-button>
-        <router-link class="ghost-link" to="/sessions">Session history</router-link>
+        <router-link class="ghost-link" to="/sessions">{{ t('scan.header.sessionHistory') }}</router-link>
       </template>
     </PageHeader>
 
@@ -21,32 +21,32 @@
           <div class="section-heading">
             <span class="section-number">1</span>
             <div>
-              <h2 class="section-title">Choose what to scan</h2>
-              <p class="section-sub">Leave paths empty to scan the whole repository.</p>
+              <h2 class="section-title">{{ t('scan.scope.title') }}</h2>
+              <p class="section-sub">{{ t('scan.scope.subtitle') }}</p>
             </div>
           </div>
-          <label class="field-label" for="scan-paths">Repository paths</label>
+          <label class="field-label" for="scan-paths">{{ t('scan.scope.paths') }}</label>
           <el-input
             id="scan-paths"
             v-model="form.paths"
             placeholder="src/, internal/agent, cmd/opencodereview"
             maxlength="4000"
           />
-          <p class="field-hint">Comma-separated, repo-relative files or directories. Every file still passes the rule filters.</p>
+          <p class="field-hint">{{ t('scan.scope.pathsHint') }}</p>
           <p v-if="pathsError" class="scope-error">{{ pathsError }}</p>
 
           <div class="scan-scope">
             <div class="scan-scope__item">
               <span class="scan-scope__value">{{ repo?.is_git ? formatCount(repo.dirty) : '--' }}</span>
-              <span class="scan-scope__label">changed files</span>
+              <span class="scan-scope__label">{{ t('scan.scope.changedFiles') }}</span>
             </div>
             <div class="scan-scope__item">
               <span class="scan-scope__value">{{ repo?.is_git ? repo.branches.length : '--' }}</span>
-              <span class="scan-scope__label">refs available</span>
+              <span class="scan-scope__label">{{ t('scan.scope.refsAvailable') }}</span>
             </div>
             <div class="scan-scope__item scan-scope__item--wide">
-              <span class="scan-scope__value mono">{{ form.paths ? 'Selected paths' : 'Whole repository' }}</span>
-              <span class="scan-scope__label">scope</span>
+              <span class="scan-scope__value mono">{{ form.paths ? t('scan.scope.selectedPaths') : t('scan.scope.wholeRepository') }}</span>
+              <span class="scan-scope__label">{{ t('scan.scope.valueLabel') }}</span>
             </div>
           </div>
         </section>
@@ -55,8 +55,8 @@
           <div class="section-heading">
             <span class="section-number">2</span>
             <div>
-              <h2 class="section-title">Add context</h2>
-              <p class="section-sub">Tell the model what this codebase is for.</p>
+              <h2 class="section-title">{{ t('scan.context.title') }}</h2>
+              <p class="section-sub">{{ t('scan.context.subtitle') }}</p>
             </div>
           </div>
           <el-input
@@ -66,7 +66,7 @@
             maxlength="20000"
             show-word-limit
             resize="vertical"
-            placeholder="For example: this is the billing service; focus on retry handling and idempotency."
+            :placeholder="t('scan.context.placeholder')"
           />
         </section>
 
@@ -76,42 +76,42 @@
               <template #title>
                 <span class="collapse-title">
                   <el-icon><Setting /></el-icon>
-                  Advanced options
-                  <span v-if="form.provider || form.model" class="collapse-note">run override</span>
+                  {{ t('scan.advanced.title') }}
+                  <span v-if="form.provider || form.model" class="collapse-note">{{ t('scan.advanced.overrideNote') }}</span>
                 </span>
               </template>
 
               <div class="advanced">
                 <div class="form-grid">
                   <div class="field">
-                    <label class="field-label" for="scan-batch">Batch strategy</label>
+                    <label class="field-label" for="scan-batch">{{ t('scan.advanced.batch') }}</label>
                     <el-select id="scan-batch" v-model="form.batch" class="full-width">
-                      <el-option label="Default" value="" />
-                      <el-option label="No batching" value="none" />
-                      <el-option label="By language" value="by-language" />
-                      <el-option label="By directory" value="by-directory" />
+                      <el-option :label="t('scan.advanced.batchDefault')" value="" />
+                      <el-option :label="t('scan.advanced.batchNone')" value="none" />
+                      <el-option :label="t('scan.advanced.batchByLanguage')" value="by-language" />
+                      <el-option :label="t('scan.advanced.batchByDirectory')" value="by-directory" />
                     </el-select>
                     <p class="field-hint">{{ batchHint }}</p>
                   </div>
                   <div class="field">
-                    <label class="field-label" for="scan-exclude">Exclude patterns</label>
+                    <label class="field-label" for="scan-exclude">{{ t('scan.advanced.exclude') }}</label>
                     <el-input
                       id="scan-exclude"
                       v-model="form.exclude"
                       maxlength="4000"
                       placeholder="**/generated/*, **/vendor/*"
                     />
-                    <p class="field-hint">Merged with rule.json excludes.</p>
+                    <p class="field-hint">{{ t('scan.advanced.excludeHint') }}</p>
                   </div>
                   <div class="field">
-                    <label class="field-label" for="scan-provider">Provider override</label>
+                    <label class="field-label" for="scan-provider">{{ t('scan.advanced.provider') }}</label>
                     <el-select
                       id="scan-provider"
                       v-model="form.provider"
                       class="full-width"
                       clearable
                       filterable
-                      placeholder="Use configured provider"
+                      :placeholder="t('scan.advanced.providerPlaceholder')"
                     >
                       <el-option
                         v-for="provider in providerOptions"
@@ -122,7 +122,7 @@
                     </el-select>
                   </div>
                   <div class="field">
-                    <label class="field-label" for="scan-model">Model override</label>
+                    <label class="field-label" for="scan-model">{{ t('scan.advanced.model') }}</label>
                     <el-select
                       id="scan-model"
                       v-model="form.model"
@@ -131,13 +131,13 @@
                       filterable
                       allow-create
                       default-first-option
-                      placeholder="Use configured model"
+                      :placeholder="t('scan.advanced.modelPlaceholder')"
                     >
                       <el-option v-for="model in modelOptions" :key="model" :label="model" :value="model" />
                     </el-select>
                   </div>
                   <div class="field">
-                    <label class="field-label" for="scan-concurrency">Concurrency</label>
+                    <label class="field-label" for="scan-concurrency">{{ t('scan.advanced.concurrency') }}</label>
                     <el-input-number
                       id="scan-concurrency"
                       v-model="form.concurrency"
@@ -147,7 +147,7 @@
                     />
                   </div>
                   <div class="field">
-                    <label class="field-label" for="scan-timeout">Task timeout (minutes)</label>
+                    <label class="field-label" for="scan-timeout">{{ t('scan.advanced.timeout') }}</label>
                     <el-input-number
                       id="scan-timeout"
                       v-model="form.timeout"
@@ -157,7 +157,7 @@
                     />
                   </div>
                   <div class="field">
-                    <label class="field-label" for="scan-max-tokens">Max tokens per file</label>
+                    <label class="field-label" for="scan-max-tokens">{{ t('scan.advanced.maxTokens') }}</label>
                     <el-input-number
                       id="scan-max-tokens"
                       v-model="form.max_tokens"
@@ -165,10 +165,10 @@
                       :step="1000"
                       controls-position="right"
                     />
-                    <p class="field-hint">0 uses the configured default.</p>
+                    <p class="field-hint">{{ t('scan.advanced.maxTokensHint') }}</p>
                   </div>
                   <div class="field">
-                    <label class="field-label" for="scan-budget">Token budget</label>
+                    <label class="field-label" for="scan-budget">{{ t('scan.advanced.budget') }}</label>
                     <el-input-number
                       id="scan-budget"
                       v-model="form.max_tokens_budget"
@@ -176,29 +176,29 @@
                       :step="10000"
                       controls-position="right"
                     />
-                    <p class="field-hint">0 means unlimited.</p>
+                    <p class="field-hint">{{ t('scan.advanced.budgetHint') }}</p>
                   </div>
                 </div>
 
                 <div class="toggle-list">
                   <div class="switch-row">
                     <div>
-                      <p class="switch-row__title">Skip the plan phase</p>
-                      <p class="switch-row__text">Saves tokens on trivial files, but can reduce review depth.</p>
+                      <p class="switch-row__title">{{ t('scan.advanced.planTitle') }}</p>
+                      <p class="switch-row__text">{{ t('scan.advanced.planText') }}</p>
                     </div>
                     <el-switch v-model="form.no_plan" />
                   </div>
                   <div class="switch-row">
                     <div>
-                      <p class="switch-row__title">Skip deduplication</p>
-                      <p class="switch-row__text">Keep duplicate findings across files in the same batch.</p>
+                      <p class="switch-row__title">{{ t('scan.advanced.dedupTitle') }}</p>
+                      <p class="switch-row__text">{{ t('scan.advanced.dedupText') }}</p>
                     </div>
                     <el-switch v-model="form.no_dedup" />
                   </div>
                   <div class="switch-row">
                     <div>
-                      <p class="switch-row__title">Skip project summary</p>
-                      <p class="switch-row__text">Do not generate the post-run architecture summary.</p>
+                      <p class="switch-row__title">{{ t('scan.advanced.summaryTitle') }}</p>
+                      <p class="switch-row__text">{{ t('scan.advanced.summaryText') }}</p>
                     </div>
                     <el-switch v-model="form.no_summary" />
                   </div>
@@ -212,7 +212,7 @@
           <div class="form-footer__command">
             <span class="form-footer__label">
               <el-icon><Operation /></el-icon>
-              Equivalent command
+              {{ t('scan.footer.equivalentCommand') }}
             </span>
             <CommandBar :command="commandPreview" />
           </div>
@@ -223,7 +223,7 @@
               @click="submit(true)"
             >
               <el-icon class="btn-icon"><View /></el-icon>
-              Preview scope
+              {{ t('scan.footer.preview') }}
             </el-button>
             <el-button
               type="primary"
@@ -232,14 +232,14 @@
               :disabled="submitting !== null || Boolean(pathsError)"
             >
               <el-icon class="btn-icon"><VideoPlay /></el-icon>
-              Start scan
+              {{ t('scan.footer.start') }}
             </el-button>
           </div>
         </footer>
       </form>
 
       <aside class="rail">
-        <SurfaceCard title="Active model" subtitle="Resolved for this scan">
+        <SurfaceCard :title="t('scan.rail.activeModel')" :subtitle="t('scan.rail.activeModelSubtitle')">
           <div class="rail-model">
             <div class="rail-model__mark"><BrandMark :size="20" /></div>
             <div class="rail-model__body">
@@ -250,59 +250,56 @@
           </div>
           <dl class="rail-meta">
             <div>
-              <dt>Auth</dt>
+              <dt>{{ t('scan.rail.auth') }}</dt>
               <dd>{{ authLabel(active?.auth_mode) }}</dd>
             </div>
             <div>
-              <dt>Scope</dt>
-              <dd>{{ form.paths ? 'Selected paths' : 'Whole repository' }}</dd>
+              <dt>{{ t('scan.rail.scope') }}</dt>
+              <dd>{{ form.paths ? t('scan.scope.selectedPaths') : t('scan.scope.wholeRepository') }}</dd>
             </div>
             <div>
-              <dt>Batching</dt>
+              <dt>{{ t('scan.rail.batching') }}</dt>
               <dd>{{ batchLabel }}</dd>
             </div>
           </dl>
           <p v-if="!effectiveConfigured" class="rail-warning">
-            No model is configured. Choose a provider before starting the scan.
+            {{ t('scan.rail.warning') }}
           </p>
           <router-link class="rail-link" to="/providers">
-            Manage providers
+            {{ t('scan.rail.manageProviders') }}
             <el-icon><ArrowRight /></el-icon>
           </router-link>
         </SurfaceCard>
 
-        <SurfaceCard title="When to scan" subtitle="Diff review is still the default">
+        <SurfaceCard :title="t('scan.rail.whenToScan')" :subtitle="t('scan.rail.whenToScanSubtitle')">
           <ul class="reason-list">
             <li>
               <span class="reason-list__icon"><el-icon><FolderOpened /></el-icon></span>
               <div>
-                <p class="reason-list__title">Unfamiliar codebase</p>
-                <p class="reason-list__text">Audit a repository you just cloned without waiting for a diff.</p>
+                <p class="reason-list__title">{{ t('scan.rail.reasonUnfamiliar') }}</p>
+                <p class="reason-list__text">{{ t('scan.rail.reasonUnfamiliarText') }}</p>
               </div>
             </li>
             <li>
               <span class="reason-list__icon"><el-icon><Document /></el-icon></span>
               <div>
-                <p class="reason-list__title">No usable history</p>
-                <p class="reason-list__text">Review code that was imported, generated, or squashed into one commit.</p>
+                <p class="reason-list__title">{{ t('scan.rail.reasonHistory') }}</p>
+                <p class="reason-list__text">{{ t('scan.rail.reasonHistoryText') }}</p>
               </div>
             </li>
             <li>
               <span class="reason-list__icon"><el-icon><Compass /></el-icon></span>
               <div>
-                <p class="reason-list__title">Focused sweep</p>
-                <p class="reason-list__text">Point the scan at one directory to keep cost and time predictable.</p>
+                <p class="reason-list__title">{{ t('scan.rail.reasonFocused') }}</p>
+                <p class="reason-list__text">{{ t('scan.rail.reasonFocusedText') }}</p>
               </div>
             </li>
           </ul>
         </SurfaceCard>
 
         <div class="tip-card">
-          <p class="tip-card__label">Start smaller than you think</p>
-          <p class="tip-card__text">
-            A scan reviews whole files, so token usage grows quickly. Start with one package and use
-            the token budget as a guardrail.
-          </p>
+          <p class="tip-card__label">{{ t('scan.rail.tipLabel') }}</p>
+          <p class="tip-card__text">{{ t('scan.rail.tipText') }}</p>
         </div>
       </aside>
     </div>
@@ -328,6 +325,7 @@ import BrandMark from '@/components/BrandMark.vue'
 import CommandBar from '@/components/CommandBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SurfaceCard from '@/components/SurfaceCard.vue'
+import { useI18n } from '@/i18n'
 import { api, errorMessage } from '@/api/client'
 import { useMetaStore } from '@/stores/meta'
 import { createScanForm, scanCommand } from '@/utils/command'
@@ -337,6 +335,7 @@ import type { ProviderCard, ProvidersResponse, ScanFormState, ScanRequest } from
 
 const { meta, refresh } = useMetaStore()
 const router = useRouter()
+const { t, tn } = useI18n()
 const form = reactive<ScanFormState>(createScanForm())
 const providers = ref<ProvidersResponse | null>(null)
 const advancedPanels = ref<string[]>([])
@@ -349,8 +348,8 @@ const pathsError = computed(() => {
     const path = raw.trim()
     if (!path) continue
     const normalized = path.replace(/\\/g, '/')
-    if (normalized.startsWith('/') || /^[A-Za-z]:/.test(normalized)) return 'Paths must be relative to the repository.'
-    if (normalized.split('/').includes('..')) return 'Paths must stay inside the repository.'
+    if (normalized.startsWith('/') || /^[A-Za-z]:/.test(normalized)) return t('scan.scope.errorRelative')
+    if (normalized.split('/').includes('..')) return t('scan.scope.errorInside')
   }
   return ''
 })
@@ -372,12 +371,12 @@ const modelOptions = computed(() => {
 const effectiveProviderLabel = computed(() =>
   form.provider
     ? selectedProvider.value?.display_name || form.provider
-    : active.value?.provider_label || 'No provider configured',
+    : active.value?.provider_label || t('scan.rail.noProvider'),
 )
 const effectiveModel = computed(() => {
   if (form.model) return form.model
-  if (selectedProvider.value) return selectedProvider.value.model || 'Select a model'
-  return active.value?.model || 'No model selected'
+  if (selectedProvider.value) return selectedProvider.value.model || t('scan.rail.selectModel')
+  return active.value?.model || t('scan.rail.noModelSelected')
 })
 const effectiveConfigured = computed(() =>
   form.provider ? Boolean(selectedProvider.value?.configured) : Boolean(active.value?.configured),
@@ -385,25 +384,25 @@ const effectiveConfigured = computed(() =>
 const batchLabel = computed(() => {
   switch (form.batch) {
     case 'none':
-      return 'No batching'
+      return t('scan.advanced.batchNone')
     case 'by-language':
-      return 'By language'
+      return t('scan.advanced.batchByLanguage')
     case 'by-directory':
-      return 'By directory'
+      return t('scan.advanced.batchByDirectory')
     default:
-      return 'Default'
+      return t('scan.advanced.batchDefault')
   }
 })
 const batchHint = computed(() => {
   switch (form.batch) {
     case 'none':
-      return 'One file per review unit. Highest isolation and highest cost.'
+      return t('scan.advanced.batchHintNone')
     case 'by-language':
-      return 'Group files that share a language so context stays relevant.'
+      return t('scan.advanced.batchHintLanguage')
     case 'by-directory':
-      return 'Group files by directory so the model sees neighboring code together.'
+      return t('scan.advanced.batchHintDirectory')
     default:
-      return 'Let the embedded strategy decide per file.'
+      return t('scan.advanced.batchHintDefault')
   }
 })
 const commandPreview = computed(() => scanCommand({ ...form, preview: false }))

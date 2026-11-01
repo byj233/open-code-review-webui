@@ -12,71 +12,84 @@
 
     <template v-else-if="summary">
       <PageHeader
-        eyebrow="Session"
+        :eyebrow="t('nav.session')"
         :title="headerTitle"
         :description="headerDescription"
         back-to="/sessions"
-        back-label="Back to sessions"
+        :back-label="t('sessionDetail.header.back')"
       >
         <template #meta>
           <StatusPill :label="state.label" :tone="state.tone" />
           <span class="chip chip--mono">{{ shortId(summary.session_id, 16) }}</span>
           <span v-if="summary.model" class="chip">{{ summary.model }}</span>
           <span v-if="summary.git_branch" class="chip">{{ summary.git_branch }}</span>
-          <span v-if="summary.aborted" class="chip chip--accent">aborted</span>
+          <span v-if="summary.aborted" class="chip chip--accent">{{ t('sessionDetail.header.aborted') }}</span>
         </template>
         <template #actions>
           <el-tooltip
-            :content="canResume ? 'Continue this review in a new run' : 'Only commit and range sessions can be resumed'"
+            :content="
+              canResume
+                ? t('sessionDetail.actions.resumeTooltip')
+                : t('sessionDetail.actions.resumeDisabled')
+            "
             placement="top"
           >
             <el-button :disabled="!canResume" @click="resumeReview">
               <el-icon class="btn-icon"><RefreshRight /></el-icon>
-              Resume
+              {{ t('sessionDetail.actions.resume') }}
             </el-button>
           </el-tooltip>
           <el-button type="danger" plain @click="deleteOpen = true">
             <el-icon class="btn-icon"><Delete /></el-icon>
-            Delete
+            {{ t('common.delete') }}
           </el-button>
         </template>
       </PageHeader>
 
       <div v-if="summary.aborted" class="callout callout--warning">
         <el-icon class="callout__icon"><WarningFilled /></el-icon>
-        <div>This session was interrupted before it completed. Any findings saved before the interruption are still available.</div>
+        <div>{{ t('sessionDetail.callouts.interrupted') }}</div>
       </div>
 
       <div v-if="manifest?.run_failure" class="callout callout--error">
         <el-icon class="callout__icon"><WarningFilled /></el-icon>
         <div>
-          <strong>{{ manifest.run_failure.classification || 'Run failed' }}.</strong>
-          {{ manifest.run_failure.reason || 'The manifest recorded a run-level failure.' }}
+          <strong>{{ failureTitle }}</strong>
+          {{ manifest.run_failure.reason || t('sessionDetail.callouts.failureReason') }}
         </div>
       </div>
 
       <div class="stat-grid">
         <StatTile
-          label="Findings"
+          :label="t('sessionDetail.stats.findings')"
           :value="formatCount(comments.length)"
           :hint="severityHint"
           :icon="ChatDotRound"
         />
         <StatTile
-          label="Files reviewed"
+          :label="t('sessionDetail.stats.filesReviewed')"
           :value="`${summary.completed_files}/${summary.selected_files}`"
-          :hint="`${summary.reused_files} reused · ${summary.waived_files} waived`"
+          :hint="
+            t('sessionDetail.stats.reusedWaived', {
+              reused: summary.reused_files,
+              waived: summary.waived_files,
+            })
+          "
           :icon="Files"
         />
         <StatTile
-          label="Failed files"
+          :label="t('sessionDetail.stats.failedFiles')"
           :value="formatCount(summary.failed_files)"
-          :hint="summary.failed_files ? 'See coverage below' : 'No file-level failures'"
+          :hint="
+            summary.failed_files
+              ? t('sessionDetail.stats.seeCoverage')
+              : t('sessionDetail.stats.noFileFailures')
+          "
           :icon="WarningFilled"
           compact
         />
         <StatTile
-          label="Duration"
+          :label="t('sessionDetail.stats.duration')"
           :value="formatDurationNs(summary.duration_ns)"
           :hint="formatDate(summary.start_time)"
           :icon="Timer"
@@ -100,16 +113,26 @@
           <span class="spacer" />
           <button class="icon-text-button" type="button" @click="copySessionId">
             <el-icon><CopyDocument /></el-icon>
-            Copy id
+            {{ t('sessionDetail.actions.copyId') }}
           </button>
         </div>
 
         <div v-if="activeTab === 'findings'" class="tab-body">
           <div v-if="comments.length" class="findings-toolbar">
-            <el-input v-model="query" clearable placeholder="Search findings" class="findings-toolbar__search">
+            <el-input
+              v-model="query"
+              clearable
+              :placeholder="t('sessionDetail.findings.searchPlaceholder')"
+              class="findings-toolbar__search"
+            >
               <template #prefix><el-icon><Search /></el-icon></template>
             </el-input>
-            <el-select v-model="categoryFilter" clearable placeholder="All categories" class="findings-toolbar__select">
+            <el-select
+              v-model="categoryFilter"
+              clearable
+              :placeholder="t('sessionDetail.findings.allCategories')"
+              class="findings-toolbar__select"
+            >
               <el-option v-for="category in categories" :key="category" :label="categoryLabel(category)" :value="category" />
             </el-select>
             <div class="segmented">
@@ -130,7 +153,7 @@
             <section v-for="group in groupedComments" :key="group.path" class="file-group">
               <header class="file-group__head">
                 <span class="file-group__path mono" :title="group.path">{{ group.path }}</span>
-                <span class="file-group__count">{{ group.comments.length }} finding{{ group.comments.length === 1 ? '' : 's' }}</span>
+                <span class="file-group__count">{{ tn('sessionDetail.findings.count', group.comments.length) }}</span>
               </header>
               <div class="file-group__body">
                 <FindingCard v-for="comment in group.comments" :key="commentKey(comment)" :comment="comment" />
@@ -139,13 +162,13 @@
           </div>
           <EmptyState
             v-else-if="comments.length"
-            title="Nothing matches these filters"
-            description="Clear the search or choose a different severity."
+            :title="t('sessionDetail.findings.emptyFilteredTitle')"
+            :description="t('sessionDetail.findings.emptyFilteredText')"
           />
           <EmptyState
             v-else
-            title="No findings in this session"
-            description="The run completed without recording a review comment."
+            :title="t('sessionDetail.findings.emptyTitle')"
+            :description="t('sessionDetail.findings.emptyText')"
           />
         </div>
 
@@ -154,13 +177,17 @@
             <div v-for="(item, index) in items" :key="`${item.file_path}-${index}`" class="item-row">
               <span class="item-row__type" :class="itemTone(item)">{{ itemTypeLabel(item.type) }}</span>
               <span class="item-row__path mono" :title="item.file_path">{{ item.file_path }}</span>
-              <span v-if="item.comments" class="item-row__comments">{{ item.comments }} finding{{ item.comments === 1 ? '' : 's' }}</span>
-              <span v-else class="item-row__comments item-row__comments--empty">no findings</span>
+              <span v-if="item.comments" class="item-row__comments">{{ tn('sessionDetail.findings.count', item.comments) }}</span>
+              <span v-else class="item-row__comments item-row__comments--empty">{{ t('sessionDetail.files.noFindings') }}</span>
               <span class="item-row__time">{{ formatRelative(item.timestamp) }}</span>
               <span v-if="item.error" class="item-row__error" :title="item.error">{{ item.error }}</span>
             </div>
           </div>
-          <EmptyState v-else title="No file items" description="This session did not record per-file checkpoints." />
+          <EmptyState
+            v-else
+            :title="t('sessionDetail.files.emptyTitle')"
+            :description="t('sessionDetail.files.emptyText')"
+          />
         </div>
 
         <div v-else class="tab-body">
@@ -168,45 +195,45 @@
             <div class="coverage">
               <div class="coverage__item">
                 <span class="coverage__value">{{ manifest.coverage?.selected?.length ?? 0 }}</span>
-                <span class="coverage__label">selected</span>
+                <span class="coverage__label">{{ t('sessionDetail.coverage.selected') }}</span>
               </div>
               <div class="coverage__item">
                 <span class="coverage__value">{{ manifest.coverage?.completed?.length ?? 0 }}</span>
-                <span class="coverage__label">completed</span>
+                <span class="coverage__label">{{ t('sessionDetail.coverage.completed') }}</span>
               </div>
               <div class="coverage__item">
                 <span class="coverage__value">{{ manifest.coverage?.reused?.length ?? 0 }}</span>
-                <span class="coverage__label">reused</span>
+                <span class="coverage__label">{{ t('sessionDetail.coverage.reused') }}</span>
               </div>
               <div class="coverage__item" :class="{ 'coverage__item--bad': (manifest.coverage?.failed?.length ?? 0) > 0 }">
                 <span class="coverage__value">{{ manifest.coverage?.failed?.length ?? 0 }}</span>
-                <span class="coverage__label">failed</span>
+                <span class="coverage__label">{{ t('sessionDetail.coverage.failed') }}</span>
               </div>
               <div class="coverage__item">
                 <span class="coverage__value">{{ manifest.coverage?.waived?.length ?? 0 }}</span>
-                <span class="coverage__label">waived</span>
+                <span class="coverage__label">{{ t('sessionDetail.coverage.waived') }}</span>
               </div>
             </div>
 
             <dl class="manifest-meta">
               <div>
-                <dt>Terminal state</dt>
+                <dt>{{ t('sessionDetail.manifest.terminalState') }}</dt>
                 <dd>{{ manifestStateLabel(manifest.terminal_state) }}</dd>
               </div>
               <div>
-                <dt>Operation</dt>
+                <dt>{{ t('sessionDetail.manifest.operation') }}</dt>
                 <dd>{{ manifest.operation || '--' }}</dd>
               </div>
               <div>
-                <dt>Run id</dt>
+                <dt>{{ t('sessionDetail.manifest.runId') }}</dt>
                 <dd class="mono">{{ manifest.run_id || '--' }}</dd>
               </div>
               <div>
-                <dt>Parent run</dt>
+                <dt>{{ t('sessionDetail.manifest.parentRun') }}</dt>
                 <dd class="mono">{{ manifest.parent_run_id || '--' }}</dd>
               </div>
               <div>
-                <dt>Manifest elapsed</dt>
+                <dt>{{ t('sessionDetail.manifest.elapsed') }}</dt>
                 <dd>{{ formatDurationMs(manifest.elapsed_ms) }}</dd>
               </div>
             </dl>
@@ -220,41 +247,41 @@
             </ul>
 
             <details class="manifest-json">
-              <summary>Raw manifest JSON</summary>
+              <summary>{{ t('sessionDetail.manifest.rawJson') }}</summary>
               <pre>{{ manifestJson }}</pre>
             </details>
           </template>
           <EmptyState
             v-else
-            title="No manifest recorded"
-            description="This is a legacy session created before run manifests were introduced."
+            :title="t('sessionDetail.manifest.emptyTitle')"
+            :description="t('sessionDetail.manifest.emptyText')"
           />
         </div>
       </section>
 
-      <el-dialog v-model="deleteOpen" title="Delete session" width="430px" append-to-body>
-        <p class="dialog-text">
-          This removes the saved JSONL session and all of its findings from disk. The action cannot
-          be undone.
-        </p>
+      <el-dialog v-model="deleteOpen" :title="t('sessionDetail.delete.title')" width="430px" append-to-body>
+        <p class="dialog-text">{{ t('sessionDetail.delete.text') }}</p>
         <p class="dialog-session mono">{{ summary.session_id }}</p>
         <template #footer>
-          <el-button :disabled="deleting" @click="deleteOpen = false">Cancel</el-button>
-          <el-button type="danger" :loading="deleting" @click="confirmDelete">Delete session</el-button>
+          <el-button :disabled="deleting" @click="deleteOpen = false">{{ t('common.cancel') }}</el-button>
+          <el-button type="danger" :loading="deleting" @click="confirmDelete">{{ t('sessionDetail.delete.confirm') }}</el-button>
         </template>
       </el-dialog>
     </template>
 
     <template v-else>
       <PageHeader
-        eyebrow="Session"
-        title="Session not found"
-        :description="error || 'The session may have been deleted or the console was restarted.'"
+        :eyebrow="t('nav.session')"
+        :title="t('sessionDetail.notFound.title')"
+        :description="error || t('sessionDetail.notFound.text')"
         back-to="/sessions"
-        back-label="Back to sessions"
+        :back-label="t('sessionDetail.header.back')"
       />
-      <EmptyState title="Nothing to show" description="Pick another session from the history list.">
-        <el-button type="primary" size="small" @click="router.push('/sessions')">Browse sessions</el-button>
+      <EmptyState
+        :title="t('sessionDetail.notFound.emptyTitle')"
+        :description="t('sessionDetail.notFound.emptyText')"
+      >
+        <el-button type="primary" size="small" @click="router.push('/sessions')">{{ t('sessionDetail.notFound.browse') }}</el-button>
       </EmptyState>
     </template>
   </div>
@@ -280,6 +307,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import StatTile from '@/components/StatTile.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import { api, errorMessage } from '@/api/client'
+import { useI18n } from '@/i18n'
 import {
   formatCount,
   formatDate,
@@ -295,6 +323,7 @@ import {
   normalizedSeverity,
   sessionModeLabel,
   sessionState,
+  severityLabel,
   severityOrder,
 } from '@/utils/status'
 import type { LlmComment, SessionDetailResponse, SessionItem } from '@/types'
@@ -302,6 +331,7 @@ import type { LlmComment, SessionDetailResponse, SessionItem } from '@/types'
 const route = useRoute()
 const router = useRouter()
 const sessionId = String(route.params.id ?? '')
+const { t, tn } = useI18n()
 
 const detail = ref<SessionDetailResponse | null>(null)
 const loading = ref(true)
@@ -313,32 +343,44 @@ const severityFilter = ref('all')
 const deleteOpen = ref(false)
 const deleting = ref(false)
 
-const severityFilters = [
-  { value: 'all', label: 'All' },
-  { value: 'critical', label: 'Critical' },
-  { value: 'high', label: 'High' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'low', label: 'Low' },
-]
+const severityFilters = computed(() => [
+  { value: 'all', label: t('sessionDetail.severity.all') },
+  { value: 'critical', label: severityLabel('critical') },
+  { value: 'high', label: severityLabel('high') },
+  { value: 'medium', label: severityLabel('medium') },
+  { value: 'low', label: severityLabel('low') },
+])
 
 const summary = computed(() => detail.value?.summary ?? null)
 const items = computed<SessionItem[]>(() => detail.value?.items ?? [])
 const comments = computed<LlmComment[]>(() => detail.value?.comments ?? [])
-const state = computed(() => (summary.value ? sessionState(summary.value) : { key: 'unknown', label: 'Unknown', tone: 'neutral' as const, pulse: false }))
+const state = computed(() =>
+  summary.value
+    ? sessionState(summary.value)
+    : { key: 'unknown', label: t('common.unknown'), tone: 'neutral' as const, pulse: false },
+)
 const manifest = computed(() => summary.value?.run_manifest ?? null)
 const failedItems = computed(() => (manifest.value?.coverage?.failed ?? []).slice(0, 20))
 const manifestJson = computed(() => JSON.stringify(manifest.value, null, 2))
+const failureTitle = computed(() =>
+  t('sessionDetail.callouts.failureTitle', {
+    classification:
+      manifest.value?.run_failure?.classification || t('sessionDetail.callouts.failureFallback'),
+  }),
+)
 
 const headerTitle = computed(() => {
-  if (!summary.value) return 'Session'
+  if (!summary.value) return t('nav.session')
   return sessionModeLabel(summary.value)
 })
 const headerDescription = computed(() => {
   if (!summary.value) return ''
-  const parts = [`Started ${formatDate(summary.value.start_time)}`]
-  if (summary.value.duration_ns) parts.push(`took ${formatDurationNs(summary.value.duration_ns)}`)
-  if (summary.value.model) parts.push(`with ${summary.value.model}`)
-  return `${parts.join(' · ')}.`
+  const parts = [t('sessionDetail.header.started', { date: formatDate(summary.value.start_time) })]
+  if (summary.value.duration_ns) {
+    parts.push(t('sessionDetail.header.took', { duration: formatDurationNs(summary.value.duration_ns) }))
+  }
+  if (summary.value.model) parts.push(t('sessionDetail.header.withModel', { model: summary.value.model }))
+  return t('sessionDetail.header.description', { parts: parts.join(' · ') })
 })
 const severityHint = computed(() => {
   const counts = { critical: 0, high: 0, medium: 0, low: 0 }
@@ -346,7 +388,11 @@ const severityHint = computed(() => {
     const severity = normalizedSeverity(comment.severity)
     if (severity !== 'unknown') counts[severity] += 1
   }
-  return `${counts.critical} critical · ${counts.high} high · ${counts.medium} medium`
+  return t('sessionDetail.stats.severityHint', {
+    critical: counts.critical,
+    high: counts.high,
+    medium: counts.medium,
+  })
 })
 const canResume = computed(() =>
   Boolean(summary.value && ['commit', 'range'].includes(summary.value.review_mode ?? '')),
@@ -392,9 +438,9 @@ const groupedComments = computed(() => {
 })
 
 const tabs = computed(() => [
-  { value: 'findings' as const, label: 'Findings', count: comments.value.length },
-  { value: 'files' as const, label: 'File items', count: items.value.length },
-  { value: 'manifest' as const, label: 'Manifest', count: manifest.value ? 1 : 0 },
+  { value: 'findings' as const, label: t('sessionDetail.tabs.findings'), count: comments.value.length },
+  { value: 'files' as const, label: t('sessionDetail.tabs.fileItems'), count: items.value.length },
+  { value: 'manifest' as const, label: t('sessionDetail.tabs.manifest'), count: manifest.value ? 1 : 0 },
 ])
 
 function commentKey(comment: LlmComment): string {
@@ -428,8 +474,8 @@ function resumeReview(): void {
 
 async function copySessionId(): Promise<void> {
   const copied = await copyText(summary.value?.session_id ?? '')
-  if (copied) ElMessage.success('Session id copied')
-  else ElMessage.error('Could not copy the session id')
+  if (copied) ElMessage.success(t('sessionDetail.actions.copied'))
+  else ElMessage.error(t('sessionDetail.actions.copyFailed'))
 }
 
 async function confirmDelete(): Promise<void> {
@@ -437,7 +483,7 @@ async function confirmDelete(): Promise<void> {
   deleting.value = true
   try {
     await api.deleteSession(summary.value.session_id)
-    ElMessage.success('Session deleted')
+    ElMessage.success(t('sessionDetail.actions.deleted'))
     await router.push('/sessions')
   } catch (err) {
     ElMessage.error(errorMessage(err))

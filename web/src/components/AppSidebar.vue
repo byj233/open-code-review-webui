@@ -7,7 +7,7 @@
       </div>
       <div class="brand__text">
         <span class="brand__name">Open Code Review</span>
-        <span class="brand__sub">Web Console</span>
+        <span class="brand__sub">{{ t('app.console') }}</span>
       </div>
     </div>
 
@@ -23,7 +23,7 @@
       <el-icon class="repo__chevron"><ArrowRight /></el-icon>
     </router-link>
 
-    <nav class="nav" aria-label="Primary">
+    <nav class="nav" :aria-label="t('nav.primary')">
       <template v-for="group in groups" :key="group.label">
         <p class="nav__label">{{ group.label }}</p>
         <router-link
@@ -45,18 +45,18 @@
       <router-link class="provider" :class="{ 'provider--off': !provider.configured }" to="/providers" @click="$emit('navigate')">
         <span class="provider__top">
           <span class="dot" :class="provider.configured ? 'dot--green' : 'dot--amber'" />
-          <span class="provider__label">{{ provider.configured ? 'Model connected' : 'Model not configured' }}</span>
+          <span class="provider__label">{{ provider.configured ? t('provider.connected') : t('provider.notConfigured') }}</span>
         </span>
         <span class="provider__name">{{ providerName }}</span>
         <span class="provider__meta">{{ providerMeta }}</span>
       </router-link>
 
       <div class="foot-row">
-        <button class="theme-button" type="button" :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'" @click="toggleTheme">
+        <button class="theme-button" type="button" :aria-label="isDark ? t('topbar.themeLight') : t('topbar.themeDark')" @click="toggleTheme">
           <el-icon><Moon v-if="!isDark" /><Sunny v-else /></el-icon>
         </button>
         <span class="version">{{ meta?.version || 'dev' }}</span>
-        <button class="palette-button" type="button" aria-label="Open command palette" @click="$emit('palette')">
+        <button class="palette-button" type="button" :aria-label="t('topbar.openPalette')" @click="$emit('palette')">
           <el-icon><Search /></el-icon>
           <span class="kbd">K</span>
         </button>
@@ -84,6 +84,7 @@ import {
 import BrandMark from '@/components/BrandMark.vue'
 import { useMetaStore } from '@/stores/meta'
 import { useTheme } from '@/composables/useTheme'
+import { useI18n } from '@/i18n'
 import { authLabel } from '@/utils/status'
 import type { ActiveConfig } from '@/types'
 import type { Component } from 'vue'
@@ -102,37 +103,38 @@ interface NavItem {
 const route = useRoute()
 const { meta } = useMetaStore()
 const { isDark, toggleTheme } = useTheme()
+const { t } = useI18n()
 
-const groups: Array<{ label: string; items: NavItem[] }> = [
+const groups = computed<Array<{ label: string; items: NavItem[] }>>(() => [
   {
-    label: 'Workspace',
+    label: t('nav.group.workspace'),
     items: [
-      { label: 'Overview', to: '/', icon: Grid },
-      { label: 'Code review', to: '/review', icon: EditPen },
-      { label: 'Repository scan', to: '/scan', icon: Search },
+      { label: t('nav.overview'), to: '/', icon: Grid },
+      { label: t('nav.review'), to: '/review', icon: EditPen },
+      { label: t('nav.scan'), to: '/scan', icon: Search },
     ],
   },
   {
-    label: 'History',
-    items: [{ label: 'Sessions', to: '/sessions', icon: Collection }],
+    label: t('nav.group.history'),
+    items: [{ label: t('nav.sessions'), to: '/sessions', icon: Collection }],
   },
   {
-    label: 'Setup',
+    label: t('nav.group.setup'),
     items: [
-      { label: 'Providers', to: '/providers', icon: Connection },
-      { label: 'Settings', to: '/settings', icon: Setting },
-      { label: 'Review rules', to: '/rules', icon: Reading },
+      { label: t('nav.providers'), to: '/providers', icon: Connection },
+      { label: t('nav.settings'), to: '/settings', icon: Setting },
+      { label: t('nav.rules'), to: '/rules', icon: Reading },
     ],
   },
-]
+])
 
 const repo = computed(() => meta.value?.repo)
-const repoName = computed(() => repo.value?.name || 'No repository')
+const repoName = computed(() => repo.value?.name || t('repo.none'))
 const repoBranch = computed(() => {
   const info = repo.value
-  if (!info?.is_git) return 'Not a git repository'
-  if (info.detached) return `detached @ ${info.head || '--'}`
-  return info.branch || 'no commits yet'
+  if (!info?.is_git) return t('repo.notGit')
+  if (info.detached) return t('repo.detached', { head: info.head || '--' })
+  return info.branch || t('repo.noCommits')
 })
 
 const provider = computed<ActiveConfig>(
@@ -147,13 +149,13 @@ const provider = computed<ActiveConfig>(
 )
 const providerName = computed(() => {
   const active = provider.value
-  if (!active.provider_label) return 'Connect a provider'
+  if (!active.provider_label) return t('provider.connect')
   return active.provider_label
 })
 const providerMeta = computed(() => {
   const active = provider.value
-  if (!active.configured) return 'Add an API key to get started'
-  const model = active.model || 'Model not selected'
+  if (!active.configured) return t('provider.addKey')
+  const model = active.model || t('provider.modelNotSelected')
   return `${model} · ${authLabel(active.auth_mode)}`
 })
 

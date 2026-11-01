@@ -2,16 +2,18 @@
 <template>
   <div class="page">
     <PageHeader
-      eyebrow="Diff review"
-      title="Review code changes"
-      description="Send a working-tree diff, a single commit, or a branch range to your configured model. The console runs the same agentic review as the CLI."
+      :eyebrow="t('review.header.eyebrow')"
+      :title="t('review.header.title')"
+      :description="t('review.header.description')"
     >
       <template #actions>
         <el-button text @click="resetForm">
           <el-icon class="btn-icon"><Refresh /></el-icon>
-          Reset
+          {{ t('common.reset') }}
         </el-button>
-        <router-link class="ghost-link" to="/sessions">Session history</router-link>
+        <router-link class="ghost-link" to="/sessions">
+          {{ t('review.header.sessionHistory') }}
+        </router-link>
       </template>
     </PageHeader>
 
@@ -19,10 +21,9 @@
       <el-icon class="callout__icon"><Refresh /></el-icon>
       <div class="resume-callout__body">
         <span>
-          Resuming session <span class="mono">{{ resumeId }}</span>. Reused file checkpoints are
-          kept; the provider and model must still match the previous run.
+          {{ t('review.resume.lead') }}<span class="mono">{{ resumeId }}</span>{{ t('review.resume.tail') }}
         </span>
-        <el-button size="small" text @click="clearResume">Clear</el-button>
+        <el-button size="small" text @click="clearResume">{{ t('review.resume.clear') }}</el-button>
       </div>
     </div>
 
@@ -32,8 +33,8 @@
           <div class="section-heading">
             <span class="section-number">1</span>
             <div>
-              <h2 class="section-title">Choose the scope</h2>
-              <p class="section-sub">What should the review look at?</p>
+              <h2 class="section-title">{{ t('review.scope.title') }}</h2>
+              <p class="section-sub">{{ t('review.scope.subtitle') }}</p>
             </div>
           </div>
 
@@ -55,7 +56,7 @@
           </div>
 
           <div v-if="form.mode === 'commit'" class="scope-fields">
-            <label class="field-label" for="review-commit">Commit or tag</label>
+            <label class="field-label" for="review-commit">{{ t('review.commit.label') }}</label>
             <el-select
               id="review-commit"
               v-model="form.commit"
@@ -63,7 +64,7 @@
               filterable
               allow-create
               default-first-option
-              placeholder="abc1234, v1.2.0, or HEAD~1"
+              :placeholder="t('review.commit.placeholder')"
             >
               <el-option
                 v-for="option in commitOptions"
@@ -72,12 +73,12 @@
                 :value="option.value"
               />
             </el-select>
-            <p class="field-hint">The parent commit is used as the base for the diff.</p>
+            <p class="field-hint">{{ t('review.commit.hint') }}</p>
           </div>
 
           <div v-else-if="form.mode === 'range'" class="scope-fields range-fields">
             <div>
-              <label class="field-label" for="review-from">From ref</label>
+              <label class="field-label" for="review-from">{{ t('review.range.from') }}</label>
               <el-select
                 id="review-from"
                 v-model="form.from"
@@ -85,16 +86,22 @@
                 filterable
                 allow-create
                 default-first-option
-                placeholder="main"
+                :placeholder="t('review.range.fromPlaceholder')"
               >
                 <el-option v-for="ref in refOptions" :key="ref" :label="ref" :value="ref" />
               </el-select>
             </div>
-            <button class="swap-button" type="button" title="Swap refs" aria-label="Swap refs" @click="swapRefs">
+            <button
+              class="swap-button"
+              type="button"
+              :title="t('review.range.swap')"
+              :aria-label="t('review.range.swap')"
+              @click="swapRefs"
+            >
               <el-icon><Switch /></el-icon>
             </button>
             <div>
-              <label class="field-label" for="review-to">To ref</label>
+              <label class="field-label" for="review-to">{{ t('review.range.to') }}</label>
               <el-select
                 id="review-to"
                 v-model="form.to"
@@ -102,7 +109,7 @@
                 filterable
                 allow-create
                 default-first-option
-                placeholder="feature/my-branch"
+                :placeholder="t('review.range.toPlaceholder')"
               >
                 <el-option v-for="ref in refOptions" :key="ref" :label="ref" :value="ref" />
               </el-select>
@@ -113,13 +120,21 @@
             <div class="scope-summary__icon"><el-icon><Monitor /></el-icon></div>
             <div>
               <p class="scope-summary__title">
-                {{ repo?.is_git ? `${formatCount(repo.dirty)} changed ${repo.dirty === 1 ? 'file' : 'files'} in the working tree` : 'No repository detected' }}
+                {{
+                  repo?.is_git
+                    ? tn('review.workspace.changed', repo.dirty, { count: formatCount(repo.dirty) })
+                    : t('review.workspace.noRepo')
+                }}
               </p>
               <p class="scope-summary__text">
                 {{
                   repo?.is_git
-                    ? `${repo.staged} staged · ${repo.unstaged} unstaged · ${repo.untracked} untracked`
-                    : 'Start the console from a git repository to review changes.'
+                    ? t('review.workspace.counts', {
+                        staged: repo.staged,
+                        unstaged: repo.unstaged,
+                        untracked: repo.untracked,
+                      })
+                    : t('review.workspace.noRepoHint')
                 }}
               </p>
             </div>
@@ -132,8 +147,8 @@
           <div class="section-heading">
             <span class="section-number">2</span>
             <div>
-              <h2 class="section-title">Add context</h2>
-              <p class="section-sub">Optional, but it sharpens the review.</p>
+              <h2 class="section-title">{{ t('review.context.title') }}</h2>
+              <p class="section-sub">{{ t('review.context.subtitle') }}</p>
             </div>
           </div>
           <el-input
@@ -143,10 +158,10 @@
             maxlength="20000"
             show-word-limit
             resize="vertical"
-            placeholder="What is this change trying to do? For example: adding rate limiting to the login API, or migrating billing to the new schema."
+            :placeholder="t('review.context.placeholder')"
           />
           <p class="field-hint">
-            Describe the intent, constraints, or migration notes. Do not paste secrets.
+            {{ t('review.context.hint') }}
           </p>
         </section>
 
@@ -156,14 +171,14 @@
               <template #title>
                 <span class="collapse-title">
                   <el-icon><Setting /></el-icon>
-                  Advanced options
+                  {{ t('review.advanced.title') }}
                   <span v-if="overrideSummary" class="collapse-note">{{ overrideSummary }}</span>
                 </span>
               </template>
 
               <div class="advanced">
                 <div class="field">
-                  <label class="field-label">Review effort</label>
+                  <label class="field-label">{{ t('review.effort.label') }}</label>
                   <div class="segmented effort-segments">
                     <button
                       v-for="option in effortOptions"
@@ -181,14 +196,16 @@
 
                 <div class="form-grid">
                   <div class="field">
-                    <label class="field-label" for="review-provider">Provider override</label>
+                    <label class="field-label" for="review-provider">
+                      {{ t('review.override.provider') }}
+                    </label>
                     <el-select
                       id="review-provider"
                       v-model="form.provider"
                       class="full-width"
                       clearable
                       filterable
-                      placeholder="Use configured provider"
+                      :placeholder="t('review.override.providerPlaceholder')"
                     >
                       <el-option
                         v-for="provider in providerOptions"
@@ -197,10 +214,12 @@
                         :value="provider.name"
                       />
                     </el-select>
-                    <p class="field-hint">Only for this run.</p>
+                    <p class="field-hint">{{ t('review.override.hint') }}</p>
                   </div>
                   <div class="field">
-                    <label class="field-label" for="review-model">Model override</label>
+                    <label class="field-label" for="review-model">
+                      {{ t('review.override.model') }}
+                    </label>
                     <el-select
                       id="review-model"
                       v-model="form.model"
@@ -209,14 +228,16 @@
                       filterable
                       allow-create
                       default-first-option
-                      placeholder="Use configured model"
+                      :placeholder="t('review.override.modelPlaceholder')"
                     >
                       <el-option v-for="model in modelOptions" :key="model" :label="model" :value="model" />
                     </el-select>
-                    <p class="field-hint">Only for this run.</p>
+                    <p class="field-hint">{{ t('review.override.hint') }}</p>
                   </div>
                   <div class="field">
-                    <label class="field-label" for="review-concurrency">Concurrency</label>
+                    <label class="field-label" for="review-concurrency">
+                      {{ t('review.override.concurrency') }}
+                    </label>
                     <el-input-number
                       id="review-concurrency"
                       v-model="form.concurrency"
@@ -224,10 +245,12 @@
                       :max="64"
                       controls-position="right"
                     />
-                    <p class="field-hint">Parallel review subtasks.</p>
+                    <p class="field-hint">{{ t('review.override.concurrencyHint') }}</p>
                   </div>
                   <div class="field">
-                    <label class="field-label" for="review-timeout">Task timeout (minutes)</label>
+                    <label class="field-label" for="review-timeout">
+                      {{ t('review.override.timeout') }}
+                    </label>
                     <el-input-number
                       id="review-timeout"
                       v-model="form.timeout"
@@ -235,10 +258,12 @@
                       :max="1440"
                       controls-position="right"
                     />
-                    <p class="field-hint">0 means no per-task limit.</p>
+                    <p class="field-hint">{{ t('review.override.timeoutHint') }}</p>
                   </div>
                   <div class="field">
-                    <label class="field-label" for="review-max-tokens">Max tokens per group</label>
+                    <label class="field-label" for="review-max-tokens">
+                      {{ t('review.override.maxTokens') }}
+                    </label>
                     <el-input-number
                       id="review-max-tokens"
                       v-model="form.max_tokens"
@@ -246,10 +271,12 @@
                       :step="1000"
                       controls-position="right"
                     />
-                    <p class="field-hint">0 uses the configured default.</p>
+                    <p class="field-hint">{{ t('review.override.maxTokensHint') }}</p>
                   </div>
                   <div class="field">
-                    <label class="field-label" for="review-budget">Token budget</label>
+                    <label class="field-label" for="review-budget">
+                      {{ t('review.override.budget') }}
+                    </label>
                     <el-input-number
                       id="review-budget"
                       v-model="form.max_tokens_budget"
@@ -257,24 +284,26 @@
                       :step="10000"
                       controls-position="right"
                     />
-                    <p class="field-hint">0 means unlimited.</p>
+                    <p class="field-hint">{{ t('review.override.budgetHint') }}</p>
                   </div>
                   <div class="field full">
-                    <label class="field-label" for="review-exclude">Exclude patterns</label>
+                    <label class="field-label" for="review-exclude">
+                      {{ t('review.override.exclude') }}
+                    </label>
                     <el-input
                       id="review-exclude"
                       v-model="form.exclude"
                       maxlength="4000"
-                      placeholder="**/generated/*, **/testdata/*"
+                      :placeholder="t('review.override.excludePlaceholder')"
                     />
-                    <p class="field-hint">Comma-separated gitignore-style patterns, merged with project rules.</p>
+                    <p class="field-hint">{{ t('review.override.excludeHint') }}</p>
                   </div>
                 </div>
 
                 <div class="switch-row">
                   <div>
-                    <p class="switch-row__title">Skip post-filtering</p>
-                    <p class="switch-row__text">Keep every comment the agent submits, including lower-confidence notes.</p>
+                    <p class="switch-row__title">{{ t('review.filter.title') }}</p>
+                    <p class="switch-row__text">{{ t('review.filter.description') }}</p>
                   </div>
                   <el-switch v-model="form.no_filter" />
                 </div>
@@ -287,7 +316,7 @@
           <div class="form-footer__command">
             <span class="form-footer__label">
               <el-icon><Operation /></el-icon>
-              Equivalent command
+              {{ t('review.command.label') }}
             </span>
             <CommandBar :command="commandPreview" />
           </div>
@@ -298,7 +327,7 @@
               @click="submit(true)"
             >
               <el-icon class="btn-icon"><View /></el-icon>
-              Preview scope
+              {{ t('review.actions.preview') }}
             </el-button>
             <el-button
               type="primary"
@@ -307,14 +336,14 @@
               :disabled="!canRun || submitting !== null"
             >
               <el-icon class="btn-icon"><VideoPlay /></el-icon>
-              Start review
+              {{ t('review.actions.start') }}
             </el-button>
           </div>
         </footer>
       </form>
 
       <aside class="rail">
-        <SurfaceCard title="Active model" subtitle="Resolved for this run">
+        <SurfaceCard :title="t('review.model.title')" :subtitle="t('review.model.subtitle')">
           <div class="rail-model">
             <div class="rail-model__mark"><BrandMark :size="20" /></div>
             <div class="rail-model__body">
@@ -325,28 +354,31 @@
           </div>
           <dl class="rail-meta">
             <div>
-              <dt>Auth</dt>
+              <dt>{{ t('review.model.auth') }}</dt>
               <dd>{{ authLabel(effectiveAuthMode) }}</dd>
             </div>
             <div>
-              <dt>Effort</dt>
-              <dd>{{ form.effort || 'Configured default' }}</dd>
+              <dt>{{ t('review.model.effort') }}</dt>
+              <dd>{{ form.effort || t('review.model.configuredDefault') }}</dd>
             </div>
             <div v-if="form.resume">
-              <dt>Resume</dt>
+              <dt>{{ t('review.model.resume') }}</dt>
               <dd class="mono">{{ form.resume.slice(0, 12) }}…</dd>
             </div>
           </dl>
           <p v-if="!effectiveConfigured" class="rail-warning">
-            No model is configured. Choose a provider before running the review.
+            {{ t('review.model.warning') }}
           </p>
           <router-link class="rail-link" to="/providers">
-            Manage providers
+            {{ t('review.model.manage') }}
             <el-icon><ArrowRight /></el-icon>
           </router-link>
         </SurfaceCard>
 
-        <SurfaceCard title="Review pipeline" subtitle="What happens after you start">
+        <SurfaceCard
+          :title="t('review.pipeline.title')"
+          :subtitle="t('review.pipeline.subtitle')"
+        >
           <ol class="pipeline">
             <li v-for="(step, index) in pipeline" :key="step.title">
               <span class="pipeline__index">{{ index + 1 }}</span>
@@ -359,12 +391,11 @@
         </SurfaceCard>
 
         <div class="tip-card">
-          <p class="tip-card__label">A good review starts with intent</p>
+          <p class="tip-card__label">{{ t('review.tip.title') }}</p>
           <p class="tip-card__text">
-            Add the background behind the change. The agent uses it to tell a deliberate trade-off
-            from a bug, which cuts down noisy findings.
+            {{ t('review.tip.text') }}
           </p>
-          <p class="tip-card__foot">Preview costs no model tokens.</p>
+          <p class="tip-card__foot">{{ t('review.tip.foot') }}</p>
         </div>
       </aside>
     </div>
@@ -392,6 +423,7 @@ import CommandBar from '@/components/CommandBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SurfaceCard from '@/components/SurfaceCard.vue'
 import { api, errorMessage } from '@/api/client'
+import { useI18n } from '@/i18n'
 import { useMetaStore } from '@/stores/meta'
 import { createReviewForm, reviewCommand } from '@/utils/command'
 import { formatCount } from '@/utils/format'
@@ -401,6 +433,7 @@ import type { ProviderCard, ProvidersResponse, ReviewFormState, ReviewRequest } 
 const route = useRoute()
 const router = useRouter()
 const { meta, refresh } = useMetaStore()
+const { t, tn } = useI18n()
 
 const form = reactive<ReviewFormState>(createReviewForm())
 const providers = ref<ProvidersResponse | null>(null)
@@ -408,35 +441,62 @@ const advancedPanels = ref<string[]>([])
 const submitting = ref<'run' | 'preview' | null>(null)
 const resumeId = ref('')
 
-const modes = [
-  { value: 'workspace', label: 'Working tree', description: 'Staged, unstaged, and untracked files', icon: Monitor },
-  { value: 'commit', label: 'Single commit', description: 'Diff a commit against its parent', icon: Clock },
-  { value: 'range', label: 'Branch range', description: 'Compare two refs with a merge base', icon: Connection },
-] as const
+const modes = computed(() => [
+  {
+    value: 'workspace',
+    label: t('review.mode.workspace.label'),
+    description: t('review.mode.workspace.description'),
+    icon: Monitor,
+  },
+  {
+    value: 'commit',
+    label: t('review.mode.commit.label'),
+    description: t('review.mode.commit.description'),
+    icon: Clock,
+  },
+  {
+    value: 'range',
+    label: t('review.mode.range.label'),
+    description: t('review.mode.range.description'),
+    icon: Connection,
+  },
+] as const)
 
-const effortOptions = [
-  { value: '', label: 'Default' },
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-]
+const effortOptions = computed(() => [
+  { value: '', label: t('review.effort.default') },
+  { value: 'low', label: t('review.effort.low') },
+  { value: 'medium', label: t('review.effort.medium') },
+  { value: 'high', label: t('review.effort.high') },
+])
 
-const pipeline = [
-  { title: 'Select and filter', description: 'Reads the diff, applies rules, and drops binaries, secrets, and oversized files.' },
-  { title: 'Group related files', description: 'Bundles files that belong together so each review unit has full context.' },
-  { title: 'Agent review', description: 'The agent reads code, searches the repo, and submits line-precise findings.' },
-  { title: 'Filter and save', description: 'Low-confidence comments are filtered, then findings and coverage are persisted.' },
-]
+const pipeline = computed(() => [
+  {
+    title: t('review.pipeline.select.title'),
+    description: t('review.pipeline.select.description'),
+  },
+  {
+    title: t('review.pipeline.group.title'),
+    description: t('review.pipeline.group.description'),
+  },
+  {
+    title: t('review.pipeline.review.title'),
+    description: t('review.pipeline.review.description'),
+  },
+  {
+    title: t('review.pipeline.save.title'),
+    description: t('review.pipeline.save.description'),
+  },
+])
 
 const repo = computed(() => meta.value?.repo)
 const active = computed(() => meta.value?.config.active)
 const canRun = computed(() => Boolean(repo.value?.is_git) && !scopeError.value && submitting.value === null)
 const scopeError = computed(() => {
-  if (!repo.value?.is_git) return 'Open the console from a git repository to run a review.'
-  if (form.mode === 'commit' && !form.commit.trim()) return 'Choose a commit or tag to review.'
+  if (!repo.value?.is_git) return t('review.error.noRepo')
+  if (form.mode === 'commit' && !form.commit.trim()) return t('review.error.commit')
   if (form.mode === 'range') {
-    if (!form.from.trim() || !form.to.trim()) return 'Choose both a from and a to ref.'
-    if (form.from.trim() === form.to.trim()) return 'The from and to refs must be different.'
+    if (!form.from.trim() || !form.to.trim()) return t('review.error.refs')
+    if (form.from.trim() === form.to.trim()) return t('review.error.sameRefs')
   }
   return ''
 })
@@ -472,33 +532,33 @@ const modelOptions = computed(() => {
 
 const effectiveProviderLabel = computed(() => {
   if (form.provider) return selectedProvider.value?.display_name || form.provider
-  return active.value?.provider_label || 'No provider configured'
+  return active.value?.provider_label || t('review.model.noProvider')
 })
 const effectiveModel = computed(() => {
   if (form.model) return form.model
-  if (selectedProvider.value) return selectedProvider.value.model || 'Select a model'
-  return active.value?.model || 'No model selected'
+  if (selectedProvider.value) return selectedProvider.value.model || t('review.model.selectModel')
+  return active.value?.model || t('review.model.noModel')
 })
 const effectiveAuthMode = computed(() => selectedProvider.value?.auth_mode ?? active.value?.auth_mode)
 const effectiveConfigured = computed(() =>
   form.provider ? Boolean(selectedProvider.value?.configured) : Boolean(active.value?.configured),
 )
 const overrideSummary = computed(() => {
-  if (form.provider && form.model) return 'provider + model override'
-  if (form.provider) return 'provider override'
-  if (form.model) return 'model override'
+  if (form.provider && form.model) return t('review.override.summaryBoth')
+  if (form.provider) return t('review.override.summaryProvider')
+  if (form.model) return t('review.override.summaryModel')
   return ''
 })
 const effortHint = computed(() => {
   switch (form.effort) {
     case 'low':
-      return 'One review round per group. Fastest, best for small changes.'
+      return t('review.effort.hint.low')
     case 'high':
-      return 'Up to three rounds per group. Slower, best for subtle or risky changes.'
+      return t('review.effort.hint.high')
     case 'medium':
-      return 'Two review rounds per group. The default balance.'
+      return t('review.effort.hint.medium')
     default:
-      return 'Use the configured effort (medium unless changed in Settings).'
+      return t('review.effort.hint.default')
   }
 })
 
@@ -551,7 +611,7 @@ function payload(preview: boolean): ReviewRequest {
 
 async function submit(preview: boolean): Promise<void> {
   if (!canRun.value) {
-    ElMessage.warning(scopeError.value || 'The review is already starting.')
+    ElMessage.warning(scopeError.value || t('review.error.busy'))
     return
   }
   submitting.value = preview ? 'preview' : 'run'

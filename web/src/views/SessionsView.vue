@@ -2,30 +2,45 @@
 <template>
   <div class="page">
     <PageHeader
-      eyebrow="History"
-      title="Sessions"
-      description="Every review and scan is persisted as a JSONL session under ~/.opencodereview/sessions. Open one to inspect findings, coverage, and the run manifest."
+      :eyebrow="t('nav.group.history')"
+      :title="t('nav.sessions')"
+      :description="t('sessions.header.description')"
     >
       <template #actions>
         <el-button text :loading="loading" @click="load">
           <el-icon class="btn-icon"><Refresh /></el-icon>
-          Refresh
+          {{ t('common.refresh') }}
         </el-button>
         <el-button type="primary" @click="go('/review')">
           <el-icon class="btn-icon"><EditPen /></el-icon>
-          New review
+          {{ t('topbar.newReview') }}
         </el-button>
       </template>
     </PageHeader>
 
     <div class="stat-grid">
-      <StatTile label="Sessions" :value="formatCount(total)" :hint="latestHint" :icon="Collection" />
-      <StatTile label="Findings" :value="formatCount(totalFindings)" hint="Across saved sessions" :icon="ChatDotRound" />
-      <StatTile label="Files reviewed" :value="formatCount(totalFiles)" hint="Completed file items" :icon="Files" />
       <StatTile
-        label="Average findings"
+        :label="t('nav.sessions')"
+        :value="formatCount(total)"
+        :hint="latestHint"
+        :icon="Collection"
+      />
+      <StatTile
+        :label="t('sessions.stat.findings')"
+        :value="formatCount(totalFindings)"
+        :hint="t('sessions.stat.findingsHint')"
+        :icon="ChatDotRound"
+      />
+      <StatTile
+        :label="t('sessions.stat.files')"
+        :value="formatCount(totalFiles)"
+        :hint="t('sessions.stat.filesHint')"
+        :icon="Files"
+      />
+      <StatTile
+        :label="t('sessions.stat.average')"
         :value="averageFindings"
-        hint="Per saved session"
+        :hint="t('sessions.stat.averageHint')"
         :icon="DataLine"
         compact
       />
@@ -35,14 +50,14 @@
       <el-icon class="callout__icon"><WarningFilled /></el-icon>
       <div class="callout__content">
         <span>{{ error }}</span>
-        <el-button size="small" @click="load">Retry</el-button>
+        <el-button size="small" @click="load">{{ t('common.retry') }}</el-button>
       </div>
     </div>
 
     <section class="card sessions-card">
       <div class="toolbar">
         <div class="toolbar__search">
-          <el-input v-model="query" clearable placeholder="Search id, model, branch, or ref">
+          <el-input v-model="query" clearable :placeholder="t('sessions.toolbar.searchPlaceholder')">
             <template #prefix><el-icon><Search /></el-icon></template>
           </el-input>
         </div>
@@ -58,18 +73,18 @@
             {{ option.label }}
           </button>
         </div>
-        <span class="toolbar__count">{{ filtered.length }} shown</span>
+        <span class="toolbar__count">{{ t('sessions.toolbar.shown', { count: filtered.length }) }}</span>
       </div>
 
       <div class="session-table">
         <div class="session-table__head">
-          <span>Session</span>
-          <span>Started</span>
-          <span class="col-model">Model</span>
-          <span class="col-scope">Branch / scope</span>
-          <span>Files</span>
-          <span>Findings</span>
-          <span>Duration</span>
+          <span>{{ t('nav.session') }}</span>
+          <span>{{ t('sessions.table.started') }}</span>
+          <span class="col-model">{{ t('sessions.table.model') }}</span>
+          <span class="col-scope">{{ t('sessions.table.scope') }}</span>
+          <span>{{ t('sessions.table.files') }}</span>
+          <span>{{ t('sessions.table.findings') }}</span>
+          <span>{{ t('sessions.table.duration') }}</span>
           <span />
         </div>
 
@@ -95,7 +110,7 @@
               </span>
               <span class="session-cell__sub mono">
                 {{ shortId(session.session_id, 12) }}
-                <span v-if="session.resumed_from" class="session-cell__resume">resumed</span>
+                <span v-if="session.resumed_from" class="session-cell__resume">{{ t('sessions.row.resumed') }}</span>
               </span>
             </span>
             <span class="session-cell">
@@ -120,8 +135,8 @@
             </span>
             <span class="session-cell mono">{{ formatDurationNs(session.duration_ns) }}</span>
             <span class="session-cell session-cell--actions">
-              <el-tooltip content="Delete session" placement="top" :show-after="300">
-                <button class="row-action" type="button" aria-label="Delete session" @click.stop="askDelete(session)">
+              <el-tooltip :content="t('sessions.delete.action')" placement="top" :show-after="300">
+                <button class="row-action" type="button" :aria-label="t('sessions.delete.action')" @click.stop="askDelete(session)">
                   <el-icon><Delete /></el-icon>
                 </button>
               </el-tooltip>
@@ -132,20 +147,18 @@
 
         <EmptyState
           v-else
-          :title="sessions.length ? 'No sessions match' : 'No sessions yet'"
-          :description="
-            sessions.length
-              ? 'Try a different search term or status filter.'
-              : 'Run a review or scan and its findings will be saved here.'
-          "
+          :title="sessions.length ? t('sessions.empty.noMatch') : t('sessions.empty.none')"
+          :description="sessions.length ? t('sessions.empty.noMatchHint') : t('sessions.empty.noneHint')"
         >
-          <el-button v-if="!sessions.length" type="primary" size="small" @click="go('/review')">Run a review</el-button>
-          <el-button v-else size="small" @click="clearFilters">Clear filters</el-button>
+          <el-button v-if="!sessions.length" type="primary" size="small" @click="go('/review')">
+            {{ t('sessions.empty.runReview') }}
+          </el-button>
+          <el-button v-else size="small" @click="clearFilters">{{ t('sessions.empty.clearFilters') }}</el-button>
         </EmptyState>
       </div>
 
       <footer v-if="filtered.length > pageSize" class="sessions-footer">
-        <span class="muted">{{ filtered.length }} sessions · page {{ page }}</span>
+        <span class="muted">{{ t('sessions.footer.summary', { count: filtered.length, page: page }) }}</span>
         <el-pagination
           v-model:current-page="page"
           :page-size="pageSize"
@@ -157,15 +170,14 @@
       </footer>
     </section>
 
-    <el-dialog v-model="deleteOpen" title="Delete session" width="430px" append-to-body>
+    <el-dialog v-model="deleteOpen" :title="t('sessions.delete.dialogTitle')" width="430px" append-to-body>
       <p class="dialog-text">
-        This removes the saved session and its findings from disk. The review itself is not
-        affected, but the history cannot be recovered.
+        {{ t('sessions.delete.description') }}
       </p>
       <p v-if="deleteTarget" class="dialog-session mono">{{ deleteTarget.session_id }}</p>
       <template #footer>
-        <el-button :disabled="deleting" @click="deleteOpen = false">Cancel</el-button>
-        <el-button type="danger" :loading="deleting" @click="confirmDelete">Delete session</el-button>
+        <el-button :disabled="deleting" @click="deleteOpen = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="danger" :loading="deleting" @click="confirmDelete">{{ t('sessions.delete.action') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -191,6 +203,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import StatTile from '@/components/StatTile.vue'
 import { api, errorMessage } from '@/api/client'
+import { useI18n } from '@/i18n'
 import {
   formatCount,
   formatDate,
@@ -202,6 +215,7 @@ import { sessionModeLabel, sessionState, type Tone } from '@/utils/status'
 import type { SessionSummary } from '@/types'
 
 const router = useRouter()
+const { t, tn } = useI18n()
 const sessions = ref<SessionSummary[]>([])
 const total = ref(0)
 const loading = ref(true)
@@ -214,13 +228,13 @@ const deleteOpen = ref(false)
 const deleteTarget = ref<SessionSummary | null>(null)
 const deleting = ref(false)
 
-const statusOptions = [
-  { value: 'all', label: 'All' },
-  { value: 'complete', label: 'Complete' },
-  { value: 'partial', label: 'Partial' },
-  { value: 'failed', label: 'Failed' },
-  { value: 'interrupted', label: 'Interrupted' },
-]
+const statusOptions = computed(() => [
+  { value: 'all', label: t('sessions.filter.all') },
+  { value: 'complete', label: t('status.complete') },
+  { value: 'partial', label: t('status.partial') },
+  { value: 'failed', label: t('status.failed') },
+  { value: 'interrupted', label: t('status.interrupted') },
+])
 
 const filtered = computed(() => {
   const term = query.value.trim().toLowerCase()
@@ -260,7 +274,11 @@ const averageFindings = computed(() => {
   if (!sessions.value.length) return '--'
   return (totalFindings.value / sessions.value.length).toFixed(1)
 })
-const latestHint = computed(() => (sessions.value.length ? `Latest ${formatRelative(sessions.value[0].start_time)}` : 'No history yet'))
+const latestHint = computed(() =>
+  sessions.value.length
+    ? t('sessions.stat.latest', { when: formatRelative(sessions.value[0].start_time) })
+    : t('sessions.stat.noHistory'),
+)
 
 watch([query, statusFilter], () => {
   page.value = 1
@@ -282,10 +300,16 @@ function stateDot(tone: Tone): string {
 }
 
 function scopeRefs(session: SessionSummary): string {
-  if (session.review_mode === 'scan') return 'whole repository'
-  if (session.review_mode === 'commit') return session.diff_commit ? `commit ${session.diff_commit.slice(0, 10)}` : 'commit'
+  if (session.review_mode === 'scan') return t('sessions.scope.wholeRepository')
+  if (session.review_mode === 'commit') {
+    return session.diff_commit
+      ? t('sessions.scope.commit', { id: session.diff_commit.slice(0, 10) })
+      : t('sessions.scope.commitOnly')
+  }
   if (session.diff_from && session.diff_to) return `${session.diff_from}..${session.diff_to}`
-  return session.review_mode === 'workspace' ? 'working tree' : session.review_mode || '--'
+  return session.review_mode === 'workspace'
+    ? t('sessions.scope.workingTree')
+    : session.review_mode || '--'
 }
 
 function filePercent(session: SessionSummary): number {
@@ -319,7 +343,7 @@ async function confirmDelete(): Promise<void> {
     await api.deleteSession(target.session_id)
     deleteOpen.value = false
     deleteTarget.value = null
-    ElMessage.success('Session deleted')
+    ElMessage.success(t('sessions.delete.success'))
     await load()
     if (!paginated.value.length && page.value > 1) page.value -= 1
   } catch (err) {

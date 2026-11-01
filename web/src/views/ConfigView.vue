@@ -2,18 +2,18 @@
 <template>
   <div class="page">
     <PageHeader
-      eyebrow="Setup"
-      title="Settings"
-      description="Review defaults, legacy endpoint settings, telemetry, and MCP servers. Writes go through the ocr config command, so the CLI and this console never disagree."
+      :eyebrow="t('nav.group.setup')"
+      :title="t('nav.settings')"
+      :description="t('config.page.description')"
     >
       <template #actions>
         <el-button text :loading="loading" @click="load()">
           <el-icon class="btn-icon"><Refresh /></el-icon>
-          Reload
+          {{ t('config.actions.reload') }}
         </el-button>
         <el-button type="primary" @click="go('/providers')">
           <el-icon class="btn-icon"><Connection /></el-icon>
-          Manage providers
+          {{ t('config.actions.manageProviders') }}
         </el-button>
       </template>
     </PageHeader>
@@ -22,7 +22,7 @@
       <el-icon class="callout__icon"><WarningFilled /></el-icon>
       <div class="callout__content">
         <span>{{ error }}</span>
-        <el-button size="small" @click="load()">Retry</el-button>
+        <el-button size="small" @click="load()">{{ t('common.retry') }}</el-button>
       </div>
     </div>
 
@@ -39,13 +39,13 @@
 
     <div v-else class="settings-grid">
       <div class="stack settings-main">
-        <SurfaceCard title="Model and review defaults" subtitle="These values apply to every review and scan unless overridden per run.">
+        <SurfaceCard :title="t('config.model.title')" :subtitle="t('config.model.subtitle')">
           <div class="active-provider">
             <span class="active-provider__mark"><BrandMark :size="18" /></span>
             <div class="active-provider__body">
-              <p class="active-provider__name">{{ configView?.active.provider_label || 'No provider configured' }}</p>
+              <p class="active-provider__name">{{ configView?.active.provider_label || t('config.model.noProvider') }}</p>
               <p class="active-provider__meta">
-                {{ configView?.active.model || 'No model selected' }}
+                {{ configView?.active.model || t('config.model.noModel') }}
                 <span class="sep">·</span>
                 {{ authLabel(configView?.active.auth_mode) }}
                 <span class="sep">·</span>
@@ -53,97 +53,96 @@
               </p>
             </div>
             <router-link class="text-link" to="/providers">
-              Change
+              {{ t('config.model.change') }}
               <el-icon><ArrowRight /></el-icon>
             </router-link>
           </div>
 
           <el-form label-position="top" class="settings-form" @submit.prevent="saveModel">
             <div class="form-grid">
-              <el-form-item label="Model">
+              <el-form-item :label="t('config.model.modelLabel')">
                 <el-select
                   v-model="modelForm.model"
                   class="full-width"
                   filterable
                   allow-create
                   default-first-option
-                  placeholder="Use the provider's configured model"
+                  :placeholder="t('config.model.modelPlaceholder')"
                 >
                   <el-option v-for="model in modelOptions" :key="model" :label="model" :value="model" />
                 </el-select>
-                <p class="field-hint">Written to the active provider. An empty value leaves runs to fail loudly instead of guessing.</p>
+                <p class="field-hint">{{ t('config.model.modelHint') }}</p>
               </el-form-item>
-              <el-form-item label="Review effort">
-                <el-select v-model="modelForm.effort" class="full-width" placeholder="Use default (medium)">
-                  <el-option label="Use default (medium)" value="" />
-                  <el-option label="Low - one round" value="low" />
-                  <el-option label="Medium - two rounds" value="medium" />
-                  <el-option label="High - three rounds" value="high" />
+              <el-form-item :label="t('config.model.effortLabel')">
+                <el-select v-model="modelForm.effort" class="full-width" :placeholder="t('config.model.effortDefault')">
+                  <el-option :label="t('config.model.effortDefault')" value="" />
+                  <el-option :label="t('config.model.effortLow')" value="low" />
+                  <el-option :label="t('config.model.effortMedium')" value="medium" />
+                  <el-option :label="t('config.model.effortHigh')" value="high" />
                 </el-select>
-                <p class="field-hint">Controls how many review rounds each file group gets.</p>
+                <p class="field-hint">{{ t('config.model.effortHint') }}</p>
               </el-form-item>
-              <el-form-item label="Max tokens per group">
+              <el-form-item :label="t('config.model.maxTokensLabel')">
                 <el-input-number v-model="modelForm.maxTokens" :min="0" :step="1000" controls-position="right" />
-                <p class="field-hint">0 clears the setting and uses the embedded template default.</p>
+                <p class="field-hint">{{ t('config.model.maxTokensHint') }}</p>
               </el-form-item>
-              <el-form-item label="Output language">
-                <el-input v-model="modelForm.language" placeholder="English" maxlength="80" />
-                <p class="field-hint">Language the model should write review comments in.</p>
+              <el-form-item :label="t('config.model.languageLabel')">
+                <el-input v-model="modelForm.language" :placeholder="t('config.model.languagePlaceholder')" maxlength="80" />
+                <p class="field-hint">{{ t('config.model.languageHint') }}</p>
               </el-form-item>
             </div>
             <div class="form-actions">
-              <span v-if="modelDirty" class="dirty-note">Unsaved changes</span>
+              <span v-if="modelDirty" class="dirty-note">{{ t('config.common.unsavedChanges') }}</span>
               <el-button type="primary" :disabled="!modelDirty" :loading="saving === 'model'" @click="saveModel">
-                Save defaults
+                {{ t('config.model.save') }}
               </el-button>
             </div>
           </el-form>
         </SurfaceCard>
 
         <SurfaceCard
-          title="Legacy endpoint (llm.*)"
-          subtitle="A single OpenAI- or Anthropic-compatible endpoint without a provider preset."
+          :title="t('config.legacy.title')"
+          :subtitle="t('config.legacy.subtitle')"
         >
           <div v-if="configView?.active.provider" class="callout callout--warning legacy-warning">
             <el-icon class="callout__icon"><InfoFilled /></el-icon>
             <div>
-              The active provider overrides <span class="code-inline">llm.*</span> settings. Remove the
-              active provider on the Providers page before relying on this endpoint.
+              {{ t('config.legacy.overrideBefore') }}<span class="code-inline">llm.*</span>{{ t('config.legacy.overrideAfter') }}
             </div>
           </div>
 
           <el-form label-position="top" class="settings-form" @submit.prevent="saveLlm">
             <div class="form-grid">
-              <el-form-item label="Endpoint URL">
+              <el-form-item :label="t('config.legacy.urlLabel')">
                 <el-input v-model="llmForm.url" placeholder="https://api.example.com/v1" />
               </el-form-item>
-              <el-form-item label="Model">
-                <el-input v-model="llmForm.model" placeholder="gpt-5.4 or claude-sonnet-4-6" />
+              <el-form-item :label="t('config.legacy.modelLabel')">
+                <el-input v-model="llmForm.model" :placeholder="t('config.legacy.modelPlaceholder')" />
               </el-form-item>
-              <el-form-item label="Protocol">
-                <el-select v-model="llmForm.protocol" class="full-width" placeholder="Anthropic messages">
-                  <el-option label="Anthropic messages" value="anthropic" />
-                  <el-option label="OpenAI chat completions" value="openai" />
-                  <el-option label="OpenAI responses" value="openai-responses" />
+              <el-form-item :label="t('config.legacy.protocolLabel')">
+                <el-select v-model="llmForm.protocol" class="full-width" :placeholder="t('config.legacy.protocolAnthropic')">
+                  <el-option :label="t('config.legacy.protocolAnthropic')" value="anthropic" />
+                  <el-option :label="t('config.legacy.protocolOpenaiChat')" value="openai" />
+                  <el-option :label="t('config.legacy.protocolOpenaiResponses')" value="openai-responses" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="Request timeout (seconds)">
+              <el-form-item :label="t('config.legacy.timeoutLabel')">
                 <el-input-number v-model="llmForm.timeoutSec" :min="0" :max="86400" controls-position="right" />
-                <p class="field-hint">0 uses the client default.</p>
+                <p class="field-hint">{{ t('config.legacy.timeoutHint') }}</p>
               </el-form-item>
-              <el-form-item label="Auth token">
+              <el-form-item :label="t('config.legacy.authTokenLabel')">
                 <el-input
                   v-model="llmForm.authToken"
                   type="password"
                   show-password
                   autocomplete="off"
-                  :placeholder="configView?.llm.auth_token_set ? 'Stored token present - paste to replace' : 'Paste an auth token'"
+                  :placeholder="configView?.llm.auth_token_set ? t('config.legacy.authTokenPlaceholderStored') : t('config.legacy.authTokenPlaceholder')"
                 />
-                <p class="field-hint">Stored tokens are never returned to the browser.</p>
+                <p class="field-hint">{{ t('config.legacy.authTokenHint') }}</p>
               </el-form-item>
-              <el-form-item label="Auth token command">
+              <el-form-item :label="t('config.legacy.authTokenCmdLabel')">
                 <el-input v-model="llmForm.authTokenCmd" placeholder="secret-tool lookup llm token" />
-                <p class="field-hint">Runs only when no static token is stored.</p>
+                <p class="field-hint">{{ t('config.legacy.authTokenCmdHint') }}</p>
               </el-form-item>
             </div>
             <div class="form-actions form-actions--split">
@@ -154,48 +153,48 @@
                 :loading="saving === 'clear-token'"
                 @click="clearToken"
               >
-                Clear stored token
+                {{ t('config.legacy.clearToken') }}
               </el-button>
               <span class="spacer" />
-              <span v-if="llmDirty" class="dirty-note">Unsaved changes</span>
+              <span v-if="llmDirty" class="dirty-note">{{ t('config.common.unsavedChanges') }}</span>
               <el-button type="primary" :disabled="!llmDirty" :loading="saving === 'llm'" @click="saveLlm">
-                Save endpoint
+                {{ t('config.legacy.save') }}
               </el-button>
             </div>
           </el-form>
         </SurfaceCard>
 
-        <SurfaceCard title="Telemetry" subtitle="Off by default. Content logging is only meaningful when telemetry is enabled.">
+        <SurfaceCard :title="t('config.telemetry.title')" :subtitle="t('config.telemetry.subtitle')">
           <el-form label-position="top" class="settings-form" @submit.prevent="saveTelemetry">
             <div class="toggle-row">
               <div>
-                <p class="toggle-row__title">Enable telemetry</p>
-                <p class="toggle-row__text">Export traces and metrics for review runs.</p>
+                <p class="toggle-row__title">{{ t('config.telemetry.enableTitle') }}</p>
+                <p class="toggle-row__text">{{ t('config.telemetry.enableText') }}</p>
               </div>
               <el-switch v-model="telemetryForm.enabled" />
             </div>
             <div class="form-grid telemetry-grid">
-              <el-form-item label="Exporter">
-                <el-select v-model="telemetryForm.exporter" class="full-width" placeholder="Default">
-                  <el-option label="Console" value="console" />
-                  <el-option label="OTLP" value="otlp" />
+              <el-form-item :label="t('config.telemetry.exporterLabel')">
+                <el-select v-model="telemetryForm.exporter" class="full-width" :placeholder="t('config.telemetry.exporterPlaceholder')">
+                  <el-option :label="t('config.telemetry.exporterConsole')" value="console" />
+                  <el-option :label="t('config.telemetry.exporterOtlp')" value="otlp" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="OTLP endpoint">
+              <el-form-item :label="t('config.telemetry.otlpLabel')">
                 <el-input v-model="telemetryForm.otlpEndpoint" placeholder="http://localhost:4318" />
               </el-form-item>
             </div>
             <div class="toggle-row">
               <div>
-                <p class="toggle-row__title">Include content</p>
-                <p class="toggle-row__text">Add prompts and responses to telemetry. This can contain source code.</p>
+                <p class="toggle-row__title">{{ t('config.telemetry.contentTitle') }}</p>
+                <p class="toggle-row__text">{{ t('config.telemetry.contentText') }}</p>
               </div>
               <el-switch v-model="telemetryForm.contentLog" />
             </div>
             <div class="form-actions">
-              <span v-if="telemetryDirty" class="dirty-note">Unsaved changes</span>
+              <span v-if="telemetryDirty" class="dirty-note">{{ t('config.common.unsavedChanges') }}</span>
               <el-button type="primary" :disabled="!telemetryDirty" :loading="saving === 'telemetry'" @click="saveTelemetry">
-                Save telemetry
+                {{ t('config.telemetry.save') }}
               </el-button>
             </div>
           </el-form>
@@ -203,45 +202,43 @@
       </div>
 
       <aside class="stack settings-rail">
-        <SurfaceCard title="Config file" subtitle="The CLI remains the source of truth">
+        <SurfaceCard :title="t('config.file.title')" :subtitle="t('config.file.subtitle')">
           <div class="config-path">
             <el-icon><FolderOpened /></el-icon>
-            <span class="mono" :title="configView?.path">{{ configView?.path || 'Loading…' }}</span>
+            <span class="mono" :title="configView?.path">{{ configView?.path || t('config.file.loading') }}</span>
           </div>
           <div class="config-meta">
             <span class="chip">
               <span class="dot" :class="configView?.exists ? 'dot--green' : 'dot--amber'" />
-              {{ configView?.exists ? 'File exists' : 'Not created yet' }}
+              {{ configView?.exists ? t('config.file.exists') : t('config.file.notCreated') }}
             </span>
-            <span v-if="configView?.error" class="chip chip--accent">parse error</span>
+            <span v-if="configView?.error" class="chip chip--accent">{{ t('config.file.parseError') }}</span>
           </div>
           <p v-if="configView?.error" class="config-error">{{ configView.error }}</p>
           <p class="config-note">
-            Every save runs <span class="code-inline">ocr config set</span> or
-            <span class="code-inline">ocr config unset</span>, preserving unknown fields and provider
-            layout.
+            {{ t('config.file.noteBefore') }}<span class="code-inline">ocr config set</span>{{ t('config.file.noteBetween') }}<span class="code-inline">ocr config unset</span>{{ t('config.file.noteAfter') }}
           </p>
           <div class="config-actions">
             <el-button size="small" @click="copyPath">
               <el-icon class="btn-icon"><CopyDocument /></el-icon>
-              Copy path
+              {{ t('config.file.copyPath') }}
             </el-button>
-            <el-button size="small" text @click="go('/providers')">Providers</el-button>
+            <el-button size="small" text @click="go('/providers')">{{ t('nav.providers') }}</el-button>
           </div>
         </SurfaceCard>
 
-        <SurfaceCard title="MCP servers" :subtitle="`${configView?.mcp_servers?.length ?? 0} configured`">
+        <SurfaceCard :title="t('config.mcp.title')" :subtitle="t('config.mcp.configuredCount', { count: configView?.mcp_servers?.length ?? 0 })">
           <div v-if="configView?.mcp_servers?.length" class="mcp-list">
             <div v-for="server in configView.mcp_servers" :key="server.name" class="mcp-row">
               <div class="mcp-row__body">
                 <p class="mcp-row__name">{{ server.name }}</p>
                 <p class="mcp-row__meta">
                   <span class="chip chip--ghost">{{ server.type || 'stdio' }}</span>
-                  <span class="mono" :title="server.command || server.url">{{ server.command || server.url || 'no command' }}</span>
+                  <span class="mono" :title="server.command || server.url">{{ server.command || server.url || t('config.mcp.noCommand') }}</span>
                 </p>
               </div>
-              <el-tooltip content="Remove MCP server" placement="top" :show-after="300">
-                <button class="icon-button" type="button" aria-label="Remove MCP server" @click="removeMcp(server.name)">
+              <el-tooltip :content="t('config.mcp.removeServer')" placement="top" :show-after="300">
+                <button class="icon-button" type="button" :aria-label="t('config.mcp.removeServer')" @click="removeMcp(server.name)">
                   <el-icon><Delete /></el-icon>
                 </button>
               </el-tooltip>
@@ -249,16 +246,15 @@
           </div>
           <EmptyState
             v-else
-            title="No MCP servers"
-            description="MCP servers are managed with ocr config set mcp_servers.<name> in the terminal."
+            :title="t('config.mcp.emptyTitle')"
+            :description="t('config.mcp.emptyDescription')"
           />
         </SurfaceCard>
 
         <div class="settings-tip">
-          <p class="settings-tip__title">A note on secrets</p>
+          <p class="settings-tip__title">{{ t('config.secrets.title') }}</p>
           <p class="settings-tip__text">
-            API keys and auth tokens are written once and never sent back to this page. Prefer
-            <span class="code-inline">*_cmd</span> settings if you use a secret manager.
+            {{ t('config.secrets.textBefore') }}<span class="code-inline">*_cmd</span>{{ t('config.secrets.textAfter') }}
           </p>
         </div>
       </aside>
@@ -285,12 +281,14 @@ import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SurfaceCard from '@/components/SurfaceCard.vue'
 import { api, errorMessage } from '@/api/client'
+import { useI18n } from '@/i18n'
 import { useMetaStore } from '@/stores/meta'
 import { copyText } from '@/utils/clipboard'
 import { authLabel, sourceLabel } from '@/utils/status'
 import type { ConfigView } from '@/types'
 
 const router = useRouter()
+const { t, tn } = useI18n()
 const { refresh } = useMetaStore()
 
 const configView = ref<ConfigView | null>(null)
@@ -372,7 +370,7 @@ async function load(silent = false): Promise<void> {
   try {
     const view = await api.config()
     configView.value = view
-    if (view.error) error.value = `The config file could not be parsed: ${view.error}`
+    if (view.error) error.value = t('config.file.parseFailed', { error: view.error })
     modelForm.model = view.active.model || view.providers?.[view.active.provider || '']?.model || ''
     modelForm.effort = view.effort || ''
     modelForm.maxTokens = view.max_tokens || 0
@@ -415,7 +413,7 @@ async function applyChanges(set: Record<string, string>, unset: string[] = []): 
   const response = await api.applyConfig(set, unset)
   await Promise.all([load(true), refresh(true)])
   const first = response.messages.find(Boolean)
-  ElMessage.success(first ? first.replace(/^Set /, 'Saved: ') : 'Settings saved')
+  ElMessage.success(first ? first.replace(/^Set /, t('config.toast.savedPrefix')) : t('config.toast.saved'))
 }
 
 async function saveModel(): Promise<void> {
@@ -470,9 +468,9 @@ async function saveLlm(): Promise<void> {
 async function clearToken(): Promise<void> {
   try {
     await ElMessageBox.confirm(
-      'Clear the stored llm.auth_token? The endpoint will fail unless a token command or environment variable supplies one.',
-      'Clear auth token',
-      { confirmButtonText: 'Clear token', cancelButtonText: 'Cancel', type: 'warning' },
+      t('config.legacy.clearTokenConfirm'),
+      t('config.legacy.clearTokenTitle'),
+      { confirmButtonText: t('config.legacy.clearTokenConfirmButton'), cancelButtonText: t('common.cancel'), type: 'warning' },
     )
   } catch {
     return
@@ -509,9 +507,9 @@ async function saveTelemetry(): Promise<void> {
 async function removeMcp(name: string): Promise<void> {
   try {
     await ElMessageBox.confirm(
-      `Remove MCP server "${name}" from the configuration?`,
-      'Remove MCP server',
-      { confirmButtonText: 'Remove', cancelButtonText: 'Cancel', type: 'warning' },
+      t('config.mcp.removeConfirm', { name }),
+      t('config.mcp.removeServer'),
+      { confirmButtonText: t('config.mcp.removeButton'), cancelButtonText: t('common.cancel'), type: 'warning' },
     )
   } catch {
     return
@@ -525,8 +523,8 @@ async function removeMcp(name: string): Promise<void> {
 
 async function copyPath(): Promise<void> {
   const copied = await copyText(configView.value?.path ?? '')
-  if (copied) ElMessage.success('Config path copied')
-  else ElMessage.error('Could not copy the config path')
+  if (copied) ElMessage.success(t('config.file.copied'))
+  else ElMessage.error(t('config.file.copyFailed'))
 }
 
 function go(path: string): void {

@@ -3,7 +3,7 @@
   <div class="page">
     <PageHeader
       v-if="job"
-      :eyebrow="`${kindLabel} run`"
+      :eyebrow="t('run.header.eyebrow', { kind: kindLabel })"
       :title="job.title"
       :description="runDescription"
       :back-to="backTo"
@@ -11,32 +11,32 @@
     >
       <template #meta>
         <StatusPill :status="job.status" />
-        <span class="chip chip--mono">started {{ formatDate(job.started_at) }}</span>
+        <span class="chip chip--mono">{{ t('run.header.started', { time: formatDate(job.started_at) }) }}</span>
         <span class="chip">{{ duration }}</span>
-        <span v-if="job.exit_code !== undefined" class="chip chip--mono">exit {{ job.exit_code }}</span>
+        <span v-if="job.exit_code !== undefined" class="chip chip--mono">{{ t('run.header.exit', { code: job.exit_code }) }}</span>
         <span v-if="running" class="chip" :class="{ 'chip--accent': connected }">
           <span class="dot" :class="connected ? 'dot--accent dot--pulse' : 'dot--amber'" />
-          {{ connected ? 'live stream' : 'polling' }}
+          {{ connected ? t('run.header.liveStream') : t('run.header.polling') }}
         </span>
       </template>
       <template #actions>
         <template v-if="running">
-          <el-button type="danger" plain :loading="canceling" @click="cancelRun">Stop run</el-button>
+          <el-button type="danger" plain :loading="canceling" @click="cancelRun">{{ t('run.header.stop') }}</el-button>
         </template>
         <template v-else>
-          <el-button v-if="sessionId" @click="openSession">Open session</el-button>
-          <el-button @click="runAgain">Run again</el-button>
+          <el-button v-if="sessionId" @click="openSession">{{ t('run.header.openSession') }}</el-button>
+          <el-button @click="runAgain">{{ t('run.header.runAgain') }}</el-button>
         </template>
       </template>
     </PageHeader>
 
     <PageHeader
       v-else-if="error"
-      eyebrow="Run"
-      title="Run not available"
-      description="This run may have expired or the console was restarted."
+      :eyebrow="t('nav.run')"
+      :title="t('run.unavailable.title')"
+      :description="t('run.unavailable.description')"
       back-to="/"
-      back-label="Back to overview"
+      :back-label="t('notFound.backToOverview')"
     />
 
     <CommandBar v-if="job" :command="job.command_preview" />
@@ -45,7 +45,7 @@
       <el-icon class="callout__icon"><WarningFilled /></el-icon>
       <div class="callout__content">
         <span>{{ error }}</span>
-        <el-button size="small" @click="refresh">Retry</el-button>
+        <el-button size="small" @click="refresh">{{ t('common.retry') }}</el-button>
       </div>
     </div>
 
@@ -60,46 +60,46 @@
           :lines="job.logs ?? []"
           :running="running"
           :truncated="job.logs_truncated"
-          :title="`${kindLabel} output`"
+          :title="t('run.log.title', { kind: kindLabel })"
           :height="job.logs?.length ? 440 : 180"
         />
 
         <aside class="run-rail">
-          <SurfaceCard title="Run details" subtitle="Command, timing, and output location">
+          <SurfaceCard :title="t('run.details.title')" :subtitle="t('run.details.subtitle')">
             <dl class="detail-list">
               <div>
-                <dt>Status</dt>
+                <dt>{{ t('run.details.status') }}</dt>
                 <dd><StatusPill :status="job.status" /></dd>
               </div>
               <div>
-                <dt>Started</dt>
+                <dt>{{ t('run.details.started') }}</dt>
                 <dd>{{ formatDate(job.started_at) }}</dd>
               </div>
               <div>
-                <dt>Duration</dt>
+                <dt>{{ t('run.details.duration') }}</dt>
                 <dd>{{ duration }}</dd>
               </div>
               <div v-if="job.exit_code !== undefined">
-                <dt>Exit code</dt>
+                <dt>{{ t('run.details.exitCode') }}</dt>
                 <dd class="mono">{{ job.exit_code }}</dd>
               </div>
               <div v-if="llmModel">
-                <dt>Model</dt>
+                <dt>{{ t('run.details.model') }}</dt>
                 <dd class="mono" :title="llmModel">{{ llmModel }}</dd>
               </div>
               <div v-if="sessionId">
-                <dt>Session</dt>
+                <dt>{{ t('run.details.session') }}</dt>
                 <dd class="detail-list__session">
                   <button class="link-button mono" type="button" @click="openSession" :title="sessionId">
                     {{ shortId(sessionId, 12) }}
                   </button>
-                  <button class="icon-button" type="button" aria-label="Copy session id" @click="copySession">
+                  <button class="icon-button" type="button" :aria-label="t('run.details.copySession')" @click="copySession">
                     <el-icon><CopyDocument /></el-icon>
                   </button>
                 </dd>
               </div>
               <div>
-                <dt>Run id</dt>
+                <dt>{{ t('run.details.runId') }}</dt>
                 <dd class="mono">{{ shortId(job.id, 12) }}</dd>
               </div>
             </dl>
@@ -110,23 +110,23 @@
             </div>
           </SurfaceCard>
 
-          <SurfaceCard v-if="running" title="Current step" subtitle="Latest line from the run">
-            <p class="latest-line mono">{{ latestLine || 'Waiting for output…' }}</p>
+          <SurfaceCard v-if="running" :title="t('run.live.currentStep')" :subtitle="t('run.live.subtitle')">
+            <p class="latest-line mono">{{ latestLine || t('run.live.waiting') }}</p>
             <div class="live-hint">
               <span class="dot dot--accent dot--pulse" />
-              {{ connected ? 'Streaming progress from the CLI' : 'Falling back to polling' }}
+              {{ connected ? t('run.live.streaming') : t('run.live.fallback') }}
             </div>
           </SurfaceCard>
 
-          <SurfaceCard v-else-if="job.status === 'failed'" title="What to check">
+          <SurfaceCard v-else-if="job.status === 'failed'" :title="t('run.checks.title')">
             <ul class="check-list">
-              <li>Provider and model are configured on the Providers page.</li>
-              <li>The API key is valid and the endpoint is reachable.</li>
-              <li>The selected refs exist and contain reviewable changes.</li>
+              <li>{{ t('run.checks.provider') }}</li>
+              <li>{{ t('run.checks.apiKey') }}</li>
+              <li>{{ t('run.checks.refs') }}</li>
             </ul>
             <div class="rail-actions">
-              <router-link class="rail-link" to="/providers">Open providers <el-icon><ArrowRight /></el-icon></router-link>
-              <router-link class="rail-link" to="/settings">Open settings <el-icon><ArrowRight /></el-icon></router-link>
+              <router-link class="rail-link" to="/providers">{{ t('run.checks.openProviders') }} <el-icon><ArrowRight /></el-icon></router-link>
+              <router-link class="rail-link" to="/settings">{{ t('run.checks.openSettings') }} <el-icon><ArrowRight /></el-icon></router-link>
             </div>
           </SurfaceCard>
         </aside>
@@ -135,20 +135,20 @@
       <section class="result-section">
         <header class="result-section__head">
           <div>
-            <h2 class="section-title">Results</h2>
+            <h2 class="section-title">{{ t('run.result.title') }}</h2>
             <p class="result-section__sub">
-              {{ running ? 'The result panel fills in when the command exits.' : 'Structured output from the CLI, rendered for review.' }}
+              {{ running ? t('run.result.runningDescription') : t('run.result.description') }}
             </p>
           </div>
-          <span v-if="job.status === 'failed'" class="chip chip--accent">partial output</span>
+          <span v-if="job.status === 'failed'" class="chip chip--accent">{{ t('run.result.partial') }}</span>
         </header>
 
         <div v-if="running" class="result-waiting">
           <span class="result-waiting__spinner" />
           <div>
-            <p class="result-waiting__title">{{ kindLabel }} in progress</p>
+            <p class="result-waiting__title">{{ t('run.result.waitingTitle', { kind: kindLabel }) }}</p>
             <p class="result-waiting__text">
-              {{ job.logs?.length ? `${formatCount(job.logs.length)} progress lines received so far.` : 'The command is starting.' }}
+              {{ job.logs?.length ? tn('run.result.progressLines', job.logs.length, { count: formatCount(job.logs.length) }) : t('run.result.starting') }}
             </p>
           </div>
         </div>
@@ -159,13 +159,13 @@
           </div>
           <div class="connection-card__body">
             <h3 class="connection-card__title">
-              {{ job.status === 'succeeded' ? 'Connection verified' : 'Connection test failed' }}
+              {{ job.status === 'succeeded' ? t('run.connection.verifiedTitle') : t('run.connection.failedTitle') }}
             </h3>
             <p class="connection-card__text">
               {{
                 job.status === 'succeeded'
-                  ? 'The provider accepted the test conversation. You can run a review or scan now.'
-                  : 'The provider did not complete the test request. Check the error and the activity log.'
+                  ? t('run.connection.verifiedText')
+                  : t('run.connection.failedText')
               }}
             </p>
             <dl v-if="connectionDetails.length" class="connection-meta">
@@ -175,12 +175,12 @@
               </div>
             </dl>
             <details v-if="connectionOutput" class="connection-output">
-              <summary>Full test output</summary>
+              <summary>{{ t('run.connection.fullOutput') }}</summary>
               <pre>{{ connectionOutput }}</pre>
             </details>
             <div class="connection-actions">
-              <el-button size="small" @click="runAgain">Back to providers</el-button>
-              <el-button v-if="job.status === 'succeeded'" size="small" type="primary" @click="go('/review')">Run a review</el-button>
+              <el-button size="small" @click="runAgain">{{ t('run.header.backToProviders') }}</el-button>
+              <el-button v-if="job.status === 'succeeded'" size="small" type="primary" @click="go('/review')">{{ t('run.connection.runReview') }}</el-button>
             </div>
           </div>
         </div>
@@ -189,13 +189,13 @@
           <div v-if="job.status === 'failed'" class="callout callout--error result-callout">
             <el-icon class="callout__icon"><WarningFilled /></el-icon>
             <div>
-              <strong>The run did not finish cleanly.</strong>
-              {{ job.error || 'See the activity log for details.' }} Any findings produced before the failure are shown below.
+              <strong>{{ t('run.result.failedTitle') }}</strong>
+              {{ job.error || t('run.result.failedFallback') }} {{ t('run.result.failedFooter') }}
             </div>
           </div>
           <div v-else-if="job.status === 'canceled'" class="callout callout--warning result-callout">
             <el-icon class="callout__icon"><WarningFilled /></el-icon>
-            <div>Run canceled. Findings produced before cancellation are shown below.</div>
+            <div>{{ t('run.result.canceled') }}</div>
           </div>
           <ReviewResultPanel :result="result" />
         </template>
@@ -203,14 +203,14 @@
         <div v-else-if="job.status === 'failed' || job.status === 'canceled'" class="callout callout--error">
           <el-icon class="callout__icon"><WarningFilled /></el-icon>
           <div>
-            <strong>{{ job.status === 'canceled' ? 'Run canceled.' : 'The command failed.' }}</strong>
-            {{ job.error || 'No structured result was produced. The activity log above contains the details.' }}
+            <strong>{{ job.status === 'canceled' ? t('run.result.canceledTitle') : t('run.result.commandFailed') }}</strong>
+            {{ job.error || t('run.result.noResult') }}
           </div>
         </div>
 
         <div v-else class="callout">
           <el-icon class="callout__icon"><InfoFilled /></el-icon>
-          <div>This run finished without a structured result. The activity log above contains its output.</div>
+          <div>{{ t('run.result.noResultFinished') }}</div>
         </div>
       </section>
     </template>
@@ -235,6 +235,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import ReviewResultPanel from '@/components/ReviewResultPanel.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import SurfaceCard from '@/components/SurfaceCard.vue'
+import { useI18n } from '@/i18n'
 import { api, errorMessage } from '@/api/client'
 import { useJobStream } from '@/composables/useJobStream'
 import { formatCount, formatDate, formatElapsed, shortId } from '@/utils/format'
@@ -243,6 +244,7 @@ import type { PreviewResult, ReviewResult } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
+const { t, tn } = useI18n()
 const jobId = String(route.params.id ?? '')
 const { job, connected, error, start, refresh } = useJobStream(jobId)
 
@@ -256,11 +258,11 @@ const running = computed(() =>
 const kindLabel = computed(() => {
   switch (job.value?.kind) {
     case 'scan':
-      return 'Repository scan'
+      return t('run.kind.scan')
     case 'llm-test':
-      return 'Connection test'
+      return t('run.kind.llmTest')
     default:
-      return 'Code review'
+      return t('run.kind.review')
   }
 })
 const backTo = computed(() => {
@@ -276,16 +278,16 @@ const backTo = computed(() => {
 const backLabel = computed(() => {
   switch (job.value?.kind) {
     case 'scan':
-      return 'Back to scan'
+      return t('run.header.backToScan')
     case 'llm-test':
-      return 'Back to providers'
+      return t('run.header.backToProviders')
     default:
-      return 'Back to review'
+      return t('run.header.backToReview')
   }
 })
 const runDescription = computed(() => {
   if (!job.value) return ''
-  return `Started ${formatDate(job.value.started_at)} from the Web Console.`
+  return t('run.header.description', { time: formatDate(job.value.started_at) })
 })
 const duration = computed(() => {
   const current = job.value
@@ -324,11 +326,11 @@ const connectionDetails = computed(() =>
 async function cancelRun(): Promise<void> {
   try {
     await ElMessageBox.confirm(
-      'Stop this run? The command will be terminated and partial output will be kept.',
-      'Stop run',
+      t('run.confirm.message'),
+      t('run.confirm.title'),
       {
-        confirmButtonText: 'Stop run',
-        cancelButtonText: 'Keep running',
+        confirmButtonText: t('run.confirm.confirm'),
+        cancelButtonText: t('run.confirm.cancel'),
         type: 'warning',
       },
     )
@@ -339,7 +341,7 @@ async function cancelRun(): Promise<void> {
   try {
     await api.cancelJob(jobId)
     await refresh()
-    ElMessage.info('Stopping the run')
+    ElMessage.info(t('run.message.stopping'))
   } catch (err) {
     ElMessage.error(errorMessage(err))
   } finally {
@@ -355,8 +357,8 @@ function openSession(): void {
 
 async function copySession(): Promise<void> {
   const copied = await copyText(sessionId.value)
-  if (copied) ElMessage.success('Session id copied')
-  else ElMessage.error('Could not copy the session id')
+  if (copied) ElMessage.success(t('run.message.sessionCopied'))
+  else ElMessage.error(t('run.message.copyFailed'))
 }
 
 function runAgain(): void {

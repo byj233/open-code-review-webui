@@ -3,7 +3,7 @@
   <Teleport to="body">
     <transition name="palette">
       <div v-if="open" class="palette-overlay" @mousedown.self="close">
-        <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+        <div class="palette" role="dialog" aria-modal="true" :aria-label="t('palette.title')">
           <div class="palette__search">
             <el-icon class="palette__search-icon"><Search /></el-icon>
             <input
@@ -11,8 +11,8 @@
               v-model="query"
               class="palette__input"
               type="text"
-              placeholder="Search commands and pages..."
-              aria-label="Search commands"
+              :placeholder="t('palette.placeholder')"
+              :aria-label="t('palette.searchLabel')"
               @keydown.up.prevent="move(-1)"
               @keydown.down.prevent="move(1)"
               @keydown.enter.prevent="runActive"
@@ -42,17 +42,17 @@
                   <span class="palette__item-label">{{ item.label }}</span>
                   <span class="palette__item-hint">{{ item.hint }}</span>
                 </span>
-                <span class="palette__item-kind">{{ item.group }}</span>
+                <span class="palette__item-kind">{{ item.groupLabel }}</span>
               </button>
             </template>
           </div>
           <div v-else class="palette__empty">
-            No commands match “{{ query }}”.
+            {{ t('palette.empty', { query }) }}
           </div>
 
           <div class="palette__foot">
-            <span><span class="kbd">↑</span><span class="kbd">↓</span> navigate</span>
-            <span><span class="kbd">↵</span> select</span>
+            <span><span class="kbd">↑</span><span class="kbd">↓</span> {{ t('palette.navigate') }}</span>
+            <span><span class="kbd">↵</span> {{ t('palette.select') }}</span>
             <span class="palette__foot-brand">Open Code Review</span>
           </div>
         </div>
@@ -76,50 +76,69 @@ import {
   VideoPlay,
 } from '@element-plus/icons-vue'
 import { api, errorMessage } from '@/api/client'
+import { useI18n, type MessageKey } from '@/i18n'
 import type { Component } from 'vue'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ 'update:open': [value: boolean] }>()
 
+type PaletteGroup = 'navigate' | 'actions'
+
 interface PaletteItem {
   id: string
-  label: string
-  hint: string
-  group: 'Navigate' | 'Actions'
+  labelKey: MessageKey
+  hintKey: MessageKey
+  group: PaletteGroup
   icon: Component
   to?: string
   action?: 'test-connection'
 }
 
+interface RenderedItem extends PaletteItem {
+  label: string
+  hint: string
+  groupLabel: string
+}
+
 const router = useRouter()
+const { t } = useI18n()
 const query = ref('')
 const activeId = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
 
 const items: PaletteItem[] = [
-  { id: 'overview', label: 'Overview', hint: 'Workspace, sessions, and recent activity', group: 'Navigate', icon: Grid, to: '/' },
-  { id: 'review', label: 'Run a code review', hint: 'Review working tree, a commit, or a branch range', group: 'Navigate', icon: EditPen, to: '/review' },
-  { id: 'scan', label: 'Scan the repository', hint: 'Review whole files without a diff', group: 'Navigate', icon: Search, to: '/scan' },
-  { id: 'sessions', label: 'Sessions', hint: 'Browse saved review history', group: 'Navigate', icon: Collection, to: '/sessions' },
-  { id: 'providers', label: 'Providers', hint: 'Choose a model provider and add credentials', group: 'Navigate', icon: Connection, to: '/providers' },
-  { id: 'settings', label: 'Settings', hint: 'Review effort, tokens, telemetry, and MCP servers', group: 'Navigate', icon: Setting, to: '/settings' },
-  { id: 'rules', label: 'Review rules', hint: 'Inspect the built-in language rules', group: 'Navigate', icon: Reading, to: '/rules' },
-  { id: 'test', label: 'Test model connection', hint: 'Send a small request to the configured provider', group: 'Actions', icon: VideoPlay, action: 'test-connection' },
+  { id: 'overview', labelKey: 'palette.overview.label', hintKey: 'palette.overview.hint', group: 'navigate', icon: Grid, to: '/' },
+  { id: 'review', labelKey: 'palette.review.label', hintKey: 'palette.review.hint', group: 'navigate', icon: EditPen, to: '/review' },
+  { id: 'scan', labelKey: 'palette.scan.label', hintKey: 'palette.scan.hint', group: 'navigate', icon: Search, to: '/scan' },
+  { id: 'sessions', labelKey: 'palette.sessions.label', hintKey: 'palette.sessions.hint', group: 'navigate', icon: Collection, to: '/sessions' },
+  { id: 'providers', labelKey: 'palette.providers.label', hintKey: 'palette.providers.hint', group: 'navigate', icon: Connection, to: '/providers' },
+  { id: 'settings', labelKey: 'palette.settings.label', hintKey: 'palette.settings.hint', group: 'navigate', icon: Setting, to: '/settings' },
+  { id: 'rules', labelKey: 'palette.rules.label', hintKey: 'palette.rules.hint', group: 'navigate', icon: Reading, to: '/rules' },
+  { id: 'test', labelKey: 'palette.test.label', hintKey: 'palette.test.hint', group: 'actions', icon: VideoPlay, action: 'test-connection' },
 ]
 
-const filtered = computed(() => {
+const groupLabel = (group: PaletteGroup): string => t(`palette.group.${group}` as MessageKey)
+
+const filtered = computed<PaletteItem[]>(() => {
   const value = query.value.trim().toLowerCase()
   if (!value) return items
   return items.filter((item) =>
-    `${item.label} ${item.hint} ${item.group}`.toLowerCase().includes(value),
+    `${t(item.labelKey)} ${t(item.hintKey)} ${groupLabel(item.group)}`.toLowerCase().includes(value),
   )
 })
 
-const grouped = computed(() => {
-  const groups: Array<{ label: string; items: PaletteItem[] }> = []
-  for (const label of ['Navigate', 'Actions'] as const) {
-    const groupItems = filtered.value.filter((item) => item.group === label)
-    if (groupItems.length) groups.push({ label, items: groupItems })
+const grouped = computed<Array<{ label: string; items: RenderedItem[] }>>(() => {
+  const groups: Array<{ label: string; items: RenderedItem[] }> = []
+  for (const group of ['navigate', 'actions'] as const) {
+    const groupItems = filtered.value
+      .filter((item) => item.group === group)
+      .map((item) => ({
+        ...item,
+        label: t(item.labelKey),
+        hint: t(item.hintKey),
+        groupLabel: groupLabel(group),
+      }))
+    if (groupItems.length) groups.push({ label: groupLabel(group), items: groupItems })
   }
   return groups
 })

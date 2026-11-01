@@ -16,19 +16,18 @@
   <div v-else class="page overview">
     <header class="hero">
       <div class="hero__main">
-        <p class="eyebrow eyebrow--accent">Workspace overview</p>
+        <p class="eyebrow eyebrow--accent">{{ t('overview.hero.eyebrow') }}</p>
         <h1 class="page-title hero__title">
           {{ greeting }}.<br />
           <span class="hero__line">{{ heroLine }}</span>
         </h1>
         <p class="page-description">
-          Review a diff, scan a whole repository, and revisit every finding. The console runs the
-          same <span class="code-inline">ocr</span> commands as your terminal.
+          {{ t('overview.hero.descriptionLead') }}<span class="code-inline">ocr</span>{{ t('overview.hero.descriptionTail') }}
         </p>
         <div class="hero__meta">
           <span class="chip">
             <el-icon><Files /></el-icon>
-            {{ repo?.name || 'No repository' }}
+            {{ repo?.name || t('repo.none') }}
           </span>
           <span class="chip chip--mono">
             <el-icon><Share /></el-icon>
@@ -36,18 +35,18 @@
           </span>
           <span v-if="meta" class="chip chip--ghost">{{ meta.platform }}</span>
           <span v-if="repo?.is_git && repo.dirty" class="chip chip--accent">
-            {{ repo.dirty }} changed
+            {{ t('overview.hero.changed', { count: repo.dirty }) }}
           </span>
         </div>
       </div>
       <div class="hero__actions">
         <el-button type="primary" @click="go('/review')">
           <el-icon class="btn-icon"><EditPen /></el-icon>
-          New review
+          {{ t('topbar.newReview') }}
         </el-button>
         <el-button @click="go('/scan')">
           <el-icon class="btn-icon"><Search /></el-icon>
-          Scan repository
+          {{ t('overview.hero.scanRepo') }}
         </el-button>
       </div>
     </header>
@@ -60,9 +59,8 @@
     <div v-if="repo && !repo.is_git" class="callout callout--warning">
       <el-icon class="callout__icon"><WarningFilled /></el-icon>
       <div>
-        <strong>This folder is not a git repository.</strong>
-        Code review and scan need Git history. Start the console from a repository, or run
-        <span class="code-inline">git init</span> here first.
+        <strong>{{ t('overview.notGit.title') }}</strong>
+        {{ t('overview.notGit.bodyLead') }}<span class="code-inline">git init</span>{{ t('overview.notGit.bodyTail') }}
       </div>
     </div>
 
@@ -70,10 +68,10 @@
       <el-icon class="callout__icon"><MagicStick /></el-icon>
       <div class="callout__content">
         <div>
-          <strong>Connect a model to start reviewing.</strong>
-          Add an API key for a provider, or point the console at an OpenAI-compatible endpoint.
+          <strong>{{ t('overview.model.connectTitle') }}</strong>
+          {{ t('overview.model.connectBody') }}
         </div>
-        <el-button size="small" @click="go('/providers')">Choose a provider</el-button>
+        <el-button size="small" @click="go('/providers')">{{ t('overview.model.chooseProvider') }}</el-button>
       </div>
     </div>
 
@@ -81,23 +79,23 @@
       <button class="quick-card quick-card--accent" type="button" @click="go('/review')">
         <span class="quick-card__icon"><el-icon><EditPen /></el-icon></span>
         <span class="quick-card__body">
-          <span class="quick-card__title">Review changes</span>
-          <span class="quick-card__desc">Working tree, a commit, or a branch range</span>
+          <span class="quick-card__title">{{ t('overview.quick.reviewTitle') }}</span>
+          <span class="quick-card__desc">{{ t('overview.quick.reviewDesc') }}</span>
         </span>
         <el-icon class="quick-card__arrow"><ArrowRight /></el-icon>
       </button>
       <button class="quick-card" type="button" @click="go('/scan')">
         <span class="quick-card__icon"><el-icon><Search /></el-icon></span>
         <span class="quick-card__body">
-          <span class="quick-card__title">Scan a codebase</span>
-          <span class="quick-card__desc">Whole-file review without a diff</span>
+          <span class="quick-card__title">{{ t('overview.quick.scanTitle') }}</span>
+          <span class="quick-card__desc">{{ t('overview.quick.scanDesc') }}</span>
         </span>
         <el-icon class="quick-card__arrow"><ArrowRight /></el-icon>
       </button>
       <button class="quick-card" type="button" @click="go('/providers')">
         <span class="quick-card__icon"><el-icon><Connection /></el-icon></span>
         <span class="quick-card__body">
-          <span class="quick-card__title">{{ active?.configured ? 'Model & providers' : 'Connect a model' }}</span>
+          <span class="quick-card__title">{{ active?.configured ? t('overview.quick.modelsTitle') : t('overview.quick.connectTitle') }}</span>
           <span class="quick-card__desc">{{ quickProviderDesc }}</span>
         </span>
         <el-icon class="quick-card__arrow"><ArrowRight /></el-icon>
@@ -106,26 +104,26 @@
 
     <div class="stat-grid">
       <StatTile
-        label="Changed files"
+        :label="t('overview.stats.changedFiles')"
         :value="repo?.is_git ? formatCount(repo.dirty) : '--'"
         :hint="changedHint"
         :icon="Files"
       />
       <StatTile
-        label="Saved sessions"
+        :label="t('overview.stats.savedSessions')"
         :value="formatCount(sessions.length)"
         :hint="sessionsHint"
         :icon="Collection"
       />
       <StatTile
-        label="Findings recorded"
+        :label="t('overview.stats.findingsRecorded')"
         :value="formatCount(totalFindings)"
         :hint="findingsHint"
         :icon="ChatDotRound"
       />
       <StatTile
-        label="Active model"
-        :value="active?.model || active?.provider_label || 'Not set'"
+        :label="t('overview.stats.activeModel')"
+        :value="active?.model || active?.provider_label || t('overview.stats.notSet')"
         :hint="providerHint"
         :icon="Connection"
         compact
@@ -134,13 +132,13 @@
 
     <div class="overview-grid">
       <SurfaceCard
-        title="Recent sessions"
-        subtitle="Findings saved under ~/.opencodereview/sessions"
+        :title="t('overview.sessions.title')"
+        :subtitle="t('overview.sessions.subtitle')"
         flush
       >
         <template #actions>
           <router-link class="text-link" to="/sessions">
-            View all
+            {{ t('overview.sessions.viewAll') }}
             <el-icon><ArrowRight /></el-icon>
           </router-link>
         </template>
@@ -168,14 +166,23 @@
               <span class="session-row__sub">
                 {{ formatRelative(session.start_time) }}
                 <span class="session-row__sep">·</span>
-                {{ session.model || 'model not recorded' }}
+                {{ session.model || t('overview.sessions.modelUnknown') }}
                 <span v-if="session.git_branch" class="session-row__sep">·</span>
                 <span v-if="session.git_branch">{{ session.git_branch }}</span>
               </span>
             </span>
             <span class="session-row__stats">
-              <span>{{ formatCount(session.total_comments) }} findings</span>
-              <span>{{ session.completed_files }}/{{ session.selected_files }} files</span>
+              <span>{{
+                tn('overview.sessions.findings', session.total_comments, {
+                  count: formatCount(session.total_comments),
+                })
+              }}</span>
+              <span>{{
+                tn('overview.sessions.files', session.selected_files, {
+                  completed: formatCount(session.completed_files),
+                  selected: session.selected_files,
+                })
+              }}</span>
             </span>
             <el-icon class="session-row__arrow"><ArrowRight /></el-icon>
           </button>
@@ -183,21 +190,28 @@
 
         <EmptyState
           v-else
-          title="No sessions yet"
-          description="Your first review will appear here, with every finding saved to disk."
+          :title="t('overview.sessions.emptyTitle')"
+          :description="t('overview.sessions.emptyDesc')"
         >
-          <el-button type="primary" size="small" @click="go('/review')">Run a review</el-button>
-          <el-button size="small" @click="go('/sessions')">Browse history</el-button>
+          <el-button type="primary" size="small" @click="go('/review')">{{ t('overview.sessions.run') }}</el-button>
+          <el-button size="small" @click="go('/sessions')">{{ t('overview.sessions.browse') }}</el-button>
         </EmptyState>
 
         <template #footer>
-          <span class="muted">{{ sessions.length ? `${sessions.length} total sessions` : 'History starts with your first run' }}</span>
-          <span class="muted mono">{{ repo?.is_git ? shortPath(repo.path) : 'no repository' }}</span>
+          <span class="muted">{{
+            sessions.length
+              ? tn('overview.sessions.total', sessions.length)
+              : t('overview.sessions.emptyHistory')
+          }}</span>
+          <span class="muted mono">{{ repo?.is_git ? shortPath(repo.path) : t('overview.sessions.noRepo') }}</span>
         </template>
       </SurfaceCard>
 
       <div class="stack">
-        <SurfaceCard title="Workspace" :subtitle="repo?.is_git ? repo.path : 'Repository status'">
+        <SurfaceCard
+          :title="t('nav.group.workspace')"
+          :subtitle="repo?.is_git ? repo.path : t('overview.workspace.repoStatus')"
+        >
           <template v-if="repo?.is_git" #actions>
             <span class="chip chip--mono">{{ branchLabel }}</span>
           </template>
@@ -206,45 +220,48 @@
             <div class="dirty-row">
               <div class="dirty">
                 <span class="dirty__value">{{ repo.staged }}</span>
-                <span class="dirty__label">staged</span>
+                <span class="dirty__label">{{ t('overview.workspace.staged') }}</span>
               </div>
               <div class="dirty">
                 <span class="dirty__value">{{ repo.unstaged }}</span>
-                <span class="dirty__label">unstaged</span>
+                <span class="dirty__label">{{ t('overview.workspace.unstaged') }}</span>
               </div>
               <div class="dirty">
                 <span class="dirty__value">{{ repo.untracked }}</span>
-                <span class="dirty__label">untracked</span>
+                <span class="dirty__label">{{ t('overview.workspace.untracked') }}</span>
               </div>
               <div v-if="repo.ahead || repo.behind" class="dirty dirty--ahead">
                 <span class="dirty__value">{{ repo.ahead }}↑ {{ repo.behind }}↓</span>
-                <span class="dirty__label">upstream</span>
+                <span class="dirty__label">{{ t('overview.workspace.upstream') }}</span>
               </div>
             </div>
 
             <div class="commit-list">
-              <p class="section-label">Recent commits</p>
+              <p class="section-label">{{ t('overview.workspace.recentCommits') }}</p>
               <div v-for="commit in recentCommits" :key="commit.hash" class="commit">
                 <span class="commit__hash">{{ commit.short }}</span>
                 <span class="commit__subject" :title="commit.subject">{{ commit.subject }}</span>
                 <span class="commit__date">{{ commit.date }}</span>
               </div>
-              <p v-if="!recentCommits.length" class="faint commit-empty">No commits yet.</p>
+              <p v-if="!recentCommits.length" class="faint commit-empty">{{ t('overview.workspace.noCommits') }}</p>
             </div>
           </template>
 
           <EmptyState
             v-else
-            title="No repository"
-            description="Open the console from a git repository to review diffs and keep history."
+            :title="t('repo.none')"
+            :description="t('overview.workspace.emptyDesc')"
           >
             <span class="code-inline">ocr web --repo ~/work/project</span>
           </EmptyState>
         </SurfaceCard>
 
-        <SurfaceCard title="Model" subtitle="Resolved from config, environment, and provider settings">
+        <SurfaceCard
+          :title="t('overview.model.title')"
+          :subtitle="t('overview.model.subtitle')"
+        >
           <template #actions>
-            <router-link class="text-link" to="/providers">Manage</router-link>
+            <router-link class="text-link" to="/providers">{{ t('overview.model.manage') }}</router-link>
           </template>
 
           <div class="model-card">
@@ -252,23 +269,23 @@
               <BrandMark :size="20" />
             </span>
             <div class="model-card__body">
-              <p class="model-card__name">{{ active?.provider_label || 'No provider configured' }}</p>
-              <p class="model-card__model mono">{{ active?.model || 'Select a model to begin' }}</p>
+              <p class="model-card__name">{{ active?.provider_label || t('overview.model.noProvider') }}</p>
+              <p class="model-card__model mono">{{ active?.model || t('overview.model.selectModel') }}</p>
             </div>
             <span class="dot" :class="active?.configured ? 'dot--green' : 'dot--amber'" />
           </div>
 
           <dl class="meta-list">
             <div>
-              <dt>Auth</dt>
+              <dt>{{ t('overview.model.auth') }}</dt>
               <dd>{{ authLabel(active?.auth_mode) }}</dd>
             </div>
             <div>
-              <dt>Source</dt>
+              <dt>{{ t('overview.model.source') }}</dt>
               <dd>{{ sourceLabel(active?.source) }}</dd>
             </div>
             <div v-if="active?.base_url">
-              <dt>Endpoint</dt>
+              <dt>{{ t('overview.model.endpoint') }}</dt>
               <dd class="mono" :title="active.base_url">{{ active.base_url }}</dd>
             </div>
           </dl>
@@ -281,19 +298,23 @@
               @click="testConnection"
             >
               <el-icon class="btn-icon"><VideoPlay /></el-icon>
-              Test connection
+              {{ t('overview.model.test') }}
             </el-button>
-            <el-button size="small" @click="go('/settings')">Review settings</el-button>
+            <el-button size="small" @click="go('/settings')">{{ t('overview.model.reviewSettings') }}</el-button>
           </div>
         </SurfaceCard>
       </div>
     </div>
 
-    <SurfaceCard v-if="jobs.length" title="Recent activity" subtitle="Commands started from this console">
+    <SurfaceCard
+      v-if="jobs.length"
+      :title="t('overview.activity.title')"
+      :subtitle="t('overview.activity.subtitle')"
+    >
       <template #actions>
         <button class="text-button" type="button" @click="loadAll">
           <el-icon><Refresh /></el-icon>
-          Refresh
+          {{ t('common.refresh') }}
         </button>
       </template>
       <div class="job-list">
@@ -338,6 +359,7 @@ import StatTile from '@/components/StatTile.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import SurfaceCard from '@/components/SurfaceCard.vue'
 import { api, errorMessage } from '@/api/client'
+import { useI18n } from '@/i18n'
 import { useMetaStore } from '@/stores/meta'
 import {
   formatCount,
@@ -354,6 +376,7 @@ import type { JobSnapshot, SessionSummary } from '@/types'
 
 const router = useRouter()
 const { meta, refresh } = useMetaStore()
+const { t, tn } = useI18n()
 
 const sessions = ref<SessionSummary[]>([])
 const jobs = ref<JobSnapshot[]>([])
@@ -372,39 +395,45 @@ const totalFindings = computed(() =>
 
 const greeting = computed(() => {
   const hour = new Date().getHours()
-  if (hour < 5) return 'Working late'
-  if (hour < 12) return 'Good morning'
-  if (hour < 18) return 'Good afternoon'
-  return 'Good evening'
+  if (hour < 5) return t('overview.greeting.workingLate')
+  if (hour < 12) return t('overview.greeting.morning')
+  if (hour < 18) return t('overview.greeting.afternoon')
+  return t('overview.greeting.evening')
 })
-const heroLine = computed(() => (repo.value?.is_git ? "Let's review some code." : 'Point the console at a repository.'))
+const heroLine = computed(() =>
+  repo.value?.is_git ? t('overview.hero.headlineReview') : t('overview.hero.headlineNoRepo'),
+)
 const branchLabel = computed(() => {
   const info = repo.value
-  if (!info?.is_git) return 'not a git repository'
-  if (info.detached) return `detached @ ${info.head || '--'}`
-  return info.branch || 'no commits yet'
+  if (!info?.is_git) return t('overview.hero.branchNotGit')
+  if (info.detached) return t('repo.detached', { head: info.head || '--' })
+  return info.branch || t('repo.noCommits')
 })
 const changedHint = computed(() => {
   const info = repo.value
-  if (!info?.is_git) return 'Git is required for review'
-  return `${info.staged} staged · ${info.unstaged} unstaged · ${info.untracked} untracked`
+  if (!info?.is_git) return t('overview.stats.gitRequired')
+  return t('overview.stats.dirtySummary', {
+    staged: info.staged,
+    unstaged: info.unstaged,
+    untracked: info.untracked,
+  })
 })
 const sessionsHint = computed(() => {
-  if (!sessions.value.length) return 'No history yet'
-  return `Latest ${formatRelative(sessions.value[0].start_time)}`
+  if (!sessions.value.length) return t('overview.stats.noHistory')
+  return t('overview.stats.latest', { time: formatRelative(sessions.value[0].start_time) })
 })
 const findingsHint = computed(() => {
-  if (!sessions.value.length) return 'Across saved sessions'
+  if (!sessions.value.length) return t('overview.stats.acrossSessions')
   const latest = sessions.value[0]
-  return `${latest.total_comments} in the latest session`
+  return t('overview.stats.latestFindings', { count: latest.total_comments })
 })
 const providerHint = computed(() => {
-  if (!active.value?.configured) return 'No model configured'
+  if (!active.value?.configured) return t('overview.stats.modelMissing')
   return `${authLabel(active.value.auth_mode)} · ${sourceLabel(active.value.source)}`
 })
 const quickProviderDesc = computed(() => {
-  if (active.value?.configured) return active.value.model || active.value.provider_label || 'Manage models'
-  return 'API key, environment variable, or custom endpoint'
+  if (active.value?.configured) return active.value.model || active.value.provider_label || t('overview.quick.manageModels')
+  return t('overview.quick.providerDesc')
 })
 
 function stateDot(tone: Tone): string {

@@ -1,21 +1,24 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <template>
   <div v-if="html" class="markdown-body" v-html="html" />
-  <p v-else class="markdown-empty">{{ emptyText }}</p>
+  <p v-else class="markdown-empty">{{ emptyLabel }}</p>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
+import { useI18n } from '@/i18n'
 
 const props = withDefaults(
   defineProps<{
     text?: string
     emptyText?: string
   }>(),
-  { text: '', emptyText: 'Nothing to show yet.' },
+  { text: '' },
 )
+
+const { t } = useI18n()
 
 marked.setOptions({ gfm: true, breaks: true })
 
@@ -25,6 +28,8 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
     node.setAttribute('rel', 'noopener noreferrer')
   }
 })
+
+const emptyLabel = computed(() => props.emptyText ?? t('markdown.empty'))
 
 const html = computed(() => {
   const source = props.text?.trim()

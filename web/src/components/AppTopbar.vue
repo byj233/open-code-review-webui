@@ -2,11 +2,11 @@
 <template>
   <header class="topbar">
     <div class="topbar__left">
-      <button class="icon-button menu-button" type="button" aria-label="Open navigation" @click="$emit('open-menu')">
+      <button class="icon-button menu-button" type="button" :aria-label="t('topbar.openNavigation')" @click="$emit('open-menu')">
         <el-icon><Menu /></el-icon>
       </button>
       <div class="crumbs">
-        <span class="crumbs__root">Console</span>
+        <span class="crumbs__root">{{ t('topbar.console') }}</span>
         <span class="crumbs__slash">/</span>
         <span class="crumbs__page">{{ title }}</span>
       </div>
@@ -15,24 +15,26 @@
     <div class="topbar__right">
       <router-link class="repo-chip" to="/" :title="repo?.path">
         <el-icon><Files /></el-icon>
-        <span class="repo-chip__name">{{ repo?.name || 'No repository' }}</span>
+        <span class="repo-chip__name">{{ repo?.name || t('repo.none') }}</span>
         <span class="sep" />
         <span class="repo-chip__branch">{{ branchLabel }}</span>
       </router-link>
 
-      <button class="palette-trigger" type="button" aria-label="Open command palette" @click="$emit('open-palette')">
+      <button class="palette-trigger" type="button" :aria-label="t('topbar.openPalette')" @click="$emit('open-palette')">
         <el-icon><Search /></el-icon>
-        <span class="palette-trigger__label">Search</span>
+        <span class="palette-trigger__label">{{ t('topbar.search') }}</span>
         <span class="kbd">Ctrl</span><span class="kbd">K</span>
       </button>
 
-      <button class="icon-button" type="button" :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'" @click="toggleTheme">
+      <LocaleSwitcher />
+
+      <button class="icon-button" type="button" :aria-label="isDark ? t('topbar.themeLight') : t('topbar.themeDark')" @click="toggleTheme">
         <el-icon><Moon v-if="!isDark" /><Sunny v-else /></el-icon>
       </button>
 
       <el-button v-if="!isReviewRoute" type="primary" class="new-review" @click="startReview">
         <el-icon class="new-review__icon"><Plus /></el-icon>
-        New review
+        {{ t('topbar.newReview') }}
       </el-button>
     </div>
   </header>
@@ -42,8 +44,10 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Files, Menu, Moon, Plus, Search, Sunny } from '@element-plus/icons-vue'
+import LocaleSwitcher from '@/components/LocaleSwitcher.vue'
 import { useMetaStore } from '@/stores/meta'
 import { useTheme } from '@/composables/useTheme'
+import { useI18n, type MessageKey } from '@/i18n'
 
 defineEmits<{ 'open-menu': []; 'open-palette': [] }>()
 
@@ -51,14 +55,18 @@ const route = useRoute()
 const router = useRouter()
 const { meta } = useMetaStore()
 const { isDark, toggleTheme } = useTheme()
+const { t } = useI18n()
 
-const title = computed(() => (route.meta.title as string) || 'Overview')
+const title = computed(() => {
+  const key = route.meta.title as MessageKey | undefined
+  return key ? t(key) : t('nav.overview')
+})
 const repo = computed(() => meta.value?.repo)
 const branchLabel = computed(() => {
   const info = repo.value
-  if (!info?.is_git) return 'not git'
-  if (info.detached) return info.head || 'detached'
-  return info.branch || 'no commits'
+  if (!info?.is_git) return t('repo.notGitShort')
+  if (info.detached) return info.head || t('repo.detachedShort')
+  return info.branch || t('repo.noCommitsShort')
 })
 const isReviewRoute = computed(() => route.name === 'review' || route.name === 'run')
 

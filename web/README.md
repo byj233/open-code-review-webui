@@ -77,30 +77,35 @@ compiles.
 
 ### Internationalization
 
-The console ships English and Simplified Chinese. Copy lives in
-`src/i18n/messages/en/<feature>.ts`, one slice per page or shared component;
-`messages/en.ts` merges the slices and its key union is the `MessageKey` type
-that `t()` accepts, so a typo in a component fails `npm run typecheck`.
-`messages/zh.ts` is typed `Record<MessageKey, string>`, which makes a missing
-translation a compile error rather than a silent English fallback.
+The console ships English, Simplified Chinese, Japanese, Korean, and Russian.
+Copy lives in `src/i18n/messages/en/<feature>.ts`, one slice per page or shared
+component; `messages/en.ts` merges the slices and its key union is the
+`MessageKey` type that `t()` accepts, so a typo in a component fails
+`npm run typecheck`. Every other locale's `messages/<code>.ts` is typed
+`Record<MessageKey, string>`, which makes a missing translation a compile error
+rather than a silent English fallback.
 
 Components read copy through `useI18n()`:
 
 ```ts
 const { t, tn } = useI18n()
 t('review.form.mode')          // plain message
-tn('review.files', 3)          // looks up review.files.one / .other
+tn('review.files', 3)          // plural: Intl.PluralRules picks the form
 ```
 
-The first visit follows `navigator.languages`, falls back to English, and the
-picker in the topbar stores the choice under `ocr-locale` in `localStorage`.
-`<html lang>` and Element Plus's own locale switch with it, and
-`src/utils/format.ts` builds its `Intl` formatters for the active locale.
+`tn()` asks `Intl.PluralRules` which form the active locale needs, so Russian
+can supply `.one` / `.few` / `.many` where English only has `.one` / `.other`;
+a missing form falls back to `.other`. The first visit follows
+`navigator.languages`, falls back to English, and the picker in the topbar
+stores the choice under `ocr-locale` in `localStorage`. `<html lang>`, Element
+Plus's own locale, and the `Intl` formatters in `src/utils/format.ts` all follow
+the active locale.
 
 To add a locale, copy `messages/zh/` to `messages/<code>/`, translate the
 slices, then register the code in `src/i18n/index.ts`: the `LocaleCode` union,
-`LOCALES`, the `catalogue`, and the Element Plus language pack. That directory
-is exempt from `make english-check` (see `allowedPrefixes` in
+`LOCALES` (label, short, `htmlLang`, `intlTag`), the `catalogue`, and an Element
+Plus language pack in `elementLocales`. That directory is exempt from
+`make english-check` (see `allowedPrefixes` in
 `scripts/verify-english-only.go`); do not put translated copy anywhere else.
 
 ### Layout

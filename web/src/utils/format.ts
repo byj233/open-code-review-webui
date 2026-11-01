@@ -1,19 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 alibaba/open-code-review Contributors
 
-import { locale, t } from '@/i18n'
+import { intlTag, t } from '@/i18n'
 
 const dateTimeFormatters = new Map<string, Intl.DateTimeFormat>()
 const dateFormatters = new Map<string, Intl.DateTimeFormat>()
 const numberFormatters = new Map<string, Intl.NumberFormat>()
 const compactFormatters = new Map<string, Intl.NumberFormat>()
 
-function intlLocale(): string {
-  return locale.value === 'zh' ? 'zh-CN' : 'en-US'
-}
-
 function cached<T>(cache: Map<string, T>, build: (tag: string) => T): T {
-  const tag = intlLocale()
+  const tag = intlTag.value
   let formatter = cache.get(tag)
   if (!formatter) {
     formatter = build(tag)

@@ -175,7 +175,7 @@ Prefer a browser? Launch the local console:
 ocr web
 ```
 
-It opens `http://localhost:5484` and mirrors the CLI: run reviews and scans, watch progress, read findings, browse saved sessions, and manage providers and settings. See [web/README.md](web/README.md) for build and development details.
+It opens `http://localhost:5484` and mirrors the CLI: run reviews and scans, watch progress, read findings, browse saved sessions, and manage providers and settings. See [frontend/README.md](frontend/README.md) for build and development details.
 
 ## Documentation
 

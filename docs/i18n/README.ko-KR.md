@@ -175,7 +175,7 @@ ocr delegate rule src/main.go src/handler.go
 ocr web
 ```
 
-`http://localhost:5484`가 열리며 CLI와 동일한 작업을 수행할 수 있습니다. 리뷰와 스캔 실행, 진행 상황 확인, 발견 사항 열람, 저장된 세션 탐색, 프로바이더와 설정 관리가 가능합니다. 빌드 및 개발 방법은 [web/README.md](../../web/README.md)를 참고하세요.
+`http://localhost:5484`가 열리며 CLI와 동일한 작업을 수행할 수 있습니다. 리뷰와 스캔 실행, 진행 상황 확인, 발견 사항 열람, 저장된 세션 탐색, 프로바이더와 설정 관리가 가능합니다. 빌드 및 개발 방법은 [frontend/README.md](../../frontend/README.md)를 참고하세요.
 
 ## Documentation
 

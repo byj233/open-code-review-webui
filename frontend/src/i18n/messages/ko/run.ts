@@ -1,0 +1,82 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 alibaba/open-code-review Contributors
+
+export const run = {
+  'run.kind.scan': '리포지토리 스캔',
+  'run.kind.llmTest': '연결 테스트',
+  'run.kind.review': '코드 리뷰',
+
+  'run.header.eyebrow': '{kind} 실행',
+  'run.header.description': '웹 콘솔에서 {time}에 시작했습니다.',
+  'run.header.started': '{time}에 시작',
+  'run.header.exit': '종료 코드 {code}',
+  'run.header.liveStream': '실시간 스트림',
+  'run.header.polling': '폴링 중',
+  'run.header.stop': '실행 중지',
+  'run.header.openSession': '세션 열기',
+  'run.header.runAgain': '다시 실행',
+  'run.header.backToScan': '스캔으로 돌아가기',
+  'run.header.backToProviders': '공급자로 돌아가기',
+  'run.header.backToReview': '리뷰로 돌아가기',
+
+  'run.unavailable.title': '실행을 사용할 수 없음',
+  'run.unavailable.description': '이 실행은 만료되었거나 콘솔이 재시작되었을 수 있습니다.',
+
+  'run.log.title': '{kind} 출력',
+
+  'run.details.title': '실행 세부 정보',
+  'run.details.subtitle': '명령, 소요 시간, 출력 위치',
+  'run.details.status': '상태',
+  'run.details.started': '시작 시간',
+  'run.details.duration': '소요 시간',
+  'run.details.exitCode': '종료 코드',
+  'run.details.model': '모델',
+  'run.details.session': '세션',
+  'run.details.runId': '실행 ID',
+  'run.details.copySession': '세션 ID 복사',
+
+  'run.live.currentStep': '현재 단계',
+  'run.live.subtitle': '실행의 최신 출력 줄',
+  'run.live.waiting': '출력을 기다리는 중…',
+  'run.live.streaming': 'CLI에서 진행 상황을 스트리밍하는 중',
+  'run.live.fallback': '폴링으로 전환됨',
+
+  'run.checks.title': '확인할 사항',
+  'run.checks.provider': '공급자와 모델이 공급자 페이지에 구성되어 있습니다.',
+  'run.checks.apiKey': 'API 키가 유효하고 엔드포인트에 연결할 수 있습니다.',
+  'run.checks.refs': '선택한 ref가 존재하고 리뷰할 변경 사항이 포함되어 있습니다.',
+  'run.checks.openProviders': '공급자 열기',
+  'run.checks.openSettings': '설정 열기',
+
+  'run.result.title': '결과',
+  'run.result.runningDescription': '명령이 종료되면 결과 패널이 채워집니다.',
+  'run.result.description': 'CLI의 구조화된 출력을 리뷰용으로 렌더링한 것입니다.',
+  'run.result.partial': '부분 출력',
+  'run.result.waitingTitle': '{kind} 진행 중',
+  'run.result.progressLines': '지금까지 {count}줄의 진행 출력을 받았습니다. | 지금까지 {count}줄의 진행 출력을 받았습니다.',
+  'run.result.starting': '명령을 시작하는 중입니다.',
+  'run.result.failedTitle': '실행이 정상적으로 끝나지 않았습니다.',
+  'run.result.failedFallback': '자세한 내용은 활동 로그에서 확인할 수 있습니다.',
+  'run.result.failedFooter': '실패하기 전에 생성된 지적 사항은 아래에 표시됩니다.',
+  'run.result.canceled': '실행이 취소되었습니다. 취소 전에 생성된 지적 사항은 아래에 표시됩니다.',
+  'run.result.canceledTitle': '실행이 취소되었습니다.',
+  'run.result.commandFailed': '명령이 실패했습니다.',
+  'run.result.noResult': '구조화된 결과가 생성되지 않았습니다. 자세한 내용은 위의 활동 로그에 있습니다.',
+  'run.result.noResultFinished': '이 실행은 구조화된 결과 없이 종료되었습니다. 위의 활동 로그에 출력이 있습니다.',
+
+  'run.connection.verifiedTitle': '연결 확인됨',
+  'run.connection.failedTitle': '연결 테스트 실패',
+  'run.connection.verifiedText': '공급자가 테스트 대화를 수락했습니다. 이제 리뷰나 스캔을 실행할 수 있습니다.',
+  'run.connection.failedText': '공급자가 테스트 요청을 완료하지 못했습니다. 오류와 활동 로그를 확인하세요.',
+  'run.connection.fullOutput': '전체 테스트 출력',
+  'run.connection.runReview': '리뷰 실행',
+
+  'run.confirm.message': '이 실행을 중지할까요? 명령이 종료되며 부분 출력은 유지됩니다.',
+  'run.confirm.title': '실행 중지',
+  'run.confirm.confirm': '실행 중지',
+  'run.confirm.cancel': '계속 실행',
+
+  'run.message.stopping': '실행을 중지하는 중입니다',
+  'run.message.sessionCopied': '세션 ID를 복사했습니다',
+  'run.message.copyFailed': '세션 ID를 복사하지 못했습니다',
+} satisfies Record<string, string>

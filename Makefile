@@ -3,12 +3,12 @@
 	build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 \
 	build-windows-amd64 build-windows-arm64 \
 	license-check license-add english-check \
-	web web-install web-build
+	frontend frontend-install frontend-build
 
 BINARY_NAME := opencodereview
 GO          := go
 DIST_DIR    := ./dist
-WEB_DIR     := ./web
+FRONTEND_DIR     := ./frontend
 EXE         := $(if $(filter Windows_NT,$(OS)),.exe,)
 
 # Version info — use git tag if available, fallback to short commit hash
@@ -36,16 +36,16 @@ build:
 	$(GO) build -ldflags "$(LD_FLAGS)" -o $(DIST_DIR)/$(BINARY_NAME)$(EXE) ./cmd/opencodereview
 
 # The Web Console is a Vite app embedded into the binary. `make build` alone
-# compiles whatever assets are present; use `make web` for a binary that
+# compiles whatever assets are present; use `make frontend` for a binary that
 # contains the current interface. The assets directory is gitignored except for
 # its keep.txt placeholder, so a fresh checkout still compiles.
-web-install:
-	cd $(WEB_DIR) && npm ci
+frontend-install:
+	cd $(FRONTEND_DIR) && npm ci
 
-web-build:
-	cd $(WEB_DIR) && npm run build
+frontend-build:
+	cd $(FRONTEND_DIR) && npm run build
 
-web: web-build
+frontend: frontend-build
 	$(GO) build -ldflags "$(LD_FLAGS)" -o $(DIST_DIR)/$(BINARY_NAME)$(EXE) ./cmd/opencodereview
 
 # No node_modules filter is needed for the docs site: pages/go.mod puts it in a

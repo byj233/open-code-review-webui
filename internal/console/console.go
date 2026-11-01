@@ -676,12 +676,12 @@ const fallbackHTML = `<!doctype html>
   <h1>Console assets are not built yet.</h1>
   <p>The Go server is running, but this binary was compiled without the Vue
   bundle. Build the interface and rebuild the binary:</p>
-  <pre>cd web
+  <pre>cd frontend
 npm install
 npm run build
 cd ..
 go build -o dist/opencodereview ./cmd/opencodereview</pre>
-  <p>Or run <code>make web</code> from the repository root.</p>
+  <p>Or run <code>make frontend</code> from the repository root.</p>
 </main>
 </body>
 </html>`

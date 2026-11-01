@@ -201,7 +201,7 @@ jobs:
           CGO_ENABLED: '0'
         run: go build -o /dev/null ./...
 
-  web:
+  frontend:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     container:
@@ -214,6 +214,6 @@ jobs:
 
       - name: Build the Web Console
         run: |
-          cd web
+          cd frontend
           npm ci --no-audit --no-fund
           npm run build

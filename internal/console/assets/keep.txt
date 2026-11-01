@@ -1,2 +1,2 @@
-Rebuilt by `cd web && npm install && npm run build`. The console embeds this
+Rebuilt by `cd frontend && npm install && npm run build`. The console embeds this
 directory into the Go binary.

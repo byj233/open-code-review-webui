@@ -18,6 +18,17 @@ make frontend-install  # npm ci
 make frontend          # vite build + go build -> dist/opencodereview
 ```
 
+Without `make` (a Windows box without GNU make, for example), the same two
+steps are:
+
+```powershell
+cd frontend
+npm ci
+npm run build
+cd ..
+go build -o dist/opencodereview.exe ./cmd/opencodereview
+```
+
 Start it from a repository:
 
 ```bash

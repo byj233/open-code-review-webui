@@ -8,7 +8,7 @@
 BINARY_NAME := opencodereview
 GO          := go
 DIST_DIR    := ./dist
-FRONTEND_DIR     := ./frontend
+FRONTEND_DIR := ./frontend
 EXE         := $(if $(filter Windows_NT,$(OS)),.exe,)
 
 # Version info — use git tag if available, fallback to short commit hash

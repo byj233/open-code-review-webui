@@ -16,7 +16,7 @@ const keepAssets: Plugin = {
     mkdirSync(assetsDir, { recursive: true })
     writeFileSync(
       new URL('../internal/console/assets/keep.txt', import.meta.url),
-      'Rebuilt by `cd web && npm install && npm run build`. The console embeds this\ndirectory into the Go binary.\n',
+      'Rebuilt by `cd frontend && npm install && npm run build`. The console embeds this\ndirectory into the Go binary.\n',
     )
   },
 }

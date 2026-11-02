@@ -167,6 +167,16 @@ ocr delegate preview
 ocr delegate rule src/main.go src/handler.go
 ```
 
+#### Web Console
+
+Prefer a browser? Launch the local console:
+
+```bash
+ocr web
+```
+
+It opens `http://localhost:5484` and mirrors the CLI: run reviews and scans, watch progress, read findings, browse saved sessions, and manage providers and settings. See [web/README.md](web/README.md) for build and development details.
+
 ## Documentation
 
 Full documentation lives at **[open-codereview.ai/docs](https://open-codereview.ai/docs)**:

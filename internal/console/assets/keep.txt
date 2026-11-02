@@ -1,0 +1,2 @@
+Rebuilt by `cd web && npm install && npm run build`. The console embeds this
+directory into the Go binary.

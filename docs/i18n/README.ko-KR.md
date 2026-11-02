@@ -167,6 +167,16 @@ ocr delegate preview
 ocr delegate rule src/main.go src/handler.go
 ```
 
+#### 웹 콘솔
+
+브라우저에서 작업하려면 로컬 콘솔을 실행하세요.
+
+```bash
+ocr web
+```
+
+`http://localhost:5484`가 열리며 CLI와 동일한 작업을 수행할 수 있습니다. 리뷰와 스캔 실행, 진행 상황 확인, 발견 사항 열람, 저장된 세션 탐색, 프로바이더와 설정 관리가 가능합니다. 빌드 및 개발 방법은 [web/README.md](../../web/README.md)를 참고하세요.
+
 ## Documentation
 
 전체 문서는 **[open-codereview.ai/docs](https://open-codereview.ai/docs)** 에서 확인할 수 있습니다:

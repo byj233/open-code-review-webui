@@ -167,6 +167,16 @@ ocr delegate preview
 ocr delegate rule src/main.go src/handler.go
 ```
 
+#### Web 控制台
+
+更喜欢浏览器？启动本地控制台：
+
+```bash
+ocr web
+```
+
+它会打开 `http://localhost:5484`，并完整映射 CLI 的操作：运行代码审查与扫描、实时查看进度、阅读审查结果、浏览历史会话，以及管理模型提供商和设置。构建与开发说明见 [web/README.md](../../web/README.md)。
+
 ## 文档
 
 完整文档见 **[open-codereview.ai/docs](https://open-codereview.ai/docs)**：

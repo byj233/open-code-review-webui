@@ -70,6 +70,25 @@ Then work against `http://localhost:5173`. Frontend edits need
 `npm run build` before they show up in the `ocr web` binary, because the assets
 are embedded at compile time.
 
+### One-click start (Windows)
+
+Double-click `start.cmd`, or run it from a terminal. It checks for Go and Node,
+installs frontend dependencies only when `frontend/node_modules` is missing,
+rebuilds the console only when `internal/console/assets/index.html` is missing,
+then builds the CLI and opens the console:
+
+```powershell
+.\start.cmd                      # build what is missing, then open the browser
+.\start.cmd -RebuildFrontend     # force a frontend rebuild first
+.\start.cmd -NoOpen              # do not open a browser
+.\start.cmd -Addr localhost:9000 # another port
+.\start.cmd -Repo C:\work\project
+```
+
+`start.ps1` holds the logic; `start.cmd` is only the double-click wrapper.
+Repeat launches skip the frontend build, so they take about as long as
+`go build` (a second or two with the Go cache warm).
+
 ## Repository layout
 
 ```

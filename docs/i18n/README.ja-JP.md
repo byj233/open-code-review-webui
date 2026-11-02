@@ -169,13 +169,35 @@ ocr delegate rule src/main.go src/handler.go
 
 #### Web コンソール
 
-ブラウザで操作したい場合は、ローカルコンソールを起動します：
+ブラウザで操作したい場合は、CLI と同じ機能を持つローカルコンソールを使えます。レビューとスキャンの実行、進捗の確認、指摘の閲覧、セッション履歴の参照、プロバイダーと設定の管理ができます。
 
-```bash
-ocr web
+**必要なもの**：ビルドと実行に Go 1.26.10 以上。コンソールをビルドするときだけ Node.js 22 以上。
+
+**Windows ワンクリック**：リポジトリ直下の `start.cmd` をダブルクリックするか、次を実行します。
+
+```powershell
+.\start.cmd                      # 不足分をビルドしてコンソールを開く
+.\start.cmd -RebuildFrontend     # フロントエンドを強制的に再ビルド
+.\start.cmd -NoOpen              # ブラウザを自動で開かない
+.\start.cmd -Addr localhost:9000 # 別のポート
 ```
 
-`http://localhost:5484` が開き、CLI と同じ操作を実行できます。レビューとスキャンの実行、進捗の確認、指摘の閲覧、過去セッションの参照、プロバイダーと設定の管理に対応しています。ビルドと開発の詳細は [frontend/README.md](../../frontend/README.md) を参照してください。
+**手動ビルド**：
+
+```bash
+cd frontend
+npm ci          # 初回のみ
+npm run build
+cd ..
+go build -o dist/opencodereview ./cmd/opencodereview
+./dist/opencodereview web
+```
+
+コンソールは `http://localhost:5484` で開きます。すべての操作は実際の CLI を子プロセスとして実行するため、ブラウザとターミナルの挙動がずれることはありません。レビューとスキャンは同時に 1 つずつ実行できます。
+
+**開発時**：`go run ./cmd/opencodereview web --open=never` でバックエンドを、`cd frontend && npm run dev` で Vite を起動し、`http://localhost:5173` を開きます。コンソール内部は [frontend/README.md](../../frontend/README.md)、この fork のビルド手順は [FORK.md](../../FORK.md) を参照してください。
+
+**コンソールの使い方**：トップバーで English、简体中文、日本語、한국어、Русский を切り替えられ、テーマも変更できます。ページは概要、コードレビュー、リポジトリスキャン、セッション、プロバイダー、設定、レビュールールです。
 
 ## ドキュメント
 

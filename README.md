@@ -169,13 +169,35 @@ ocr delegate rule src/main.go src/handler.go
 
 #### Web Console
 
-Prefer a browser? Launch the local console:
+Prefer a browser? The console mirrors the CLI: run reviews and scans, watch progress, read findings, browse saved sessions, and manage providers and settings.
 
-```bash
-ocr web
+**Requirements:** Go 1.26.10+ to build and run; Node.js 22+ only when building the console.
+
+**Windows one-click:** double-click `start.cmd` in the repository root, or run:
+
+```powershell
+.\start.cmd                      # build what is missing, then open the console
+.\start.cmd -RebuildFrontend     # force a frontend rebuild
+.\start.cmd -NoOpen              # do not open a browser
+.\start.cmd -Addr localhost:9000 # another port
 ```
 
-It opens `http://localhost:5484` and mirrors the CLI: run reviews and scans, watch progress, read findings, browse saved sessions, and manage providers and settings. See [frontend/README.md](frontend/README.md) for build and development details.
+**Manual build:**
+
+```bash
+cd frontend
+npm ci          # first time only
+npm run build
+cd ..
+go build -o dist/opencodereview ./cmd/opencodereview
+./dist/opencodereview web
+```
+
+The console opens at `http://localhost:5484`. Every operation runs the real CLI as a child process, so the browser and the terminal cannot drift apart. One review and one scan may run at a time.
+
+**Development:** start the backend with `go run ./cmd/opencodereview web --open=never`, the Vite server with `cd frontend && npm run dev`, then work against `http://localhost:5173`. Console internals live in [frontend/README.md](frontend/README.md); this fork's build notes are in [FORK.md](FORK.md).
+
+**In the console:** the topbar switches between English, 简体中文, 日本語, 한국어, and Русский and toggles the theme. Pages cover the overview, code review, repository scan, sessions, providers, settings, and review rules.
 
 ## Documentation
 

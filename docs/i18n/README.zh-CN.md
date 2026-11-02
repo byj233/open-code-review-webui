@@ -169,13 +169,35 @@ ocr delegate rule src/main.go src/handler.go
 
 #### Web 控制台
 
-更喜欢浏览器？启动本地控制台：
+偏好浏览器？控制台完整映射 CLI 的能力：运行代码审查与扫描、实时查看进度、阅读审查结果、浏览历史会话，以及管理模型提供商和设置。
 
-```bash
-ocr web
+**环境要求**：构建和运行需要 Go 1.26.10+；仅在构建前端时需要 Node.js 22+。
+
+**Windows 一键启动**：双击仓库根目录的 `start.cmd`，或在终端执行：
+
+```powershell
+.\start.cmd                      # 缺什么建什么，然后打开控制台
+.\start.cmd -RebuildFrontend     # 强制重建前端
+.\start.cmd -NoOpen              # 不自动打开浏览器
+.\start.cmd -Addr localhost:9000 # 换端口
 ```
 
-它会打开 `http://localhost:5484`，并完整映射 CLI 的操作：运行代码审查与扫描、实时查看进度、阅读审查结果、浏览历史会话，以及管理模型提供商和设置。构建与开发说明见 [frontend/README.md](../../frontend/README.md)。
+**手动构建**：
+
+```bash
+cd frontend
+npm ci          # 仅首次
+npm run build
+cd ..
+go build -o dist/opencodereview ./cmd/opencodereview
+./dist/opencodereview web
+```
+
+控制台会在 `http://localhost:5484` 打开。所有操作都以子进程方式运行真实的 CLI，所以浏览器与终端不会出现行为差异；同一时间只允许一个审查和一个扫描运行。
+
+**开发模式**：用 `go run ./cmd/opencodereview web --open=never` 起后端，用 `cd frontend && npm run dev` 起 Vite，然后访问 `http://localhost:5173`。控制台内部说明见 [frontend/README.md](../../frontend/README.md)，本 fork 的构建说明见 [FORK.md](../../FORK.md)。
+
+**控制台内**：顶栏可以在 English、简体中文、日本語、한국어、Русский 之间切换，并可切换明暗主题。页面包括概览、代码审查、仓库扫描、会话、模型供应商、设置和审查规则。
 
 ## 文档
 

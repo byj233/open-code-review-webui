@@ -169,13 +169,35 @@ ocr delegate rule src/main.go src/handler.go
 
 #### 웹 콘솔
 
-브라우저에서 작업하려면 로컬 콘솔을 실행하세요.
+브라우저에서 작업하려면 CLI와 동일한 기능을 제공하는 로컬 콘솔을 사용하세요. 리뷰와 스캔 실행, 진행 상황 확인, 발견 사항 열람, 저장된 세션 탐색, 공급자와 설정 관리를 할 수 있습니다.
 
-```bash
-ocr web
+**요구 사항**: 빌드와 실행에는 Go 1.26.10 이상, 콘솔을 빌드할 때만 Node.js 22 이상이 필요합니다.
+
+**Windows 원클릭**: 저장소 루트의 `start.cmd`를 더블클릭하거나 다음을 실행하세요.
+
+```powershell
+.\start.cmd                      # 필요한 것만 빌드한 뒤 콘솔 열기
+.\start.cmd -RebuildFrontend     # 프런트엔드 강제 재빌드
+.\start.cmd -NoOpen              # 브라우저 자동 실행 안 함
+.\start.cmd -Addr localhost:9000 # 다른 포트
 ```
 
-`http://localhost:5484`가 열리며 CLI와 동일한 작업을 수행할 수 있습니다. 리뷰와 스캔 실행, 진행 상황 확인, 발견 사항 열람, 저장된 세션 탐색, 프로바이더와 설정 관리가 가능합니다. 빌드 및 개발 방법은 [frontend/README.md](../../frontend/README.md)를 참고하세요.
+**수동 빌드**:
+
+```bash
+cd frontend
+npm ci          # 최초 1회만
+npm run build
+cd ..
+go build -o dist/opencodereview ./cmd/opencodereview
+./dist/opencodereview web
+```
+
+콘솔은 `http://localhost:5484`에서 열립니다. 모든 작업은 실제 CLI를 자식 프로세스로 실행하므로 브라우저와 터미널의 동작이 달라지지 않습니다. 리뷰와 스캔은 한 번에 하나씩만 실행됩니다.
+
+**개발 모드**: `go run ./cmd/opencodereview web --open=never`로 백엔드를, `cd frontend && npm run dev`로 Vite를 실행한 뒤 `http://localhost:5173`에서 작업하세요. 콘솔 내부는 [frontend/README.md](../../frontend/README.md), 이 포크의 빌드 방법은 [FORK.md](../../FORK.md)를 참고하세요.
+
+**콘솔 사용법**: 상단 바에서 English, 简体中文, 日本語, 한국어, Русский를 전환하고 테마를 바꿀 수 있습니다. 페이지는 개요, 코드 리뷰, 리포지토리 스캔, 세션, 공급자, 설정, 리뷰 규칙으로 구성됩니다.
 
 ## Documentation
 

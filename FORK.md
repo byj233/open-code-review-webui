@@ -101,10 +101,12 @@ needs the one/few/many split, so `frontend/src/i18n/index.ts` registers a
 ## Relationship to upstream
 
 - Upstream: `https://github.com/alibaba/open-code-review`
-- This fork keeps the console that upstream removed, plus the work listed above.
-- The fork's changes are independent of upstream `main`; rebasing selected
-  changes back upstream is a manual job because the console no longer exists
-  there.
+- `main` mirrors upstream and is not used for development.
+- `feat/web-console` is based on upstream `main` and adds the console plus the
+  work listed above, in reviewable commits.
+- Upstream `main` no longer contains the console, so this branch reads as a
+  large addition rather than a small patch. Open an issue upstream before
+  proposing it as a pull request.
 
 ## License
 

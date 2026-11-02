@@ -1,0 +1,111 @@
+# Open Code Review — Web Console fork
+
+This repository is a fork of [alibaba/open-code-review](https://github.com/alibaba/open-code-review)
+that keeps the browser console as a first-class part of the CLI and adds a
+complete internationalization pass on top of it.
+
+Upstream `main` no longer ships the console (`web/` and `internal/console` are
+gone from it). This fork starts from a snapshot that still contained the
+console, so it carries the Go CLI and the Vue console together.
+
+## What is in here
+
+- **CLI (Go)** — `review`, `scan`, `session`, `provider`, `rule`, `config`,
+  `web`; unchanged upstream behaviour.
+- **Browser console** — Vue 3 + Element Plus + Vite, served by `ocr web` at
+  `http://localhost:5484` and embedded into the binary with `go:embed`.
+- **Five locales** — English, 简体中文, 日本語, 한국어, Русский, switched from the
+  topbar picker and persisted in `localStorage` under `ocr-locale`.
+- **RESTful routes** — `/reviews`, `/reviews/<job>`, `/scans`, `/scans/<job>`,
+  `/sessions`, `/sessions/<id>`, `/providers`, `/settings`, `/rules`; the old
+  `/review` and `/scan` paths redirect.
+- **Layout shell** — sidebar and topbar live in `frontend/src/layouts/AppShell.vue`,
+  `App.vue` only wires the Element Plus locale and the router.
+- **Type-safe copy** — flat message tables per feature; a missing translation
+  fails `npm run typecheck` instead of silently falling back to English.
+
+## Build and run
+
+Requirements: Go 1.26.10+, Node.js 22+.
+
+Windows, without `make`:
+
+```powershell
+cd frontend
+npm ci
+npm run build
+cd ..
+go build -o dist/opencodereview.exe ./cmd/opencodereview
+.\dist\opencodereview.exe web
+```
+
+With `make`:
+
+```bash
+make frontend-install
+make frontend
+./dist/opencodereview web
+```
+
+The console opens at `http://localhost:5484`. Useful flags:
+
+```bash
+ocr web --addr localhost:9000   # another port
+ocr web --open=never            # do not open a browser
+ocr web --repo ~/work/project   # point at another repository
+```
+
+### Development loop
+
+```powershell
+# terminal 1: backend with the CLI and the embedded assets
+go run ./cmd/opencodereview web --open=never
+
+# terminal 2: Vite with hot reload, /api proxied to :5484
+cd frontend
+npm run dev
+```
+
+Then work against `http://localhost:5173`. Frontend edits need
+`npm run build` before they show up in the `ocr web` binary, because the assets
+are embedded at compile time.
+
+## Repository layout
+
+```
+cmd/opencodereview/     CLI entry point and commands
+internal/console/       HTTP server, SSE job stream, embedded console assets
+internal/               review agent, LLM clients, diff, session, tools
+frontend/               Vue 3 console (Vite)
+  src/layouts/          AppShell, sidebar, topbar
+  src/views/            overview, review, scan, run, sessions, providers,
+                        settings, rules
+  src/i18n/             locale state, per-feature message slices
+acp/                    ACP adapter (separate Go module)
+docs/i18n/              translated README and CONTRIBUTING
+pages/                  documentation site
+```
+
+## Internationalization
+
+Copy lives in `frontend/src/i18n/messages/<locale>/<feature>.ts` and is merged
+by `messages/<locale>/index.ts`. vue-i18n runs with `legacy: false` and
+`flatJson: true`, so keys stay dotted (`nav.overview`). The English table's key
+union is the `MessageKey` type `t()` accepts; every other table is typed
+`Record<MessageKey, string>`.
+
+Plural forms live in a single key using vue-i18n's `one | other` syntax. Russian
+needs the one/few/many split, so `frontend/src/i18n/index.ts` registers a
+`pluralRules.ru` entry and that locale writes three segments.
+
+## Relationship to upstream
+
+- Upstream: `https://github.com/alibaba/open-code-review`
+- This fork keeps the console that upstream removed, plus the work listed above.
+- The fork's changes are independent of upstream `main`; rebasing selected
+  changes back upstream is a manual job because the console no longer exists
+  there.
+
+## License
+
+Apache-2.0, the same license as upstream.

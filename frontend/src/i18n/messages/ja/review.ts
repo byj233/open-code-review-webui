@@ -122,4 +122,7 @@ export const review = {
   'review.error.refs': '開始 ref と終了 ref の両方を選択してください。',
   'review.error.sameRefs': '開始 ref と終了 ref は異なるものを指定してください。',
   'review.error.busy': 'レビューはすでに開始されています。',
+  'review.refs.hint': '現在のブランチ: {branch}。起点と終点を選ぶか、任意の ref を入力してください。',
+  'review.refs.branches': 'ブランチ',
+  'review.refs.tags': 'タグ',
 } satisfies Record<string, string>;

@@ -155,4 +155,12 @@ export const shell = {
     'ルートが移動したか、セッションまたは実行が期限切れです。コンソールの機能はすべてナビゲーションから開けます。',
   'notFound.backToOverview': '概要に戻る',
   'notFound.goBack': '前のページに戻る',
+  'repoPicker.title': 'リポジトリを切り替え',
+  'repoPicker.description': 'コンソールの対象ディレクトリを変更します。レビュー、スキャン、セッションは選択したリポジトリに切り替わります。',
+  'repoPicker.pathLabel': 'リポジトリのディレクトリ',
+  'repoPicker.placeholder': 'C:/work/project または /home/me/project',
+  'repoPicker.hint': 'ワークツリー内のディレクトリなら git のトップレベルが使われます。Git でないディレクトリでもスキャンは可能です。',
+  'repoPicker.recent': '最近使ったリポジトリ',
+  'repoPicker.open': 'リポジトリを開く',
+  'repoPicker.opened': 'リポジトリを切り替えました',
 } satisfies Record<string, string>;

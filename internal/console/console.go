@@ -58,6 +58,7 @@ type Options struct {
 
 // Server holds the console's state and HTTP handler.
 type Server struct {
+	repoMu     sync.RWMutex
 	repoDir    string
 	configPath string
 	version    string
@@ -129,6 +130,20 @@ func New(opts Options) (*Server, error) {
 // Handler returns the fully wrapped HTTP handler.
 func (s *Server) Handler() http.Handler {
 	return s.handler
+}
+
+// repoRoot returns the directory reviews and scans run in. The console can
+// switch it at runtime, so every handler reads it through here.
+func (s *Server) repoRoot() string {
+	s.repoMu.RLock()
+	defer s.repoMu.RUnlock()
+	return s.repoDir
+}
+
+func (s *Server) setRepoRoot(dir string) {
+	s.repoMu.Lock()
+	s.repoDir = dir
+	s.repoMu.Unlock()
 }
 
 // StartServer binds the listen address and serves until the listener fails.
@@ -211,6 +226,7 @@ func (s *Server) routes() http.Handler {
 	mux.HandleFunc("GET /api/health", s.handleHealth)
 	mux.HandleFunc("GET /api/meta", s.handleMeta)
 	mux.HandleFunc("GET /api/repo", s.handleRepo)
+	mux.HandleFunc("POST /api/repo/open", s.handleRepoOpen)
 	mux.HandleFunc("GET /api/config", s.handleConfig)
 	mux.HandleFunc("POST /api/config/apply", s.handleConfigApply)
 	mux.HandleFunc("GET /api/providers", s.handleProviders)
@@ -265,7 +281,7 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
 		"ok":      true,
 		"version": s.version,
-		"repo":    s.repoDir,
+		"repo":    s.repoRoot(),
 	})
 }
 
@@ -291,7 +307,7 @@ func (s *Server) handleMeta(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, metaResponse{
 		Version:  s.version,
 		Platform: runtime.GOOS + "/" + runtime.GOARCH,
-		Repo:     inspectRepo(s.repoDir),
+		Repo:     inspectRepo(s.repoRoot()),
 		Config:   buildConfigSummary(s.configPath),
 		Efforts:  template.EffortNames(),
 		Defaults: metaDefaults{
@@ -306,7 +322,38 @@ func (s *Server) handleMeta(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleRepo(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, inspectRepo(s.repoDir))
+	writeJSON(w, http.StatusOK, inspectRepo(s.repoRoot()))
+}
+
+type repoOpenRequest struct {
+	Path string `json:"path"`
+}
+
+// handleRepoOpen points the console at another directory. Switching is refused
+// while a job is running so an in-flight review cannot be attributed to the
+// wrong repository.
+func (s *Server) handleRepoOpen(w http.ResponseWriter, r *http.Request) {
+	var req repoOpenRequest
+	if err := readJSON(w, r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	path := strings.TrimSpace(req.Path)
+	if path == "" {
+		writeError(w, http.StatusBadRequest, "repository path is required")
+		return
+	}
+	dir, err := resolveRepoDir(path)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if running := s.jobs.Running(); running > 0 {
+		writeError(w, http.StatusConflict, "cancel running jobs before switching repositories")
+		return
+	}
+	s.setRepoRoot(dir)
+	writeJSON(w, http.StatusOK, inspectRepo(dir))
 }
 
 func (s *Server) handleJobs(w http.ResponseWriter, r *http.Request) {

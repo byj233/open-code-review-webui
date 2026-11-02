@@ -122,4 +122,7 @@ export const review = {
   'review.error.refs': 'Укажите обе ссылки: начальную и конечную.',
   'review.error.sameRefs': 'Начальная и конечная ссылки должны различаться.',
   'review.error.busy': 'Ревью уже запускается.',
+  'review.refs.hint': 'Текущая ветка: {branch}. Выберите начало и конец или введите любой ref.',
+  'review.refs.branches': 'Ветки',
+  'review.refs.tags': 'Теги',
 } satisfies Record<string, string>;

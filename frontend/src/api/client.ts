@@ -74,6 +74,12 @@ export const api = {
   repo(): Promise<RepoInfo> {
     return request('/api/repo');
   },
+  openRepo(path: string): Promise<RepoInfo> {
+    return request('/api/repo/open', {
+      method: 'POST',
+      body: JSON.stringify({ path }),
+    });
+  },
   config(): Promise<ConfigView> {
     return request('/api/config');
   },

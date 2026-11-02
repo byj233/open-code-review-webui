@@ -115,4 +115,7 @@ export const review = {
   'review.error.refs': '시작 ref와 대상 ref를 모두 선택해야 합니다.',
   'review.error.sameRefs': '시작 ref와 대상 ref는 달라야 합니다.',
   'review.error.busy': '리뷰가 이미 시작 중입니다.',
+  'review.refs.hint': '현재 브랜치: {branch}. 시작과 끝을 선택하거나 임의의 ref를 입력하세요.',
+  'review.refs.branches': '브랜치',
+  'review.refs.tags': '태그',
 } satisfies Record<string, string>;

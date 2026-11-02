@@ -45,7 +45,7 @@
               class="mode-card"
               :class="{ 'is-active': form.mode === mode.value }"
               type="button"
-              @click="form.mode = mode.value"
+              @click="selectMode(mode.value)"
             >
               <span class="mode-card__title">
                 <el-icon><component :is="mode.icon" /></el-icon>
@@ -88,7 +88,12 @@
                 default-first-option
                 :placeholder="t('review.range.fromPlaceholder')"
               >
-                <el-option v-for="ref in refOptions" :key="ref" :label="ref" :value="ref" />
+                <el-option-group v-if="branchOptions.length" :label="t('review.refs.branches')">
+                  <el-option v-for="ref in branchOptions" :key="ref" :label="ref" :value="ref" />
+                </el-option-group>
+                <el-option-group v-if="tagOptions.length" :label="t('review.refs.tags')">
+                  <el-option v-for="ref in tagOptions" :key="ref" :label="ref" :value="ref" />
+                </el-option-group>
               </el-select>
             </div>
             <button
@@ -111,9 +116,17 @@
                 default-first-option
                 :placeholder="t('review.range.toPlaceholder')"
               >
-                <el-option v-for="ref in refOptions" :key="ref" :label="ref" :value="ref" />
+                <el-option-group v-if="branchOptions.length" :label="t('review.refs.branches')">
+                  <el-option v-for="ref in branchOptions" :key="ref" :label="ref" :value="ref" />
+                </el-option-group>
+                <el-option-group v-if="tagOptions.length" :label="t('review.refs.tags')">
+                  <el-option v-for="ref in tagOptions" :key="ref" :label="ref" :value="ref" />
+                </el-option-group>
               </el-select>
             </div>
+            <p v-if="repo?.branch" class="field-hint range-hint">
+              {{ t('review.refs.hint', { branch: repo.branch }) }}
+            </p>
           </div>
 
           <div v-else class="scope-summary">
@@ -429,7 +442,7 @@ import { useMetaStore } from '@/stores/meta';
 import { createReviewForm, reviewCommand } from '@/utils/command';
 import { jobPath } from '@/utils/routes';
 import { authLabel } from '@/utils/status';
-import type { ProviderCard, ProvidersResponse, ReviewFormState, ReviewRequest } from '@/types';
+import type { ProviderCard, ProvidersResponse, ReviewFormState, ReviewMode, ReviewRequest } from '@/types';
 
 const route = useRoute();
 const router = useRouter();
@@ -502,10 +515,15 @@ const scopeError = computed(() => {
   return '';
 });
 
-const refOptions = computed(() => {
-  const values = [...(repo.value?.branches ?? []), ...(repo.value?.tags ?? [])];
-  return Array.from(new Set(values));
-});
+const branchOptions = computed(() => repo.value?.branches ?? []);
+const tagOptions = computed(() => repo.value?.tags ?? []);
+
+function selectMode(value: ReviewMode): void {
+  form.mode = value;
+  if (value === 'range' && !form.to.trim() && repo.value?.branch) {
+    form.to = repo.value.branch;
+  }
+}
 const commitOptions = computed(() =>
   (repo.value?.commits ?? []).map((commit) => ({
     value: commit.hash || commit.short,
@@ -733,6 +751,11 @@ onMounted(async () => {
   grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1fr);
   align-items: end;
   gap: 8px;
+}
+
+.range-hint {
+  grid-column: 1 / -1;
+  margin-top: 2px;
 }
 
 .swap-button {

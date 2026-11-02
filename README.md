@@ -197,7 +197,7 @@ The console opens at `http://localhost:5484`. Every operation runs the real CLI 
 
 **Development:** start the backend with `go run ./cmd/opencodereview web --open=never`, the Vite server with `cd frontend && npm run dev`, then work against `http://localhost:5173`. Console internals live in [frontend/README.md](frontend/README.md); this fork's build notes are in [FORK.md](FORK.md).
 
-**In the console:** the topbar switches between English, 简体中文, 日本語, 한국어, and Русский and toggles the theme. Pages cover the overview, code review, repository scan, sessions, providers, settings, and review rules.
+**In the console:** the topbar switches between English, 简体中文, 日本語, 한국어, and Русский and toggles the theme. Pages cover the overview, code review, repository scan, sessions, providers, settings, and review rules. Click the repository card in the sidebar to open another directory; recent directories are remembered. Branch range reviews pick the base and head from the repository branches and tags.
 
 ## Documentation
 

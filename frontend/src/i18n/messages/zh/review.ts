@@ -115,4 +115,7 @@ export const review = {
   'review.error.refs': '请同时选择起始 ref 和目标 ref。',
   'review.error.sameRefs': '起始 ref 和目标 ref 必须不同。',
   'review.error.busy': '审查已经在启动中。',
+  'review.refs.hint': '当前分支：{branch}。选择起点和终点，或直接输入任意 ref。',
+  'review.refs.branches': '分支',
+  'review.refs.tags': '标签',
 } satisfies Record<string, string>;

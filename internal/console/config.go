@@ -836,7 +836,7 @@ func (s *Server) runConfigCommand(action, key string, values ...string) (string,
 	args := append([]string{"config", action, key}, values...)
 	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 	defer cancel()
-	result := s.runner.Run(ctx, Spec{Args: args, Dir: s.repoDir}, nil)
+	result := s.runner.Run(ctx, Spec{Args: args, Dir: s.repoRoot()}, nil)
 	output := strings.TrimSpace(string(result.Stdout))
 	if output == "" {
 		output = strings.TrimSpace(string(result.Stderr))

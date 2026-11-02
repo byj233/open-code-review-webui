@@ -82,7 +82,7 @@ func (s *Server) handleRuleCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resolver, _, err := rules.NewResolver(s.repoDir, "", rules.ResolverOptions{})
+	resolver, _, err := rules.NewResolver(s.repoRoot(), "", rules.ResolverOptions{})
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "load rules: "+err.Error())
 		return

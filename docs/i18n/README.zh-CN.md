@@ -197,7 +197,7 @@ go build -o dist/opencodereview ./cmd/opencodereview
 
 **开发模式**：用 `go run ./cmd/opencodereview web --open=never` 起后端，用 `cd frontend && npm run dev` 起 Vite，然后访问 `http://localhost:5173`。控制台内部说明见 [frontend/README.md](../../frontend/README.md)，本 fork 的构建说明见 [FORK.md](../../FORK.md)。
 
-**控制台内**：顶栏可以在 English、简体中文、日本語、한국어、Русский 之间切换，并可切换明暗主题。页面包括概览、代码审查、仓库扫描、会话、模型供应商、设置和审查规则。
+**控制台内**：顶栏可以在 English、简体中文、日本語、한국어、Русский 之间切换，并可切换明暗主题。页面包括概览、代码审查、仓库扫描、会话、模型供应商、设置和审查规则。点击侧边栏的仓库卡片可以打开其他目录，最近使用的路径会被记住；分支区间审查可以直接从仓库的分支和标签中选择起点和终点。
 
 ## 文档
 

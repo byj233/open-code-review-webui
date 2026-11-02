@@ -155,4 +155,12 @@ export const shell = {
     'Маршрут мог измениться, либо сеанс или запуск истёк. Все возможности консоли доступны из навигации.',
   'notFound.backToOverview': 'Вернуться к обзору',
   'notFound.goBack': 'Назад',
+  'repoPicker.title': 'Сменить репозиторий',
+  'repoPicker.description': 'Переключить консоль на другой каталог. Ревью, сканирования и сеансы следуют за выбранным репозиторием.',
+  'repoPicker.pathLabel': 'Каталог репозитория',
+  'repoPicker.placeholder': 'C:/work/project или /home/me/project',
+  'repoPicker.hint': 'Если каталог находится внутри рабочего дерева, используется корень git. Каталоги без git тоже можно сканировать.',
+  'repoPicker.recent': 'Недавние репозитории',
+  'repoPicker.open': 'Открыть репозиторий',
+  'repoPicker.opened': 'Репозиторий переключён',
 } satisfies Record<string, string>;

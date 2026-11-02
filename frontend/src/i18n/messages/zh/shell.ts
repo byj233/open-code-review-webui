@@ -154,4 +154,12 @@ export const shell = {
   'notFound.text': '路由可能已经变更，或者某个会话、运行已经过期。控制台的所有功能都可以从导航进入。',
   'notFound.backToOverview': '返回概览',
   'notFound.goBack': '返回上一页',
+  'repoPicker.title': '切换仓库',
+  'repoPicker.description': '让控制台指向另一个目录。审查、扫描和会话都会跟随所选仓库。',
+  'repoPicker.pathLabel': '仓库目录',
+  'repoPicker.placeholder': 'C:/work/project 或 /home/me/project',
+  'repoPicker.hint': '如果目录位于工作树内，会自动使用 git 顶层目录；非 Git 目录仍然可以扫描。',
+  'repoPicker.recent': '最近使用',
+  'repoPicker.open': '打开仓库',
+  'repoPicker.opened': '已切换仓库',
 } satisfies Record<string, string>;

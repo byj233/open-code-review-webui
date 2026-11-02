@@ -122,4 +122,7 @@ export const review = {
   'review.error.refs': 'Choose both a from and a to ref.',
   'review.error.sameRefs': 'The from and to refs must be different.',
   'review.error.busy': 'The review is already starting.',
+  'review.refs.hint': 'Current branch: {branch}. Pick a base and a head, or type any ref.',
+  'review.refs.branches': 'Branches',
+  'review.refs.tags': 'Tags',
 } satisfies Record<string, string>;

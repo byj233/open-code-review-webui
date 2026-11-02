@@ -155,4 +155,12 @@ export const shell = {
     '경로가 이동했거나 세션 또는 실행이 만료되었습니다. 콘솔의 모든 기능은 탐색에서 열 수 있습니다.',
   'notFound.backToOverview': '개요로 돌아가기',
   'notFound.goBack': '뒤로 가기',
+  'repoPicker.title': '리포지토리 전환',
+  'repoPicker.description': '콘솔이 다른 디렉터리를 가리키도록 합니다. 리뷰, 스캔, 세션도 선택한 리포지토리를 따릅니다.',
+  'repoPicker.pathLabel': '리포지토리 디렉터리',
+  'repoPicker.placeholder': 'C:/work/project 또는 /home/me/project',
+  'repoPicker.hint': '디렉터리가 작업 트리 안에 있으면 git 최상위 디렉터리를 사용합니다. Git이 아닌 디렉터리도 스캔할 수 있습니다.',
+  'repoPicker.recent': '최근 리포지토리',
+  'repoPicker.open': '리포지토리 열기',
+  'repoPicker.opened': '리포지토리를 전환했습니다',
 } satisfies Record<string, string>;

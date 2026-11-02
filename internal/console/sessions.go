@@ -63,7 +63,7 @@ func (s *Server) handleSessions(w http.ResponseWriter, r *http.Request) {
 	}
 	query := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("q")))
 
-	all, err := s.sessions.List(s.repoDir)
+	all, err := s.sessions.List(s.repoRoot())
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -109,12 +109,12 @@ func (s *Server) handleSessionDetail(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	summary, items, err := s.sessions.Detail(s.repoDir, sessionID)
+	summary, items, err := s.sessions.Detail(s.repoRoot(), sessionID)
 	if err != nil {
 		writeSessionError(w, err)
 		return
 	}
-	comments, err := s.sessions.Comments(s.repoDir, sessionID)
+	comments, err := s.sessions.Comments(s.repoRoot(), sessionID)
 	if err != nil {
 		writeSessionError(w, err)
 		return
@@ -134,7 +134,7 @@ func (s *Server) handleSessionDelete(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := s.sessions.Delete(s.repoDir, sessionID); err != nil {
+	if err := s.sessions.Delete(s.repoRoot(), sessionID); err != nil {
 		writeSessionError(w, err)
 		return
 	}

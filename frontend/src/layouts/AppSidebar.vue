@@ -11,7 +11,13 @@
       </div>
     </div>
 
-    <router-link class="repo" to="/" @click="$emit('navigate')">
+    <button
+      class="repo"
+      type="button"
+      :title="t('repoPicker.title')"
+      :aria-label="t('repoPicker.title')"
+      @click="pickerOpen = true"
+    >
       <el-icon class="repo__icon"><Files /></el-icon>
       <span class="repo__body">
         <span class="repo__name">{{ repoName }}</span>
@@ -20,8 +26,8 @@
           {{ repoBranch }}
         </span>
       </span>
-      <el-icon class="repo__chevron"><ArrowRight /></el-icon>
-    </router-link>
+      <el-icon class="repo__chevron"><Switch /></el-icon>
+    </button>
 
     <nav class="nav" :aria-label="t('nav.primary')">
       <template v-for="group in groups" :key="group.label">
@@ -62,14 +68,15 @@
         </button>
       </div>
     </div>
+
+    <RepoPicker v-model:open="pickerOpen" />
   </aside>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import {
-  ArrowRight,
   Collection,
   Connection,
   EditPen,
@@ -80,8 +87,10 @@ import {
   Search,
   Setting,
   Sunny,
+  Switch,
 } from '@element-plus/icons-vue';
 import BrandMark from '@/components/BrandMark.vue';
+import RepoPicker from '@/components/RepoPicker.vue';
 import { useMetaStore } from '@/stores/meta';
 import { useTheme } from '@/composables/useTheme';
 import { useI18n } from '@/i18n';
@@ -104,6 +113,7 @@ const route = useRoute();
 const { meta } = useMetaStore();
 const { isDark, toggleTheme } = useTheme();
 const { t } = useI18n();
+const pickerOpen = ref(false);
 
 const groups = computed<Array<{ label: string; items: NavItem[] }>>(() => [
   {
@@ -226,12 +236,16 @@ function isActive(item: NavItem): boolean {
   display: flex;
   align-items: center;
   gap: 9px;
+  width: 100%;
   margin-bottom: 20px;
   padding: 9px 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: color-mix(in srgb, var(--surface) 55%, transparent);
   color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   transition: border-color 0.16s ease, background-color 0.16s ease;
 }
 

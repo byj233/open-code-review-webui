@@ -155,4 +155,14 @@ export const shell = {
     'The route may have moved, or a session or run has expired. Everything the console can do is reachable from the navigation.',
   'notFound.backToOverview': 'Back to overview',
   'notFound.goBack': 'Go back',
+  'repoPicker.title': 'Switch repository',
+  'repoPicker.description':
+    'Point the console at another directory. Reviews, scans, and sessions follow the selected repository.',
+  'repoPicker.pathLabel': 'Repository directory',
+  'repoPicker.placeholder': 'C:/work/project or /home/me/project',
+  'repoPicker.hint':
+    'When the directory is inside a work tree, the git top level is used. Non-git directories can still be scanned.',
+  'repoPicker.recent': 'Recent repositories',
+  'repoPicker.open': 'Open repository',
+  'repoPicker.opened': 'Repository switched',
 } satisfies Record<string, string>;

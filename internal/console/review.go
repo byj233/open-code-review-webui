@@ -417,7 +417,7 @@ func (s *Server) handleStartReview(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	spec, err := buildReviewSpec(req, s.repoDir)
+	spec, err := buildReviewSpec(req, s.repoRoot())
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
@@ -440,7 +440,7 @@ func (s *Server) handleStartScan(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	spec, err := buildScanSpec(req, s.repoDir)
+	spec, err := buildScanSpec(req, s.repoRoot())
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
@@ -462,7 +462,7 @@ func (s *Server) handleLLMTest(w http.ResponseWriter, r *http.Request) {
 		Kind:         "llm-test",
 		Title:        "Test LLM connection",
 		Args:         []string{"llm", "test"},
-		Dir:          s.repoDir,
+		Dir:          s.repoRoot(),
 		StreamStdout: true,
 	})
 	if err != nil {

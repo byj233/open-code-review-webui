@@ -14,6 +14,11 @@ console, so it carries the Go CLI and the Vue console together.
   `web`; unchanged upstream behaviour.
 - **Browser console** — Vue 3 + Element Plus + Vite, served by `ocr web` at
   `http://localhost:5484` and embedded into the binary with `go:embed`.
+- **Repository picker** — the sidebar card opens any local directory without
+  restarting `ocr web`; recent directories are remembered, and switching is
+  refused while a job is running.
+- **Branch picking** — branch-range reviews choose base and head from the
+  repository's branches and tags, with free-text refs still accepted.
 - **Five locales** — English, 简体中文, 日本語, 한국어, Русский, switched from the
   topbar picker and persisted in `localStorage` under `ocr-locale`.
 - **RESTful routes** — `/reviews`, `/reviews/<job>`, `/scans`, `/scans/<job>`,

@@ -197,7 +197,7 @@ go build -o dist/opencodereview ./cmd/opencodereview
 
 **개발 모드**: `go run ./cmd/opencodereview web --open=never`로 백엔드를, `cd frontend && npm run dev`로 Vite를 실행한 뒤 `http://localhost:5173`에서 작업하세요. 콘솔 내부는 [frontend/README.md](../../frontend/README.md), 이 포크의 빌드 방법은 [FORK.md](../../FORK.md)를 참고하세요.
 
-**콘솔 사용법**: 상단 바에서 English, 简体中文, 日本語, 한국어, Русский를 전환하고 테마를 바꿀 수 있습니다. 페이지는 개요, 코드 리뷰, 리포지토리 스캔, 세션, 공급자, 설정, 리뷰 규칙으로 구성됩니다.
+**콘솔 사용법**: 상단 바에서 English, 简体中文, 日本語, 한국어, Русский를 전환하고 테마를 바꿀 수 있습니다. 페이지는 개요, 코드 리뷰, 리포지토리 스캔, 세션, 공급자, 설정, 리뷰 규칙으로 구성됩니다. 사이드바의 리포지토리 카드를 클릭하면 다른 디렉터리를 열 수 있으며 최근 경로가 기억됩니다. 브랜치 범위 리뷰에서는 리포지토리의 브랜치와 태그에서 시작과 끝을 선택할 수 있습니다.
 
 ## Documentation
 

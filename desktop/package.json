@@ -1,0 +1,78 @@
+{
+  "name": "open-code-review-desktop",
+  "version": "0.1.1",
+  "private": true,
+  "description": "Open Code Review desktop application",
+  "author": "Open Code Review Contributors",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "main.mjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test *.test.mjs",
+    "build": "node build.mjs",
+    "dist": "npm run build && electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "com.opencodereview.desktop",
+    "productName": "Open Code Review",
+    "directories": {
+      "output": "../dist/desktop",
+      "buildResources": "resources"
+    },
+    "files": [
+      "main.mjs",
+      "updates.mjs",
+      "runtime.mjs",
+      "resources/icon.ico"
+    ],
+    "extraResources": [
+      {
+        "from": "bin/opencodereview.exe",
+        "to": "bin/opencodereview.exe"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "resources/icon.ico",
+      "artifactName": "OpenCodeReview-${version}-${arch}-Setup.${ext}",
+      "signExecutable": false,
+      "verifyUpdateCodeSignature": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "byj233",
+      "repo": "open-code-review-webui",
+      "tagNamePrefix": "desktop-v",
+      "releaseType": "release"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Open Code Review",
+      "runAfterFinish": true,
+      "installerIcon": "resources/icon.ico",
+      "uninstallerIcon": "resources/icon.ico",
+      "installerSidebar": "resources/sidebar.bmp",
+      "uninstallerSidebar": "resources/sidebar.bmp",
+      "installerHeader": "resources/header.bmp",
+      "installerLanguages": [
+        "en_US",
+        "zh_CN"
+      ],
+      "displayLanguageSelector": true,
+      "include": "resources/installer.nsh"
+    }
+  },
+  "dependencies": {
+    "electron-updater": "6.8.9"
+  }
+}
